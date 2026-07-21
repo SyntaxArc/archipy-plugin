@@ -1,5 +1,5 @@
 ---
-description: ArchiPy helpers/decorators — prefer ArchiPy decorators; no adapter imports at module level
+description: ArchiPy helpers/decorators — prefer ArchiPy decorators; UoW on logics
 globs: "**/helpers/decorators/**/*.py"
 alwaysApply: false
 ---
@@ -10,11 +10,13 @@ Helpers stay **pure**: no database calls, no network I/O, no constructing adapte
 
 ## Prefer ArchiPy Decorators
 
-Before writing a custom decorator, prefer ArchiPy:
+Before writing a custom decorator, prefer ArchiPy under `archipy.helpers.decorators`:
 
 - `ttl_cache` — caching (`archipy.helpers.decorators.cache`)
-- `sqlalchemy_atomic` / async variants — unit-of-work boundaries
-- tracing / timing / timeout / retry / singleton / rate-limit decorators under `archipy.helpers.decorators`
+- Unit of work (apply on **logics**, not repositories):
+  - `postgres_sqlalchemy_atomic_decorator`
+  - `async_postgres_sqlalchemy_atomic_decorator`
+- tracing / timing / timeout / retry / singleton / rate-limit decorators
 
 ## Custom Decorators
 
@@ -28,3 +30,4 @@ Before writing a custom decorator, prefer ArchiPy:
 - Hide adapter construction inside decorator modules.
 - Catch broad `Exception` without re-raising as a domain error with `raise ... from e`.
 - Mix sync/async incorrectly — provide separate sync and async wrappers when needed.
+- Put `@postgres_sqlalchemy_atomic_decorator` on repositories or services — UoW belongs on logics.

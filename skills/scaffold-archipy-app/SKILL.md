@@ -30,26 +30,31 @@ Ask the user for:
 │   └── containers.py      # DI stub (if dependency-injection extra)
 ├── models/
 │   ├── __init__.py
-│   ├── dtos/<domain>/domain/v1/
+│   ├── dtos/<domain>/
+│   │   ├── domain/v1/
+│   │   └── repository/
 │   ├── entities/
 │   └── errors/
-├── adapters/
-│   └── __init__.py
-├── helpers/
+├── helpers/               # optional — prefer archipy.helpers first
 │   ├── __init__.py
 │   ├── utils/__init__.py
 │   ├── decorators/__init__.py
 │   └── interceptors/__init__.py
 ├── repositories/
+│   └── <domain>/
+│       ├── adapters/
+│       └── <domain>_repository.py
 ├── logics/
+│   └── <domain>/
 └── services/
+    └── <domain>/v1/
 features/                  # optional BDD stub note
 .env.example
 ```
 
 4. Write `app_config.py` following ArchiPy quickstart (`customize()`, `BaseConfig.set_global`).
 5. Add a minimal domain DTO + error subclassing ArchiPy base errors.
-6. Document next steps: `/scaffold-adapter`, wire Redis/Postgres, `/docs-quickstart`.
+6. Document next steps: `/scaffold-adapter` (domain wrappers under `repositories/<domain>/adapters/`), wire Redis/Postgres, `/docs-quickstart`.
 
 ## Constraints
 

@@ -1,5 +1,5 @@
 ---
-description: ArchiPy helpers/utils — pure utilities, prefer ArchiPy utils before custom
+description: ArchiPy helpers/utils — pure utilities, AppUtils FastAPI/gRPC factories
 globs: "**/helpers/utils/**/*.py"
 alwaysApply: false
 ---
@@ -10,14 +10,36 @@ Helpers stay **pure**: no database calls, no network I/O, no constructing adapte
 
 ## Prefer ArchiPy Utils
 
-Before writing a custom util, check whether ArchiPy already provides it, for example:
+Before writing a custom util, check whether ArchiPy already provides it under `archipy.helpers.utils`:
 
-- `TracingUtils` — tracing helpers
-- `RateLimitUtils` — rate-limit helpers
+- `TracingUtils`, `RateLimitUtils`
 - `DatetimeUtils`, `StringUtils`, `JwtUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`
-- `AppUtils` — app bootstrap helpers (e.g. FastAPI factory) when building services
+- `AppUtils` — FastAPI / gRPC app factories (see below)
 
-Import from `archipy.helpers.utils.*`.
+## AppUtils (FastAPI + gRPC)
+
+```bash
+uv add "archipy[fastapi]"   # HTTP
+uv add "archipy[grpc]"      # gRPC (sync + async)
+```
+
+Prefer ArchiPy factories — do **not** hand-roll bare `FastAPI()` / `grpc.server()` when extras are installed:
+
+| Method | Use |
+|--------|-----|
+| `AppUtils.create_fastapi_app(config?)` | HTTP app; wires CORS/GZip/TrustedHost/HTTPS redirect, metrics, APM, exception handlers from `BaseConfig.FASTAPI` |
+| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception + optional trace/metric/rate-limit interceptors |
+| `AppUtils.create_async_grpc_app(config)` | Async gRPC (`grpc.aio`); same interceptor auto-registration |
+
+Rules:
+
+- Pass `BaseConfig.global_config()` (or injected config); do not duplicate middleware/interceptor setup AppUtils already does.
+- **FastAPI + uvicorn always driven by `config.FASTAPI` (`FastAPIConfig`)** — never hardcode host/port/reload/proxy settings.
+- Sync servicers → `create_grpc_app`; async servicers → `create_async_grpc_app` — do not mix.
+- Enable features via config flags (e.g. `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock ArchiPy middleware/interceptors.
+- Custom gRPC interceptors: pass `customized_interceptors=`; do not bypass the exception interceptor.
+
+Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/interceptors/
 
 ## Custom Utils
 

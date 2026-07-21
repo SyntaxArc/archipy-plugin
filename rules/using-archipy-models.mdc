@@ -1,0 +1,47 @@
+---
+description: ArchiPy app models — DTOs, entities, errors naming and layout
+globs: "**/models/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Models
+
+Data structures only — no I/O, no business rules.
+
+Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
+
+## Layout
+
+```text
+models/
+├── entities/                 # SQLAlchemy BaseEntity subclasses
+├── errors/                   # Domain errors extending ArchiPy BaseError hierarchy
+├── types/                    # Optional enums / aliases
+└── dtos/{domain}/
+    ├── domain/v{n}/          # Versioned — cross service boundary
+    └── repository/           # Internal — never versioned
+```
+
+## DTO Naming
+
+| Kind | Pattern | Example |
+|------|---------|---------|
+| Domain input | `{Op}InputDTO` | `UserRegistrationInputDTO` |
+| Domain output | `{Op}OutputDTO` | `UserRegistrationOutputDTO` |
+| Repository command | `{Action}CommandDTO` | `CreateUserCommandDTO` |
+| Repository query | `{Action}QueryDTO` | `GetUserByIdQueryDTO` |
+| Repository response | `{Domain}ResponseDTO` | `UserResponseDTO` |
+
+DTOs use Pydantic `BaseModel`. Prefer ArchiPy base entities where applicable.
+
+## Errors
+
+- Subclass ArchiPy errors from `archipy.models.errors` (e.g. `AlreadyExistsError`, `NotFoundError`).
+- Raise with context: `raise NotFoundError(...) from e`.
+- Never raise bare `Exception` for domain failures.
+
+## Do Not
+
+- Put adapters, DB sessions, or HTTP/gRPC types in models.
+- Version repository DTOs.
+- Import repositories, logics, or services from models.

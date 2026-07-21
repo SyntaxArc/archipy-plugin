@@ -1,0 +1,61 @@
+---
+description: BDD testing for ArchiPy apps — Behave, ScenarioContext, ports/mocks
+globs: "**/features/**/*"
+alwaysApply: false
+---
+
+# BDD Testing for ArchiPy Apps
+
+ArchiPy-style apps use **Behave** (not pytest) for acceptance tests.
+
+Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
+
+## Layout
+
+```text
+features/
+├── *.feature
+├── steps/
+├── scenario_context.py              # Per-scenario isolated storage
+├── scenario_context_pool_manager.py # Scenario ID → ScenarioContext
+└── environment.py                   # behave hooks — container setup/teardown
+```
+
+Optional extra: `uv add "archipy[behave]"`.
+
+## Ports and Mocks
+
+- Business code depends on ports; steps inject mocks (e.g. `RedisMock`) or real adapters.
+- Never import concrete drivers into logics just for tests — swap providers in the DI container / context.
+
+```text
+Production:  Logic → RedisAdapter
+Test:        Logic → RedisMock
+```
+
+## Scenario Isolation
+
+- Use `ScenarioContext` per scenario — no shared mutable globals across scenarios.
+- `ScenarioContextPoolManager` creates/retrieves context by scenario ID and disposes after the scenario.
+
+## Infrastructure Tags
+
+Tag scenarios that need Docker/services:
+
+```gherkin
+@needs-redis
+Scenario: ...
+```
+
+Skip when infra is unavailable:
+
+```bash
+uv run behave --tags=~@needs-redis
+uv run behave --tags=@needs-postgres
+```
+
+## Do Not
+
+- Share adapter instances or DB state across scenarios without cleanup.
+- Write pytest suites as the primary ArchiPy app test style.
+- Call real external services from untagged “unit” BDD scenarios.

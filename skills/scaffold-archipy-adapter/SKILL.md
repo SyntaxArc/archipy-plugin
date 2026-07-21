@@ -1,9 +1,9 @@
 ---
 name: scaffold-archipy-adapter
 description: >-
-  Scaffold a custom adapter package (ports.py, adapters.py, optional mocks.py)
-  for an ArchiPy app. Use when adding infrastructure integrations or domain
-  wrappers around ArchiPy adapters.
+  Scaffold a domain adapter under repositories/{domain}/adapters/ for an ArchiPy
+  app. Use when adding infrastructure integrations or thin wrappers around
+  ArchiPy adapters.
 ---
 
 # Scaffold ArchiPy Adapter
@@ -12,10 +12,11 @@ description: >-
 
 Ask the user for:
 
-1. Service / adapter name (e.g. `payments`, `user_cache`)
-2. Sync or async (or both as separate classes)
-3. Whether an in-memory `mocks.py` is needed for BDD
-4. Whether this wraps an existing ArchiPy adapter or a new external client
+1. Domain name (e.g. `user`, `order`)
+2. Adapter purpose / file stem (e.g. `db`, `cache` → `user_db_adapter.py`)
+3. Sync or async (or both as separate classes)
+4. Whether an in-memory mock is needed for BDD
+5. Whether this wraps an existing ArchiPy adapter or a new external client
 
 ## Prefer ArchiPy
 
@@ -30,24 +31,27 @@ and a thin domain wrapper — not a full reimplementation.
 ## Generate
 
 ```text
-adapters/<name>/
-├── __init__.py
-├── ports.py
-├── adapters.py
-└── mocks.py          # only if requested / needed for BDD
+repositories/<domain>/
+├── adapters/
+│   └── <domain>_<purpose>_adapter.py   # e.g. user_db_adapter.py
+└── <domain>_repository.py              # create stub if missing
 ```
 
-- `ports.py`: ABC with abstract methods and full type hints.
-- `adapters.py`: concrete class; read config from `BaseConfig.global_config()` or constructor injection; map client errors → domain errors with `raise ... from e`.
-- `mocks.py`: in-memory implementation of the same port (optional).
+- Thin wrapper: wrap ArchiPy adapter (or external client); own entity construction / query building; map client
+  errors → domain errors with `raise ... from e`.
+- Optional mock: same module suffix or sibling file only if BDD needs an in-memory double.
+- Ports: depend on ArchiPy ports when wrapping library adapters; add a local ABC only when the domain needs a
+  custom contract.
 
 ## Constraints
 
 - Sync and async must be separate classes.
 - No business logic in adapters — map data and talk to infrastructure only.
-- Export the port from `__init__.py` for DI wiring.
+- Do **not** create a top-level `adapters/<name>/` package — domain adapters live under repositories.
+- Wire via DI in `configs/containers.py`.
 
 ## Docs
 
+- https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 - https://syntaxarc.github.io/ArchiPy/tutorials/adapters/
 - https://syntaxarc.github.io/ArchiPy/api_reference/adapters/

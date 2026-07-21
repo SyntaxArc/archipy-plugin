@@ -1,0 +1,65 @@
+---
+description: ArchiPy app services — thin transport, AppUtils, uvicorn via FastAPIConfig
+globs: "**/services/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Services
+
+Services are thin transport adapters (HTTP routers / gRPC servicers). Bootstrap often lives in `manage.py` — follow this rule there too.
+
+Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
+
+## Responsibilities
+
+- Validate and translate HTTP/gRPC requests into domain `*InputDTO`.
+- Call the appropriate logic class; return domain `*OutputDTO`.
+- Map domain errors → HTTP/gRPC status codes.
+- Version in path: `services/{domain}/v{n}/` — not in business logic.
+
+## Bootstrap via AppUtils + FastAPIConfig
+
+```bash
+uv add "archipy[fastapi]"   # and/or archipy[grpc]
+```
+
+```python
+from archipy.helpers.utils.app_utils import AppUtils
+from archipy.configs.base_config import BaseConfig
+
+# FastAPI — reads BaseConfig.FASTAPI for title, docs, middleware
+app = AppUtils.create_fastapi_app()
+app.include_router(create_user_v1_router(container))
+
+# gRPC sync / async — do not mix servicer styles
+config = BaseConfig.global_config()
+server = AppUtils.create_grpc_app(config)           # sync servicers
+# server = AppUtils.create_async_grpc_app(config)    # async servicers
+```
+
+Do not re-implement CORS, exception handlers, or stock gRPC interceptors that AppUtils already wires.
+
+## manage.py / uvicorn
+
+Bind from `config.FASTAPI` — never hardcode host/port/reload/proxy:
+
+```python
+config = BaseConfig.global_config()
+uvicorn.run(
+    "manage:create_app",
+    factory=True,
+    host=config.FASTAPI.SERVE_HOST,
+    port=config.FASTAPI.SERVE_PORT,
+    reload=config.FASTAPI.RELOAD,
+    proxy_headers=config.FASTAPI.PROXY_HEADERS,
+    forwarded_allow_ips=config.FASTAPI.FORWARDED_ALLOW_IPS or "127.0.0.1",
+)
+```
+
+CLI flags may override for local runs; defaults always come from `FASTAPI`.
+
+## Do Not
+
+- Put business rules or `@postgres_sqlalchemy_atomic_decorator` in services.
+- Hand-roll bare `FastAPI()` / `grpc.server()` when AppUtils extras are installed.
+- Hardcode uvicorn host/port — use `FastAPIConfig`.

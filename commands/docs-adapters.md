@@ -10,11 +10,12 @@ Use the **archipy-docs** skill and the Adapters section of `skills/archipy-docs/
 Cover:
 
 - Prefer ArchiPy extras + shipped adapters
-- Custom `ports.py` / `adapters.py` / optional `mocks.py`
-- Boundary error mapping
+- Domain wrappers under `repositories/{domain}/adapters/` (e.g. `user_db_adapter.py`)
+- Boundary error mapping (`raise ... from e`)
 
 Live docs:
 
+- https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 - https://syntaxarc.github.io/ArchiPy/tutorials/adapters/
 - https://syntaxarc.github.io/ArchiPy/api_reference/adapters/
 

@@ -7,17 +7,33 @@ alwaysApply: true
 
 Use this when building applications that depend on the `archipy` package (not when maintaining ArchiPy itself).
 
+Live concepts: https://syntaxarc.github.io/ArchiPy/getting-started/concepts/
+
 ## Layer Map
 
 ```text
 your_app/
-├── models/       # Domain — data structures only (entities, DTOs, errors, types)
-├── adapters/     # Infrastructure — external systems (or wrappers around ArchiPy adapters)
-├── helpers/      # Support — utils, decorators, interceptors (pure; no DB/I/O)
-├── configs/      # Configuration — BaseConfig subclasses, DI containers
-├── repositories/ # Orchestrate adapters; map to DTOs
-├── logics/       # Use-case / unit-of-work boundaries
-└── services/     # Transport (HTTP/gRPC routers), versioned
+├── configs/          # BaseConfig subclasses, DI containers
+├── models/           # Entities, DTOs, errors, types — data structures only
+│   └── dtos/{domain}/
+│       ├── domain/v{n}/   # Versioned — cross service boundary
+│       └── repository/    # Internal — never versioned
+├── repositories/
+│   └── {domain}/
+│       ├── adapters/              # Domain wrappers around ArchiPy adapters
+│       └── {domain}_repository.py # Orchestrate adapters; map to DTOs
+├── logics/
+│   └── {domain}/         # Use-case / unit-of-work boundaries
+└── services/
+    └── {domain}/v{n}/    # Transport (HTTP/gRPC routers), versioned
+```
+
+Optional app-local helpers (prefer `archipy.helpers` first): `helpers/{utils,decorators,interceptors}/`.
+
+## Call Flow
+
+```text
+services → logics (@atomic) → repositories → adapters → ArchiPy
 ```
 
 ## Layer Rules
@@ -25,14 +41,29 @@ your_app/
 ### `models/`
 - Data structures only — no business logic, no I/O.
 - Prefer ArchiPy base entities/errors where applicable; subclass domain errors from ArchiPy `BaseError` hierarchy.
-- DTOs: Pydantic `BaseModel`. Version public domain DTOs under `domain/v{n}/`.
+- DTOs: Pydantic `BaseModel`.
+  - Public: `dtos/{domain}/domain/v{n}/` (versioned).
+  - Internal: `dtos/{domain}/repository/` (never versioned).
+- Naming detail lives in the models rule when editing `models/**`.
 
-### `adapters/`
-- Ports & adapters: abstract port + concrete adapter (+ optional mock for BDD).
+### `repositories/`
+- Each domain owns its data access under `repositories/{domain}/`.
+- `adapters/` — domain-specific wrappers around ArchiPy base adapters; entity construction and query building.
+- `{domain}_repository.py` — orchestrates adapters, cache-aside, maps results to response DTOs.
 - Prefer ArchiPy adapters via extras (`uv add "archipy[redis]"`) before inventing clients.
 - Catch infrastructure exceptions at the boundary and re-raise as domain errors with `raise ... from e`.
+- Never import or call repositories from a different domain.
 
-### `helpers/`
+### `logics/`
+- Pure business rules: domain DTO in → domain DTO out; framework-agnostic (no FastAPI/gRPC imports).
+- Unit of work: public methods use `@postgres_sqlalchemy_atomic_decorator` (or `async_postgres_sqlalchemy_atomic_decorator`) when Postgres SQLAlchemy is in play.
+- May call other domain logics (nested `@atomic` reuses the session); **never** another domain’s repository.
+
+### `services/`
+- Thin transport: HTTP/gRPC → domain InputDTO → logic → OutputDTO.
+- Version in path: `services/{domain}/v{n}/`. No business rules / `@atomic` here.
+
+### `helpers/` (optional)
 - Pure utilities only — no database calls, no network I/O, no adapter construction.
 - Sub-packages: `utils/`, `decorators/`, `interceptors/`.
 - Prefer ArchiPy helpers before writing custom ones.
@@ -46,10 +77,10 @@ your_app/
 ## Import Direction (one-way)
 
 ```text
-configs  ←  models  ←  helpers  ←  adapters / repositories / logics / services
+configs  ←  models  ←  helpers  ←  repositories / logics / services
 ```
 
-- Never import upward (e.g. models must not import adapters or logics).
+- Never import upward (e.g. models must not import repositories or logics).
 - Services/logics may depend on ports (abstractions), not concrete adapter modules when DI is used.
 
 ## Python Conventions (apps)

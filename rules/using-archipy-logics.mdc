@@ -1,0 +1,54 @@
+---
+description: ArchiPy app logics — business rules, unit of work, domain isolation
+globs: "**/logics/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Logics
+
+Logic classes are **pure business rules** and the unit-of-work boundary.
+
+Live: https://syntaxarc.github.io/ArchiPy/getting-started/concepts/
+
+## Responsibilities
+
+- Accept domain DTOs as input; return domain DTOs as output.
+- Framework-agnostic — no FastAPI / gRPC imports.
+- Depend on repositories / ports via DI — do not construct adapters.
+
+## Unit of Work
+
+When using Postgres SQLAlchemy, decorate public methods:
+
+```python
+from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator
+
+class UserRegistrationLogic:
+    @postgres_sqlalchemy_atomic_decorator
+    def register_user(self, input_dto: UserRegistrationInputDTO) -> UserRegistrationOutputDTO:
+        ...
+```
+
+- Async stack: `async_postgres_sqlalchemy_atomic_decorator`.
+- Nested `@atomic` calls reuse the open session — logics may call other logics.
+
+## Domain Isolation
+
+```text
+✅  OrderCreationLogic → UserQueryLogic → UserRepository
+❌  OrderCreationLogic → UserRepository   (bypasses domain boundary)
+```
+
+- May call other domain logics.
+- **Never** import or call a repository from another domain.
+
+## Errors
+
+- Raise domain errors for rule violations (`BusinessRuleViolationError`, `AlreadyExistsError`, …).
+- Infrastructure failures should already be domain errors from the adapter boundary; re-raise with `raise ... from e` when wrapping.
+
+## Do Not
+
+- Put HTTP status mapping or router code here (that belongs in `services/`).
+- Skip `@atomic` on write/read paths that need a SQLAlchemy session when Postgres is in use.
+- Construct Redis/DB clients inside logic classes.

@@ -1,5 +1,5 @@
 ---
-description: ArchiPy BaseConfig, environment loading, and DI container wiring
+description: ArchiPy BaseConfig, FastAPIConfig/uvicorn, and DI container wiring
 globs: "**/configs/**/*.py"
 alwaysApply: false
 ---
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class AppConfig(BaseConfig):
-    """Application configuration. Inherits ArchiPy sections (REDIS, FASTAPI, ...)."""
+    """Application configuration. Inherits ArchiPy sections (REDIS, FASTAPI, GRPC, ...)."""
 
     def customize(self) -> None:
         """Apply service-specific defaults after sources load."""
@@ -35,6 +35,22 @@ logger.info("Config loaded for environment: %s", config.ENVIRONMENT)
 - Call `BaseConfig.set_global(config)` once at bootstrap (typically importing `app_config` from the DI container).
 - Read elsewhere via `BaseConfig.global_config()`.
 - Document required env vars in `.env.example`; never commit secrets.
+- Env overrides use nested delimiter: `FASTAPI__PROJECT_NAME`, `FASTAPI__SERVE_PORT`, …
+
+## FastAPIConfig (`config.FASTAPI`)
+
+Drives both `AppUtils.create_fastapi_app` and uvicorn in `manage.py`:
+
+| Area | Fields |
+|------|--------|
+| Serve | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT` |
+| Proxy | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS` |
+| App / docs | `PROJECT_NAME`, `OPENAPI_URL`, `DOCS_URL`, `RE_DOC_URL`, … |
+| Middleware flags | `GZIP_MIDDLEWARE_IS_ENABLED`, `TRUSTED_HOST_MIDDLEWARE_*`, `HTTPS_REDIRECT_MIDDLEWARE_IS_ENABLED`, CORS fields |
+
+Set defaults in `customize()`; never hardcode host/port/reload for production paths.
+
+gRPC bind (parallel): `config.GRPC.SERVE_HOST`, `config.GRPC.SERVE_PORT`.
 
 ## Dependency Injection
 
@@ -42,12 +58,15 @@ logger.info("Config loaded for environment: %s", config.ENVIRONMENT)
 uv add "archipy[dependency-injection]"
 ```
 
-- Wire adapters, repositories, and logics in `configs/containers.py` as providers.
+- Wire in `configs/containers.py` as providers: **ports → adapters → repositories → logics → services**.
 - Depend on **ports** in business code; override providers in tests with mocks.
 - Import `app_config` inside the container module so `set_global` runs before wiring.
+
+Live: https://syntaxarc.github.io/ArchiPy/tutorials/config_management/ · https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/
 
 ## Do Not
 
 - Scatter `os.environ` reads outside config.
 - Construct adapters inside logics when a container exists — inject them.
 - Hardcode production secrets in defaults.
+- Hardcode uvicorn host/port — use `config.FASTAPI`.

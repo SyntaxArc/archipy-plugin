@@ -16,7 +16,8 @@ description: >-
 Ask:
 
 1. Util name / purpose
-2. Prefer existing ArchiPy util vs custom (`TracingUtils`, `RateLimitUtils`, `DatetimeUtils`, `StringUtils`, `JwtUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`, `AppUtils`, …)
+2. Prefer existing ArchiPy util vs custom (`TracingUtils`, `RateLimitUtils`, `DatetimeUtils`, `StringUtils`, `JwtUtils`,
+   `PasswordUtils`, `FileUtils`, `ErrorUtils`, `AppUtils`, …)
 
 ## Prefer ArchiPy
 

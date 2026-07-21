@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Using ArchiPy Adapters
 
+Live: https://syntaxarc.github.io/ArchiPy/tutorials/adapters/
+
 ## Prefer ArchiPy First
 
 Install the matching extra and use the shipped adapter:
@@ -21,17 +23,22 @@ from archipy.adapters.redis.adapters import RedisAdapter
 redis = RedisAdapter()  # reads BaseConfig.global_config().REDIS
 ```
 
-## Custom Adapter Package Shape
+Inject `*Port` abstractions into logics/repositories — not concrete adapters when DI is used.
 
-When wrapping a service ArchiPy does not cover (or wrapping an ArchiPy adapter for a domain):
+## Domain Adapter Shape
+
+Domain adapters live under the domain repository — **not** a top-level `adapters/` package:
 
 ```text
-adapters/<service>/
-├── __init__.py
-├── ports.py        # ABC contract
-├── adapters.py     # Concrete implementation
-└── mocks.py        # Optional — only if BDD needs an in-memory double
+repositories/<domain>/
+├── adapters/
+│   └── <domain>_<purpose>_adapter.py   # e.g. user_db_adapter.py
+└── <domain>_repository.py
 ```
+
+Thin wrappers around ArchiPy adapters (or external clients). Own entity construction and query building.
+Depend on ArchiPy ports when wrapping library adapters; add a local ABC only when the domain needs a custom
+contract. Optional in-memory mock only if BDD needs it (Redis ships `RedisMock`).
 
 ## Ports
 
@@ -50,12 +57,13 @@ Implementations and mocks must satisfy the same port.
 
 ## Boundary Errors
 
-At the infrastructure boundary, catch specific (or outermost) client errors and map to domain errors:
+Catch **specific** client/driver errors and map to domain errors with `raise ... from e`. Never bare
+`except Exception` unless the client exposes no typed root error:
 
 ```python
 try:
     await self._client.produce(topic, message)
-except Exception as e:  # only at outermost adapter boundary
+except KafkaError as e:
     raise KafkaProduceError("Failed to produce message") from e
 ```
 

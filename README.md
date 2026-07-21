@@ -193,7 +193,7 @@ archipy-cursor-plugin/
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
 ├── commands/                # Slash commands
-├── assets/logo.svg
+├── assets/logo.jpg
 ├── README.md
 ├── LICENSE
 └── CHANGELOG.md

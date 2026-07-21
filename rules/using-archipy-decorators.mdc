@@ -1,0 +1,30 @@
+---
+description: ArchiPy helpers/decorators — prefer ArchiPy decorators; no adapter imports at module level
+globs: "**/helpers/decorators/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Decorators
+
+Helpers stay **pure**: no database calls, no network I/O, no constructing adapters, no domain business rules.
+
+## Prefer ArchiPy Decorators
+
+Before writing a custom decorator, prefer ArchiPy:
+
+- `ttl_cache` — caching (`archipy.helpers.decorators.cache`)
+- `sqlalchemy_atomic` / async variants — unit-of-work boundaries
+- tracing / timing / timeout / retry / singleton / rate-limit decorators under `archipy.helpers.decorators`
+
+## Custom Decorators
+
+- Live under `helpers/decorators/`.
+- Preserve wrapped function signatures and type hints (`functools.wraps`).
+- Document usage with a short example in the Google-style docstring.
+- Do **not** import concrete adapter implementations at module level. If a decorator needs a port, accept it as an argument or resolve via injected callback/config.
+
+## Do Not
+
+- Hide adapter construction inside decorator modules.
+- Catch broad `Exception` without re-raising as a domain error with `raise ... from e`.
+- Mix sync/async incorrectly — provide separate sync and async wrappers when needed.

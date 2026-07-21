@@ -1,0 +1,71 @@
+---
+description: Using and writing adapters in ArchiPy apps — extras, ports, mocks, boundary errors
+globs: "**/adapters/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Adapters
+
+## Prefer ArchiPy First
+
+Install the matching extra and use the shipped adapter:
+
+```bash
+uv add "archipy[redis]"
+# examples: postgres-sqlalchemy, kafka, scylladb, minio, keycloak, ...
+```
+
+```python
+from archipy.adapters.redis.adapters import RedisAdapter
+
+redis = RedisAdapter()  # reads BaseConfig.global_config().REDIS
+```
+
+## Custom Adapter Package Shape
+
+When wrapping a service ArchiPy does not cover (or wrapping an ArchiPy adapter for a domain):
+
+```text
+adapters/<service>/
+├── __init__.py
+├── ports.py        # ABC contract
+├── adapters.py     # Concrete implementation
+└── mocks.py        # Optional — only if BDD needs an in-memory double
+```
+
+## Ports
+
+```python
+from abc import ABC, abstractmethod
+
+class CachePort(ABC):
+    @abstractmethod
+    def get(self, key: str) -> str | None: ...
+
+    @abstractmethod
+    def set(self, key: str, value: str, ttl: int | None = None) -> None: ...
+```
+
+Implementations and mocks must satisfy the same port.
+
+## Boundary Errors
+
+At the infrastructure boundary, catch specific (or outermost) client errors and map to domain errors:
+
+```python
+try:
+    await self._client.produce(topic, message)
+except Exception as e:  # only at outermost adapter boundary
+    raise KafkaProduceError("Failed to produce message") from e
+```
+
+Never leak raw driver exceptions into logics/services.
+
+## Sync vs Async
+
+- Sync and async are separate classes — do not mix `async def` into a sync adapter class.
+- Prefer the ArchiPy async extra when the app is async end-to-end.
+
+## Config
+
+Adapters should read settings from `BaseConfig.global_config()` (or injected config), not from scattered env reads inside methods.

@@ -1,0 +1,30 @@
+---
+description: ArchiPy helpers/interceptors — cross-cutting hooks only; wire via DI/framework
+globs: "**/helpers/interceptors/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Interceptors
+
+Helpers stay **pure**: no database calls, no constructing adapters, no domain business rules.
+
+## Role
+
+Interceptors are **cross-cutting** request/RPC/middleware hooks (metrics, auth context, logging enrichment). They are not repositories and not use-cases.
+
+## Prefer ArchiPy
+
+Use ArchiPy interceptors under `archipy.helpers.interceptors` (e.g. FastAPI / gRPC packages) before inventing new ones. Follow the live docs for wiring patterns.
+
+## Custom Interceptors
+
+- Live under `helpers/interceptors/`.
+- Keep them framework-aware but business-logic-free.
+- Wire via DI container or framework registration — do not have adapters import interceptors at module level to register themselves.
+- Sync and async variants stay separate when both exist.
+
+## Do Not
+
+- Embed use-case logic inside interceptors.
+- Perform multi-step domain writes here (that belongs in `logics/` with atomic boundaries).
+- Leak infrastructure exceptions — map to domain/HTTP/gRPC errors at the appropriate boundary.

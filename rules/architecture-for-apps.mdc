@@ -1,0 +1,60 @@
+---
+description: ArchiPy clean architecture for apps — layers, import direction, and base types
+alwaysApply: true
+---
+
+# Architecture for ArchiPy Apps
+
+Use this when building applications that depend on the `archipy` package (not when maintaining ArchiPy itself).
+
+## Layer Map
+
+```text
+your_app/
+├── models/       # Domain — data structures only (entities, DTOs, errors, types)
+├── adapters/     # Infrastructure — external systems (or wrappers around ArchiPy adapters)
+├── helpers/      # Support — utils, decorators, interceptors (pure; no DB/I/O)
+├── configs/      # Configuration — BaseConfig subclasses, DI containers
+├── repositories/ # Orchestrate adapters; map to DTOs
+├── logics/       # Use-case / unit-of-work boundaries
+└── services/     # Transport (HTTP/gRPC routers), versioned
+```
+
+## Layer Rules
+
+### `models/`
+- Data structures only — no business logic, no I/O.
+- Prefer ArchiPy base entities/errors where applicable; subclass domain errors from ArchiPy `BaseError` hierarchy.
+- DTOs: Pydantic `BaseModel`. Version public domain DTOs under `domain/v{n}/`.
+
+### `adapters/`
+- Ports & adapters: abstract port + concrete adapter (+ optional mock for BDD).
+- Prefer ArchiPy adapters via extras (`uv add "archipy[redis]"`) before inventing clients.
+- Catch infrastructure exceptions at the boundary and re-raise as domain errors with `raise ... from e`.
+
+### `helpers/`
+- Pure utilities only — no database calls, no network I/O, no adapter construction.
+- Sub-packages: `utils/`, `decorators/`, `interceptors/`.
+- Prefer ArchiPy helpers before writing custom ones.
+- Decorators and interceptors must not import concrete adapter implementations at module level.
+
+### `configs/`
+- Extend `archipy.configs.base_config.BaseConfig`.
+- Call `BaseConfig.set_global(config)` once at bootstrap.
+- No hardcoded secrets — document required vars in `.env.example`.
+
+## Import Direction (one-way)
+
+```text
+configs  ←  models  ←  helpers  ←  adapters / repositories / logics / services
+```
+
+- Never import upward (e.g. models must not import adapters or logics).
+- Services/logics may depend on ports (abstractions), not concrete adapter modules when DI is used.
+
+## Python Conventions (apps)
+
+- Python 3.14+: `X | Y`, `list[str]`, `dict[str, int]`.
+- Double quotes for strings.
+- Google-style docstrings on public functions/classes.
+- Specific exceptions; always `raise ... from e`.

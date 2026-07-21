@@ -1,0 +1,38 @@
+---
+description: ArchiPy helpers/utils — pure utilities, prefer ArchiPy utils before custom
+globs: "**/helpers/utils/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Utils
+
+Helpers stay **pure**: no database calls, no network I/O, no constructing adapters, no domain business rules.
+
+## Prefer ArchiPy Utils
+
+Before writing a custom util, check whether ArchiPy already provides it, for example:
+
+- `TracingUtils` — tracing helpers
+- `RateLimitUtils` — rate-limit helpers
+- `DatetimeUtils`, `StringUtils`, `JwtUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`
+- `AppUtils` — app bootstrap helpers (e.g. FastAPI factory) when building services
+
+Import from `archipy.helpers.utils.*`.
+
+## Custom Utils
+
+- Live under `helpers/utils/`.
+- Pure functions or small classes with clear Google-style docstrings and full type hints.
+- Lazy-import optional third-party deps **inside** functions, never at module level, when the dep is optional:
+
+```python
+def encode_jwt(payload: dict) -> str:
+    import jwt  # noqa: PLC0415
+    return jwt.encode(payload, ...)
+```
+
+## Do Not
+
+- Open sockets, DB sessions, or Redis clients here.
+- Import concrete adapters at module level.
+- Put use-case / business logic in utils (that belongs in `logics/`).

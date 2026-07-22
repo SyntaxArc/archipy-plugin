@@ -2,8 +2,8 @@
 name: scaffold-archipy-app
 description: >-
   Scaffold a minimal ArchiPy application package (config, containers stub, domain
-  slice, helpers tree). Use when starting a new ArchiPy-based service or asking
-  to bootstrap project layout.
+  slice, helpers tree, optional manage.py). Use when starting a new ArchiPy-based
+  service or asking to bootstrap project layout.
 ---
 
 # Scaffold ArchiPy App
@@ -13,7 +13,7 @@ description: >-
 Ask the user for:
 
 1. Python package name (e.g. `my_app`)
-2. ArchiPy extras to install (e.g. `redis`, `dependency-injection`, `postgres-sqlalchemy`)
+2. ArchiPy extras to install (e.g. `redis`, `dependency-injection`, `postgres-sqlalchemy`, `fastapi`)
 3. Optional: first domain name (default `user`)
 
 ## Steps
@@ -48,13 +48,17 @@ Ask the user for:
 │   └── <domain>/
 └── services/
     └── <domain>/v1/
-features/                  # optional BDD stub note
+manage.py                  # when fastapi (or HTTP) requested
+features/                  # optional — /scaffold-bdd
 .env.example
 ```
 
-4. Write `app_config.py` following ArchiPy quickstart (`customize()`, `BaseConfig.set_global`).
+4. Write `app_config.py` with `customize()` setting `self.FASTAPI.PROJECT_NAME` (and related defaults) + `BaseConfig.set_global`.
 5. Add a minimal domain DTO + error subclassing ArchiPy base errors.
-6. Document next steps: `/scaffold-adapter` (domain wrappers under `repositories/<domain>/adapters/`), wire Redis/Postgres, `/docs-quickstart`.
+6. **When extras include `fastapi` (or user wants HTTP):** emit root `manage.py`:
+   - `create_app()` uses `AppUtils.create_fastapi_app()` and includes domain routers.
+   - `uvicorn.run` binds from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`) — never hardcode host/port.
+7. Document next steps: `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-bdd`, `/docs-quickstart`.
 
 ## Constraints
 

@@ -16,8 +16,26 @@ uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
 # Combine extras as needed: uv add "archipy[redis,dependency-injection]"
 ```
 
-Common extras (non-exhaustive): `redis`, `postgres-sqlalchemy`, `postgres-sqlalchemy-async`, `kafka`, `scylladb`,
-`minio`, `keycloak`, `fastapi`, `grpc`, `dependency-injection`, `behave`.
+Common extras (non-exhaustive): see matrix below. Full list on PyPI / docs.
+
+### Extras matrix
+
+| Extra | Use |
+|-------|-----|
+| `redis` | Redis adapter + config |
+| `fakeredis` | Richer Redis mock for BDD |
+| `postgres-sqlalchemy` | Sync Postgres SQLAlchemy + `@postgres_sqlalchemy_atomic_decorator` |
+| `postgres-sqlalchemy-async` | Async Postgres SQLAlchemy + async atomic |
+| `kafka` | Kafka producer/consumer adapters |
+| `scylladb` | ScyllaDB / Cassandra adapter |
+| `minio` | MinIO / S3-compatible object storage |
+| `keycloak` | Keycloak auth adapter |
+| `fastapi` | FastAPI + `AppUtils.create_fastapi_app` |
+| `grpc` | gRPC + `create_grpc_app` / `create_async_grpc_app` |
+| `dependency-injection` | `dependency-injector` container helpers |
+| `behave` | Behave BDD helpers for apps |
+
+Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`, `/scaffold-bdd`, plus helper scaffolds (`utils` / `decorator` / `interceptor`).
 
 See PyPI / docs for the full extras matrix.
 
@@ -198,12 +216,19 @@ Live: https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/
 ## BDD testing
 
 ```text
-features/*.feature, steps/, scenario_context.py, scenario_context_pool_manager.py, environment.py
+features/
+├── *.feature, steps/
+├── scenario_context.py
+├── scenario_context_pool_manager.py
+├── test_helpers.py
+├── environment.py
+└── test_containers.py   # infra / @needs-* only
 ```
 
-- Behave (not pytest) as primary style; `uv add "archipy[behave]"` when needed.
-- Inject mocks/ports (`RedisMock`); isolate with `ScenarioContext`.
-- Tag infra scenarios `@needs-*`; skip with `behave --tags=~@needs-redis`.
+- Behave (not pytest); `uv add "archipy[behave]"`; infra also `archipy[testcontainers]`.
+- Isolate with `ScenarioContext` + pool; hooks in `environment.py` (see `/scaffold-bdd`).
+- Tag infra `@needs-*`; skip with `behave --tags=~@needs-redis`.
+- Do not copy ArchiPy-core gRPC/Temporal environment blocks unless the app needs them.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
 

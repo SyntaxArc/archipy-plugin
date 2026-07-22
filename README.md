@@ -61,38 +61,47 @@ Until listing is approved, use **Local** or **Team marketplace** install.
 
 ## What’s included
 
-### Rules (10)
+### Rules (11)
 
-| Rule file                        | Applies when                      |
-|----------------------------------|-----------------------------------|
-| `architecture-for-apps.mdc`      | Always                            |
-| `using-archipy-adapters.mdc`     | `**/adapters/**/*.py`             |
-| `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`        |
-| `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`   |
-| `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py` |
-| `config-and-di.mdc`              | `**/configs/**/*.py`              |
-| `using-archipy-models.mdc`       | `**/models/**/*.py`               |
-| `using-archipy-logics.mdc`       | `**/logics/**/*.py`               |
-| `using-archipy-services.mdc`     | `**/services/**/*.py`             |
-| `testing-bdd-for-apps.mdc`       | `**/features/**/*`                |
+| Rule file                        | Applies when                         |
+|----------------------------------|--------------------------------------|
+| `architecture-for-apps.mdc`      | Always                               |
+| `using-archipy-adapters.mdc`     | `**/adapters/**/*.py`                |
+| `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`           |
+| `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`      |
+| `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py`    |
+| `config-and-di.mdc`              | `**/configs/**/*.py`                 |
+| `using-archipy-models.mdc`       | `**/models/**/*.py`                  |
+| `using-archipy-repositories.mdc` | `**/repositories/**/*.py`            |
+| `using-archipy-logics.mdc`       | `**/logics/**/*.py`                  |
+| `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py` |
+| `testing-bdd-for-apps.mdc`       | `**/features/**/*`                   |
 
-### Skills (6)
+### Skills (10)
 
 | Skill                          | When to use                                                               |
 |--------------------------------|---------------------------------------------------------------------------|
 | `scaffold-archipy-app`         | Bootstrap a new ArchiPy-based service layout                              |
+| `scaffold-archipy-domain`      | Full domain slice (models, repo, logic, service)                          |
 | `scaffold-archipy-adapter`     | Add domain adapter under `repositories/{domain}/adapters/`                |
+| `scaffold-archipy-logic`       | Use-case under `logics/{domain}/` with `@atomic`                          |
+| `scaffold-archipy-service`     | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
+| `scaffold-archipy-bdd`         | Behave `features/` stub                                                   |
 | `scaffold-archipy-utils`       | Wire or create `helpers/utils`                                            |
 | `scaffold-archipy-decorator`   | Wire or create `helpers/decorators`                                       |
 | `scaffold-archipy-interceptor` | Wire or create `helpers/interceptors`                                     |
 | `archipy-docs`                 | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
 
-### Commands (9)
+### Commands (16)
 
 | Command                 | Action                            |
 |-------------------------|-----------------------------------|
 | `/scaffold-app`         | Run scaffold-archipy-app          |
+| `/scaffold-domain`      | Run scaffold-archipy-domain       |
 | `/scaffold-adapter`     | Run scaffold-archipy-adapter      |
+| `/scaffold-logic`       | Run scaffold-archipy-logic        |
+| `/scaffold-service`     | Run scaffold-archipy-service      |
+| `/scaffold-bdd`         | Run scaffold-archipy-bdd          |
 | `/scaffold-utils`       | Run scaffold-archipy-utils        |
 | `/scaffold-decorator`   | Run scaffold-archipy-decorator    |
 | `/scaffold-interceptor` | Run scaffold-archipy-interceptor  |
@@ -100,6 +109,9 @@ Until listing is approved, use **Local** or **Team marketplace** install.
 | `/docs-adapters`        | Adapter patterns + docs links     |
 | `/docs-helpers`         | Utils / decorators / interceptors |
 | `/docs-config`          | BaseConfig + DI docs              |
+| `/docs-errors`          | Error handling docs               |
+| `/docs-testing`         | BDD testing docs                  |
+| `/docs-observability`   | Observability docs                |
 
 There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
@@ -109,7 +121,7 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 2. Open an application workspace (empty or existing Python service).
 3. In Agent chat, run `/scaffold-app` — answer package name and extras (e.g. `redis`).
 4. Run `/docs-quickstart` to confirm config + first adapter steps.
-5. Expect: `AppConfig`, models stub, `repositories/<domain>/` (adapters + repository stub), optional helpers tree, and `.env.example`.
+5. Expect: `AppConfig`, models stub, `repositories/<domain>/`, optional `manage.py` (if `fastapi`), helpers tree, `.env.example`.
 
 ## Commands deep dive
 
@@ -117,13 +129,37 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
 - **Purpose:** Create a minimal ArchiPy app package tree.
 - **Asks:** Package name, extras, optional first domain.
-- **Outcome:** `configs/app_config.py`, models stub, `repositories/<domain>/`, optional helpers packages, `.env.example`.
+- **Outcome:** `configs/app_config.py`, models stub, `repositories/<domain>/`, optional helpers, `manage.py` when FastAPI, `.env.example`.
+
+### `/scaffold-domain`
+
+- **Purpose:** Full domain slice composing models + adapter + logic + service.
+- **Asks:** Domain, extras, transport.
+- **Outcome:** DTOs/errors, repository adapters, one logic, one service v1, DI notes.
 
 ### `/scaffold-adapter`
 
 - **Purpose:** Add a domain adapter under the domain repository.
 - **Asks:** Domain, purpose, sync/async, mocks yes/no, wrap ArchiPy vs new client.
 - **Outcome:** `repositories/<domain>/adapters/<domain>_<purpose>_adapter.py` (+ repository stub if missing).
+
+### `/scaffold-logic`
+
+- **Purpose:** Use-case class with unit-of-work decorator.
+- **Asks:** Domain, logic name, sync/async atomic.
+- **Outcome:** `logics/<domain>/<name>_logic.py`.
+
+### `/scaffold-service`
+
+- **Purpose:** Thin FastAPI router or gRPC servicer.
+- **Asks:** Domain, version, FastAPI vs gRPC.
+- **Outcome:** `services/<domain>/v{n}/<domain>_service.py` + AppUtils bootstrap notes.
+
+### `/scaffold-bdd`
+
+- **Purpose:** Behave feature layout with ScenarioContext isolation.
+- **Asks:** Feature name; mocks vs `@needs-*` infra.
+- **Outcome:** `scenario_context.py`, pool manager, `test_helpers.py`, `environment.py`, feature/steps; infra adds slim `test_containers.py` + `.env.test`.
 
 ### `/scaffold-utils`
 
@@ -143,7 +179,7 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 - **Asks:** Framework; sync/async; built-in vs custom.
 - **Outcome:** Interceptor module + wiring notes (DI / framework).
 
-### `/docs-quickstart` / `/docs-adapters` / `/docs-helpers` / `/docs-config`
+### `/docs-quickstart` / `/docs-adapters` / `/docs-helpers` / `/docs-config` / `/docs-errors` / `/docs-testing` / `/docs-observability`
 
 - **Purpose:** Orient the agent on the matching topic using `skills/archipy-docs/reference.md` first, then live docs
   URLs.
@@ -200,6 +236,13 @@ DTOs/entities/errors layout and naming (`*InputDTO` / `*CommandDTO` / …).
 - **Do:** Version domain DTOs under `domain/v{n}/`; subclass ArchiPy errors.
 - **Don’t:** Put I/O or business rules in models.
 
+### `using-archipy-repositories`
+
+Domain data access; adapters under `repositories/{domain}/adapters/`.
+
+- **Do:** Orchestrate in `{domain}_repository.py`; map to repository DTOs; isolate domains.
+- **Don’t:** Call another domain’s repository; put `@atomic` here.
+
 ### `using-archipy-logics`
 
 Business rules + unit of work; domain isolation.
@@ -231,6 +274,7 @@ archipy-cursor-plugin/
 ├── skills/                  # SKILL.md directories (+ docs reference)
 ├── commands/                # Slash commands
 ├── assets/logo.jpg
+├── AGENTS.md
 ├── README.md
 ├── LICENSE
 └── CHANGELOG.md
@@ -246,6 +290,9 @@ Cursor discovers `rules/`, `skills/`, and `commands/` automatically when the man
 | `/docs-adapters`, `scaffold-archipy-adapter` | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/), [API adapters](https://syntaxarc.github.io/ArchiPy/api_reference/adapters/)                           |
 | `/docs-helpers`, helper scaffolds            | [Helpers](https://syntaxarc.github.io/ArchiPy/tutorials/helpers/), [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                           |
 | `/docs-config`                               | [Config](https://syntaxarc.github.io/ArchiPy/tutorials/config_management/), [DI](https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/)                      |
+| `/docs-errors`                               | [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/)                                                                                             |
+| `/docs-testing`, `scaffold-archipy-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                         |
+| `/docs-observability`                        | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                                                                                               |
 | `archipy-docs` / `reference.md`              | [Docs home](https://syntaxarc.github.io/ArchiPy/), [API reference](https://syntaxarc.github.io/ArchiPy/api_reference/)                                                     |
 
 ## Developing / contributing
@@ -261,7 +308,7 @@ Cursor discovers `rules/`, `skills/`, and `commands/` automatically when the man
 ## Marketplace / security
 
 - This repository is **open source** (MIT).
-- v0.1 ships **no MCP servers** and **no plugin variables / secrets**.
+- v0.2 ships **no MCP servers** and **no plugin variables / secrets**.
 - Cursor Marketplace submissions are **manually reviewed**; updates are re-reviewed.
 - Do not add API tokens or credentials to the plugin tree.
 

@@ -1,5 +1,5 @@
 ---
-description: BDD testing for ArchiPy apps — Behave, ScenarioContext, ports/mocks
+description: BDD testing for ArchiPy apps — Behave, ScenarioContext, testcontainers
 globs: "**/features/**/*"
 alwaysApply: false
 ---
@@ -16,46 +16,45 @@ Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
 features/
 ├── *.feature
 ├── steps/
-├── scenario_context.py              # Per-scenario isolated storage
-├── scenario_context_pool_manager.py # Scenario ID → ScenarioContext
-└── environment.py                   # behave hooks — container setup/teardown
+├── scenario_context.py              # Per-scenario storage + cleanup
+├── scenario_context_pool_manager.py # Singleton pool by scenario ID
+├── test_helpers.py                  # get_current_scenario_context
+├── environment.py                   # TestConfig + before/after hooks
+└── test_containers.py               # Infra only — ContainerManager + @needs-* map
 ```
 
-Optional extra: `uv add "archipy[behave]"`.
+Extras: `uv add "archipy[behave]"`; infra also `uv add "archipy[testcontainers]"`.
+
+## Lifecycle (environment.py)
+
+1. `before_all` — `TestConfig` / `set_global`, `ScenarioContextPoolManager`, optional `ContainerManager`
+2. `before_feature` — start containers from `@needs-*` tags only
+3. `before_scenario` — allocate `ScenarioContext` from pool
+4. `after_scenario` — `cleanup_context` + `SessionManagerRegistry.reset()`
+5. `after_feature` / `after_all` — `ContainerManager.stop_all()`, `cleanup_all()`
+
+Prefer `/scaffold-bdd` templates over copying ArchiPy-core gRPC/Temporal hooks.
 
 ## Ports and Mocks
 
-- Business code depends on ports; steps inject mocks (e.g. `RedisMock`) or real adapters.
-- Never import concrete drivers into logics just for tests — swap providers in the DI container / context.
-
-```text
-Production:  Logic → RedisAdapter
-Test:        Logic → RedisMock
-```
-
-## Scenario Isolation
-
-- Use `ScenarioContext` per scenario — no shared mutable globals across scenarios.
-- `ScenarioContextPoolManager` creates/retrieves context by scenario ID and disposes after the scenario.
+- Inject mocks (e.g. `RedisMock`) or real adapters via scenario context.
+- Never share mutable globals across scenarios.
 
 ## Infrastructure Tags
 
-Tag scenarios that need Docker/services:
-
 ```gherkin
 @needs-redis
-Scenario: ...
+Feature: ...
 ```
 
-Skip when infra is unavailable:
+`ContainerManager.extract_containers_from_tags` → `start_containers`. Register only containers the app tests.
 
 ```bash
 uv run behave --tags=~@needs-redis
-uv run behave --tags=@needs-postgres
 ```
 
 ## Do Not
 
-- Share adapter instances or DB state across scenarios without cleanup.
-- Write pytest suites as the primary ArchiPy app test style.
-- Call real external services from untagged “unit” BDD scenarios.
+- Share adapter/DB state across scenarios without cleanup.
+- Use pytest as the primary ArchiPy app test style.
+- Paste the full ArchiPy library `test_containers.py` catalogue into an app.

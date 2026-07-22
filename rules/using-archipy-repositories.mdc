@@ -1,0 +1,37 @@
+---
+description: ArchiPy app repositories — domain adapters, orchestration, cache-aside
+globs: "**/repositories/**/*.py"
+alwaysApply: false
+---
+
+# Using ArchiPy Repositories
+
+Each domain owns its data access under `repositories/{domain}/`.
+
+Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
+
+## Layout
+
+```text
+repositories/{domain}/
+├── adapters/                    # Domain wrappers around ArchiPy / external clients
+│   └── {domain}_{purpose}_adapter.py
+└── {domain}_repository.py       # Orchestrate adapters; map to repository DTOs
+```
+
+## Responsibilities
+
+- `adapters/` — entity construction, query building, thin wrappers; prefer ArchiPy extras (`uv add "archipy[redis]"`) before inventing clients.
+- `{domain}_repository.py` — orchestrates adapters, cache-aside patterns, maps results to repository DTOs (`*CommandDTO` / `*QueryDTO` / `*ResponseDTO`).
+- Catch infrastructure exceptions at the adapter/repository boundary; re-raise as domain errors with `raise ... from e`.
+
+## Domain Isolation
+
+- Never import or call a repository from a different domain.
+- Cross-domain reads go through the other domain’s **logic** class.
+
+## Do Not
+
+- Put business rules or `@postgres_sqlalchemy_atomic_decorator` here (that belongs in `logics/`).
+- Create a top-level app `adapters/` package — domain adapters live under repositories.
+- Leak raw driver exceptions into logics/services.

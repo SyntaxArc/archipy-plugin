@@ -39,6 +39,7 @@ DTOs use Pydantic `BaseModel`. Prefer ArchiPy base entities where applicable.
 - Subclass ArchiPy errors from `archipy.models.errors` (e.g. `AlreadyExistsError`, `NotFoundError`).
 - Raise with context: `raise NotFoundError(...) from e`.
 - Never raise bare `Exception` for domain failures.
+- With `AppUtils.create_fastapi_app` exception handlers, ArchiPy errors map to HTTP status automatically — see https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/
 
 ## Do Not
 

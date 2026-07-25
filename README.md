@@ -1,19 +1,16 @@
-# ArchiPy Cursor Plugin
+# ArchiPy Plugin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![ArchiPy Docs](https://img.shields.io/badge/docs-ArchiPy-blue.svg)](https://syntaxarc.github.io/ArchiPy/)
 [![ArchiPy](https://img.shields.io/badge/library-SyntaxArc%2FArchiPy-0F172A.svg)](https://github.com/SyntaxArc/ArchiPy)
 
-Cursor rules, skills, and slash commands for **application teams that build
-with [ArchiPy](https://github.com/SyntaxArc/ArchiPy)**.
-
-> Marketplace listing: submit this repository
-> at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). Update this badge once the plugin is
-> approved.
+Rules, skills, and slash commands for **application teams that build
+with [ArchiPy](https://github.com/SyntaxArc/ArchiPy)**. Works with both
+**Cursor** and **Claude Code**.
 
 ## What this is
 
-This plugin helps Cursor agents follow ArchiPy clean-architecture patterns when working in **your** service repos: layer
+This plugin helps AI agents follow ArchiPy clean-architecture patterns when working in **your** service repos: layer
 boundaries, adapters, helpers (utils / decorators / interceptors), configuration, and DI.
 
 It ships:
@@ -26,14 +23,14 @@ It is **not** for maintaining the ArchiPy library itself (no graphify, library c
 
 ## Requirements
 
-- [Cursor](https://cursor.com/) with plugin support
+- [Cursor](https://cursor.com/) with plugin support, **or** [Claude Code](https://code.claude.com/) with plugin support
 - Apps targeting **Python 3.14+**
 - [`uv`](https://docs.astral.sh/uv/) package manager
 - PyPI package [`archipy`](https://pypi.org/project/archipy/) (install the extras your service needs)
 
 ## Install
 
-### Local (development / personal)
+### Cursor — Local (development / personal)
 
 ```bash
 # From a clone of this repo:
@@ -45,19 +42,34 @@ Then run **Developer: Reload Window** in Cursor (or restart Cursor).
 
 Verify under **Customize** that the `archipy` plugin loaded (rules, skills, commands).
 
-### Team marketplace (Teams / Enterprise)
+### Cursor — Team marketplace (Teams / Enterprise)
 
 1. Open **Dashboard → Plugins → Team Marketplaces**
-2. **Import from Repo** and point at `https://github.com/SyntaxArc/archipy-cursor-plugin`
+2. **Import from Repo** and point at `https://github.com/SyntaxArc/archipy-plugin`
 3. Set access and install mode (Default Off / Default On / Required)
 
-### Cursor Marketplace
+### Cursor — Cursor Marketplace
 
 1. After this plugin is listed, open **Customize** or [cursor.com/marketplace](https://cursor.com/marketplace)
 2. Search for **archipy** and install
 3. Optionally scope install to the current workspace
 
-Until listing is approved, use **Local** or **Team marketplace** install.
+### Claude Code — Local (development / personal)
+
+```bash
+# From a clone of this repo:
+mkdir -p ~/.claude/plugins/local
+ln -sfn "$(pwd)" ~/.claude/plugins/local/archipy
+```
+
+Then restart Claude Code or run `/reload-plugins`.
+
+### Claude Code — Marketplace
+
+```bash
+/plugin marketplace add SyntaxArc/archipy-plugin
+/plugin install archipy@archipy
+```
 
 ## What’s included
 
@@ -267,9 +279,13 @@ Behave + `ScenarioContext`; inject ports/mocks; `@needs-*` infra tags.
 ## Project layout
 
 ```text
-archipy-cursor-plugin/
+archipy-plugin/
+├── .claude-plugin/
+│   ├── plugin.json          # Claude Code plugin manifest
+│   └── marketplace.json     # Claude Code marketplace catalog
 ├── .cursor-plugin/
-│   └── plugin.json          # Plugin manifest (name: archipy)
+│   ├── plugin.json          # Cursor plugin manifest
+│   └── marketplace.json     # Cursor marketplace catalog
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
 ├── commands/                # Slash commands
@@ -280,7 +296,7 @@ archipy-cursor-plugin/
 └── CHANGELOG.md
 ```
 
-Cursor discovers `rules/`, `skills/`, and `commands/` automatically when the manifest does not override paths.
+Both Cursor and Claude Code discover `rules/`, `skills/`, and `commands/` automatically when the manifest does not override paths.
 
 ## ArchiPy docs map
 
@@ -297,22 +313,25 @@ Cursor discovers `rules/`, `skills/`, and `commands/` automatically when the man
 
 ## Developing / contributing
 
-1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy`.
+1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy` (Claude Code).
 2. Edit rules (`.mdc` frontmatter: `description`, `alwaysApply` / `globs`), skills (`name` + `description` matching
    folder name), or commands (`name` + `description`).
-3. Reload the Cursor window after changes.
+3. Reload the editor window after changes.
 4. Keep consumer focus: apps using PyPI `archipy`, not ArchiPy monorepo maintainers.
 5. Open a PR with a clear summary; update `CHANGELOG.md` for user-facing changes.
-6. Bump `version` in `.cursor-plugin/plugin.json` when publishing a release.
+6. Bump `version` in both `.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json` when publishing a release.
 
 ## Marketplace / security
 
 - This repository is **open source** (MIT).
 - v0.2 ships **no MCP servers** and **no plugin variables / secrets**.
 - Cursor Marketplace submissions are **manually reviewed**; updates are re-reviewed.
+- Claude Code marketplace: `/plugin marketplace add SyntaxArc/archipy-plugin`
 - Do not add API tokens or credentials to the plugin tree.
 
-Publish: [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish)
+Publish:
+- Cursor: [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish)
+- Claude Code: `/plugin marketplace add SyntaxArc/archipy-plugin`
 
 ## Changelog
 

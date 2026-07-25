@@ -1,0 +1,14 @@
+{
+  "name": "archipy",
+  "owner": {
+    "name": "SyntaxArc"
+  },
+  "plugins": [
+    {
+      "name": "archipy",
+      "source": ".",
+      "description": "Rules, skills, and commands for building apps with ArchiPy",
+      "version": "0.2.0"
+    }
+  ]
+}

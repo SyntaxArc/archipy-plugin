@@ -11,5 +11,4 @@ Follow the **scaffold-archipy-decorator** skill.
 2. Prefer `ttl_cache`, `sqlalchemy_atomic`, tracing, retry, etc.
 3. Custom decorators: no adapter imports at module level; include usage example.
 
-Reference: skills/archipy-docs/reference.md (Decorators).
-Docs: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
+Reference: skills/archipy-docs/reference.md (Decorators). Docs: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/

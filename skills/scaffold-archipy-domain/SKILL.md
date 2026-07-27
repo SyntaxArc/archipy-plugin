@@ -19,7 +19,8 @@ Ask the user for:
 
 Apply existing skills in order (reuse their constraints and file layouts):
 
-1. **Models** — `models/dtos/<domain>/domain/v1/` + `repository/` DTO stubs; `models/errors/<domain>_errors.py`; optional entity.
+1. **Models** — `models/dtos/<domain>/domain/v1/` + `repository/` DTO stubs; `models/errors/<domain>_errors.py`;
+   optional entity.
 2. **scaffold-archipy-adapter** — thin wrapper under `repositories/<domain>/adapters/` + `<domain>_repository.py`.
 3. **scaffold-archipy-logic** — at least one use-case under `logics/<domain>/`.
 4. **scaffold-archipy-service** — `services/<domain>/v1/<domain>_service.py`.

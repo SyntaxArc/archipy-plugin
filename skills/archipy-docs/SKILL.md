@@ -23,6 +23,7 @@ description: >-
 | Helpers           | https://syntaxarc.github.io/ArchiPy/tutorials/helpers/                 |
 | Config            | https://syntaxarc.github.io/ArchiPy/tutorials/config_management/       |
 | DI                | https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/    |
+| Health checks     | Bundled `reference.md` (HTTP + gRPC) + `/scaffold-health-checks`       |
 | Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/          |
 | API reference     | https://syntaxarc.github.io/ArchiPy/api_reference/                     |
 

@@ -11,5 +11,4 @@ Follow the **scaffold-archipy-utils** skill.
 2. If ArchiPy provides it, show import + usage only.
 3. Otherwise scaffold a pure util under `helpers/utils/`.
 
-Reference: skills/archipy-docs/reference.md (Utils).
-Docs: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
+Reference: skills/archipy-docs/reference.md (Utils). Docs: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/

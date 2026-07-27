@@ -20,22 +20,23 @@ Common extras (non-exhaustive): see matrix below. Full list on PyPI / docs.
 
 ### Extras matrix
 
-| Extra | Use |
-|-------|-----|
-| `redis` | Redis adapter + config |
-| `fakeredis` | Richer Redis mock for BDD |
-| `postgres-sqlalchemy` | Sync Postgres SQLAlchemy + `@postgres_sqlalchemy_atomic_decorator` |
-| `postgres-sqlalchemy-async` | Async Postgres SQLAlchemy + async atomic |
-| `kafka` | Kafka producer/consumer adapters |
-| `scylladb` | ScyllaDB / Cassandra adapter |
-| `minio` | MinIO / S3-compatible object storage |
-| `keycloak` | Keycloak auth adapter |
-| `fastapi` | FastAPI + `AppUtils.create_fastapi_app` |
-| `grpc` | gRPC + `create_grpc_app` / `create_async_grpc_app` |
-| `dependency-injection` | `dependency-injector` container helpers |
-| `behave` | Behave BDD helpers for apps |
+| Extra                       | Use                                                                |
+|-----------------------------|--------------------------------------------------------------------|
+| `redis`                     | Redis adapter + config                                             |
+| `fakeredis`                 | Richer Redis mock for BDD                                          |
+| `postgres-sqlalchemy`       | Sync Postgres SQLAlchemy + `@postgres_sqlalchemy_atomic_decorator` |
+| `postgres-sqlalchemy-async` | Async Postgres SQLAlchemy + async atomic                           |
+| `kafka`                     | Kafka producer/consumer adapters                                   |
+| `scylladb`                  | ScyllaDB / Cassandra adapter                                       |
+| `minio`                     | MinIO / S3-compatible object storage                               |
+| `keycloak`                  | Keycloak auth adapter                                              |
+| `fastapi`                   | FastAPI + `AppUtils.create_fastapi_app`                            |
+| `grpc`                      | gRPC + `create_grpc_app` / `create_async_grpc_app`                 |
+| `dependency-injection`      | `dependency-injector` container helpers                            |
+| `behave`                    | Behave BDD helpers for apps                                        |
 
-Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`, `/scaffold-bdd`, plus helper scaffolds (`utils` / `decorator` / `interceptor`).
+Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`,
+`/scaffold-bdd`, plus helper scaffolds (`utils` / `decorator` / `interceptor`).
 
 See PyPI / docs for the full extras matrix.
 
@@ -71,10 +72,10 @@ Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 
 ## DTO naming
 
-| Kind | Pattern | Example |
-|------|---------|---------|
-| Domain input / output | `{Op}InputDTO` / `{Op}OutputDTO` | `UserRegistrationInputDTO` |
-| Repo command / query / response | `{Action}CommandDTO` / `{Action}QueryDTO` / `{Domain}ResponseDTO` | `CreateUserCommandDTO` |
+| Kind                            | Pattern                                                           | Example                    |
+|---------------------------------|-------------------------------------------------------------------|----------------------------|
+| Domain input / output           | `{Op}InputDTO` / `{Op}OutputDTO`                                  | `UserRegistrationInputDTO` |
+| Repo command / query / response | `{Action}CommandDTO` / `{Action}QueryDTO` / `{Domain}ResponseDTO` | `CreateUserCommandDTO`     |
 
 ## BaseConfig
 
@@ -99,10 +100,10 @@ BaseConfig.set_global(config)
 
 `config.FASTAPI` drives `AppUtils.create_fastapi_app` **and** uvicorn — never hardcode host/port/reload:
 
-| Area | Fields |
-|------|--------|
-| Serve | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT` |
-| Proxy | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS` |
+| Area       | Fields                                                  |
+|------------|---------------------------------------------------------|
+| Serve      | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT`   |
+| Proxy      | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`                  |
 | App / docs | `PROJECT_NAME`, `OPENAPI_URL`, `DOCS_URL`, `RE_DOC_URL` |
 
 ```python
@@ -156,6 +157,125 @@ server = AppUtils.create_grpc_app(BaseConfig.global_config())       # sync
 Do not hand-roll bare `FastAPI()` / `grpc.server()` when extras are installed. Prefer config flags for stock
 middleware/interceptors (`FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`).
 
+## Health checks (liveness/readiness/startup)
+
+ArchiPy apps should expose app-level health so infrastructure can route traffic correctly — FastAPI HTTP routes and/or
+the standard gRPC Health Checking Protocol. Scaffold with `/scaffold-health-checks`.
+
+### Probe types
+
+- Liveness: "is the process alive or stuck". Failed liveness triggers a restart. Keep it simple and fast.
+- Readiness: "can this instance serve traffic right now". Failed readiness removes the instance from endpoints; it does
+  not restart. Put dependency checks here (database, cache, downstream HTTP/gRPC).
+- Startup: "has initialization finished". Prevents premature liveness/readiness failures during slow startup.
+
+### FastAPI endpoints
+
+Convention (recommended):
+
+- `GET /health/live` for liveness
+- `GET /health/ready` for readiness
+
+Liveness must not call external dependencies.
+
+Safe liveness sketch:
+
+```python
+@router.get("/health/live")
+async def liveness() -> dict[str, str | float]:
+    return {
+        "status": "ok",
+        "uptime_seconds": time.monotonic() - start_time,
+    }
+```
+
+Readiness should run dependency checks with timeouts and return:
+
+- `200` when all checks are healthy
+- `503` when any check fails
+- a per-check payload so you can see exactly what broke
+
+Example readiness payload shape:
+
+```json
+{
+  "status": "not_ready",
+  "checks": {
+    "database": { "healthy": false, "error": "..." },
+    "cache": { "healthy": true }
+  }
+}
+```
+
+### gRPC Health protocol
+
+Prefer `grpcio-health-checking` (`grpc.health.v1.Health`) — do not invent a custom health RPC.
+
+Register service names:
+
+| Service       | Meaning                                        |
+|---------------|------------------------------------------------|
+| `""` (empty)  | Overall readiness (default Check target)       |
+| `"readiness"` | Explicit readiness (deps + warm-up + shutdown) |
+| `"liveness"`  | Process-only liveness (no dependency checks)   |
+
+```python
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
+
+health_servicer = health.HealthServicer()
+health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
+health_servicer.set("liveness", health_pb2.HealthCheckResponse.SERVING)
+health_servicer.set("readiness", health_pb2.HealthCheckResponse.NOT_SERVING)
+health_servicer.set("", health_pb2.HealthCheckResponse.NOT_SERVING)
+```
+
+Wire onto `AppUtils.create_grpc_app` / `create_async_grpc_app`. Update `""` / `"readiness"` from shared check helpers;
+never flip `"liveness"` for dependency failures. On shutdown: set readiness/`""` to
+`NOT_SERVING`, then `health_servicer.enter_graceful_shutdown()`.
+
+### Kubernetes configuration notes
+
+HTTP:
+
+- Startup / liveness → `/health/live`
+- Readiness → `/health/ready` with `successThreshold: 2`
+
+gRPC:
+
+```yaml
+livenessProbe:
+  grpc:
+    port: 50051
+    service: liveness
+readinessProbe:
+  grpc:
+    port: 50051
+    service: readiness
+  successThreshold: 2
+```
+
+- Set `timeoutSeconds` high enough for the slowest readiness dependency check.
+- Ports should match `config.FASTAPI.SERVE_PORT` / `config.GRPC.SERVE_PORT`.
+
+### Graceful shutdown
+
+Combine readiness with shutdown signals:
+
+1. Receive `SIGTERM`
+2. Make readiness fail immediately (HTTP `503` / gRPC `NOT_SERVING`)
+3. Wait briefly so in-flight requests drain
+
+Optionally add Kubernetes `preStop` sleep for extra safety.
+
+### Common mistakes
+
+- Putting dependency checks in liveness (HTTP path or gRPC `"liveness"` service)
+- No timeout on dependency checks (probes hang until infra times out)
+- Returning healthy while dependencies are down (HTTP `200` or gRPC `SERVING`)
+- Hand-rolling a custom gRPC health RPC instead of `grpc.health.v1.Health`
+- Mixing sync and async gRPC servicers on one server
+- Not testing probe behavior under failure
+
 ## Utils
 
 Prefer ArchiPy utils under `archipy.helpers.utils`:
@@ -178,13 +298,13 @@ Custom utils: pure only — no DB/network/adapter construction.
 
 Prefer ArchiPy under `archipy.helpers.decorators`:
 
-| Decorator area | Examples |
-|----------------|----------|
-| Cache | `ttl_cache` |
+| Decorator area               | Examples                                                                             |
+|------------------------------|--------------------------------------------------------------------------------------|
+| Cache                        | `ttl_cache`                                                                          |
 | Transactions (on **logics**) | `postgres_sqlalchemy_atomic_decorator`, `async_postgres_sqlalchemy_atomic_decorator` |
-| Observability | tracing, timing |
-| Resilience | retry, timeout |
-| Other | singleton, rate-limit |
+| Observability                | tracing, timing                                                                      |
+| Resilience                   | retry, timeout                                                                       |
+| Other                        | singleton, rate-limit                                                                |
 
 No concrete adapter imports at module level in custom decorators.
 

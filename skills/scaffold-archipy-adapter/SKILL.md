@@ -37,11 +37,11 @@ repositories/<domain>/
 └── <domain>_repository.py              # create stub if missing
 ```
 
-- Thin wrapper: wrap ArchiPy adapter (or external client); own entity construction / query building; map client
-  errors → domain errors with `raise ... from e`.
+- Thin wrapper: wrap ArchiPy adapter (or external client); own entity construction / query building; map client errors →
+  domain errors with `raise ... from e`.
 - Optional mock: same module suffix or sibling file only if BDD needs an in-memory double.
-- Ports: depend on ArchiPy ports when wrapping library adapters; add a local ABC only when the domain needs a
-  custom contract.
+- Ports: depend on ArchiPy ports when wrapping library adapters; add a local ABC only when the domain needs a custom
+  contract.
 
 ## Constraints
 

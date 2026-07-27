@@ -11,5 +11,4 @@ Follow the **scaffold-archipy-interceptor** skill.
 2. Keep cross-cutting only — no domain use-case logic.
 3. Wire via DI or framework registration.
 
-Reference: skills/archipy-docs/reference.md (Interceptors).
-Docs: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
+Reference: skills/archipy-docs/reference.md (Interceptors). Docs: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/

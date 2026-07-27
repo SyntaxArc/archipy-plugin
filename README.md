@@ -5,8 +5,7 @@
 [![ArchiPy](https://img.shields.io/badge/library-SyntaxArc%2FArchiPy-0F172A.svg)](https://github.com/SyntaxArc/ArchiPy)
 
 Rules, skills, and slash commands for **application teams that build
-with [ArchiPy](https://github.com/SyntaxArc/ArchiPy)**. Works with both
-**Cursor** and **Claude Code**.
+with [ArchiPy](https://github.com/SyntaxArc/ArchiPy)**. Works with both **Cursor** and **Claude Code**.
 
 ## What this is
 
@@ -75,55 +74,58 @@ Then restart Claude Code or run `/reload-plugins`.
 
 ### Rules (11)
 
-| Rule file                        | Applies when                         |
-|----------------------------------|--------------------------------------|
-| `architecture-for-apps.mdc`      | Always                               |
-| `using-archipy-adapters.mdc`     | `**/adapters/**/*.py`                |
-| `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`           |
-| `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`      |
-| `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py`    |
-| `config-and-di.mdc`              | `**/configs/**/*.py`                 |
-| `using-archipy-models.mdc`       | `**/models/**/*.py`                  |
-| `using-archipy-repositories.mdc` | `**/repositories/**/*.py`            |
-| `using-archipy-logics.mdc`       | `**/logics/**/*.py`                  |
+| Rule file                        | Applies when                          |
+|----------------------------------|---------------------------------------|
+| `architecture-for-apps.mdc`      | Always                                |
+| `using-archipy-adapters.mdc`     | `**/adapters/**/*.py`                 |
+| `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`            |
+| `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`       |
+| `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py`     |
+| `config-and-di.mdc`              | `**/configs/**/*.py`                  |
+| `using-archipy-models.mdc`       | `**/models/**/*.py`                   |
+| `using-archipy-repositories.mdc` | `**/repositories/**/*.py`             |
+| `using-archipy-logics.mdc`       | `**/logics/**/*.py`                   |
 | `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py` |
-| `testing-bdd-for-apps.mdc`       | `**/features/**/*`                   |
+| `testing-bdd-for-apps.mdc`       | `**/features/**/*`                    |
 
-### Skills (10)
+### Skills (11)
 
-| Skill                          | When to use                                                               |
-|--------------------------------|---------------------------------------------------------------------------|
-| `scaffold-archipy-app`         | Bootstrap a new ArchiPy-based service layout                              |
-| `scaffold-archipy-domain`      | Full domain slice (models, repo, logic, service)                          |
-| `scaffold-archipy-adapter`     | Add domain adapter under `repositories/{domain}/adapters/`                |
-| `scaffold-archipy-logic`       | Use-case under `logics/{domain}/` with `@atomic`                          |
-| `scaffold-archipy-service`     | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
-| `scaffold-archipy-bdd`         | Behave `features/` stub                                                   |
-| `scaffold-archipy-utils`       | Wire or create `helpers/utils`                                            |
-| `scaffold-archipy-decorator`   | Wire or create `helpers/decorators`                                       |
-| `scaffold-archipy-interceptor` | Wire or create `helpers/interceptors`                                     |
-| `archipy-docs`                 | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
+| Skill                            | When to use                                                               |
+|----------------------------------|---------------------------------------------------------------------------|
+| `scaffold-archipy-app`           | Bootstrap a new ArchiPy-based service layout                              |
+| `scaffold-archipy-domain`        | Full domain slice (models, repo, logic, service)                          |
+| `scaffold-archipy-adapter`       | Add domain adapter under `repositories/{domain}/adapters/`                |
+| `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `@atomic`                          |
+| `scaffold-archipy-service`       | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
+| `scaffold-archipy-bdd`           | Behave `features/` stub                                                   |
+| `scaffold-archipy-utils`         | Wire or create `helpers/utils`                                            |
+| `scaffold-archipy-decorator`     | Wire or create `helpers/decorators`                                       |
+| `scaffold-archipy-interceptor`   | Wire or create `helpers/interceptors`                                     |
+| `scaffold-archipy-health-checks` | Scaffold FastAPI/gRPC health checks and optional K8s probe YAML           |
+| `archipy-docs`                   | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
 
-### Commands (16)
+### Commands (18)
 
-| Command                 | Action                            |
-|-------------------------|-----------------------------------|
-| `/scaffold-app`         | Run scaffold-archipy-app          |
-| `/scaffold-domain`      | Run scaffold-archipy-domain       |
-| `/scaffold-adapter`     | Run scaffold-archipy-adapter      |
-| `/scaffold-logic`       | Run scaffold-archipy-logic        |
-| `/scaffold-service`     | Run scaffold-archipy-service      |
-| `/scaffold-bdd`         | Run scaffold-archipy-bdd          |
-| `/scaffold-utils`       | Run scaffold-archipy-utils        |
-| `/scaffold-decorator`   | Run scaffold-archipy-decorator    |
-| `/scaffold-interceptor` | Run scaffold-archipy-interceptor  |
-| `/docs-quickstart`      | Quickstart + bundled reference    |
-| `/docs-adapters`        | Adapter patterns + docs links     |
-| `/docs-helpers`         | Utils / decorators / interceptors |
-| `/docs-config`          | BaseConfig + DI docs              |
-| `/docs-errors`          | Error handling docs               |
-| `/docs-testing`         | BDD testing docs                  |
-| `/docs-observability`   | Observability docs                |
+| Command                   | Action                                               |
+|---------------------------|------------------------------------------------------|
+| `/scaffold-app`           | Run scaffold-archipy-app                             |
+| `/scaffold-domain`        | Run scaffold-archipy-domain                          |
+| `/scaffold-adapter`       | Run scaffold-archipy-adapter                         |
+| `/scaffold-logic`         | Run scaffold-archipy-logic                           |
+| `/scaffold-service`       | Run scaffold-archipy-service                         |
+| `/scaffold-bdd`           | Run scaffold-archipy-bdd                             |
+| `/scaffold-utils`         | Run scaffold-archipy-utils                           |
+| `/scaffold-decorator`     | Run scaffold-archipy-decorator                       |
+| `/scaffold-interceptor`   | Run scaffold-archipy-interceptor                     |
+| `/scaffold-health-checks` | Scaffold FastAPI/gRPC health + K8s probe YAML        |
+| `/docs-quickstart`        | Quickstart + bundled reference                       |
+| `/docs-adapters`          | Adapter patterns + docs links                        |
+| `/docs-helpers`           | Utils / decorators / interceptors                    |
+| `/docs-config`            | BaseConfig + DI docs                                 |
+| `/docs-errors`            | Error handling docs                                  |
+| `/docs-testing`           | BDD testing docs                                     |
+| `/docs-observability`     | Observability docs                                   |
+| `/docs-health-checks`     | HTTP/gRPC health checks (liveness/readiness/startup) |
 
 There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
@@ -133,7 +135,8 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 2. Open an application workspace (empty or existing Python service).
 3. In Agent chat, run `/scaffold-app` — answer package name and extras (e.g. `redis`).
 4. Run `/docs-quickstart` to confirm config + first adapter steps.
-5. Expect: `AppConfig`, models stub, `repositories/<domain>/`, optional `manage.py` (if `fastapi`), helpers tree, `.env.example`.
+5. Expect: `AppConfig`, models stub, `repositories/<domain>/`, optional `manage.py` (if `fastapi`), helpers tree,
+   `.env.example`.
 
 ## Commands deep dive
 
@@ -141,7 +144,8 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
 - **Purpose:** Create a minimal ArchiPy app package tree.
 - **Asks:** Package name, extras, optional first domain.
-- **Outcome:** `configs/app_config.py`, models stub, `repositories/<domain>/`, optional helpers, `manage.py` when FastAPI, `.env.example`.
+- **Outcome:** `configs/app_config.py`, models stub, `repositories/<domain>/`, optional helpers, `manage.py` when
+  FastAPI, `.env.example`.
 
 ### `/scaffold-domain`
 
@@ -171,7 +175,8 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
 - **Purpose:** Behave feature layout with ScenarioContext isolation.
 - **Asks:** Feature name; mocks vs `@needs-*` infra.
-- **Outcome:** `scenario_context.py`, pool manager, `test_helpers.py`, `environment.py`, feature/steps; infra adds slim `test_containers.py` + `.env.test`.
+- **Outcome:** `scenario_context.py`, pool manager, `test_helpers.py`, `environment.py`, feature/steps; infra adds slim
+  `test_containers.py` + `.env.test`.
 
 ### `/scaffold-utils`
 
@@ -191,7 +196,16 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 - **Asks:** Framework; sync/async; built-in vs custom.
 - **Outcome:** Interceptor module + wiring notes (DI / framework).
 
-### `/docs-quickstart` / `/docs-adapters` / `/docs-helpers` / `/docs-config` / `/docs-errors` / `/docs-testing` / `/docs-observability`
+### `/scaffold-health-checks`
+
+- **Purpose:** Create app-level liveness/readiness health for FastAPI and/or gRPC.
+- **Asks:** Package name, transport (FastAPI / gRPC / both), readiness dependencies, optional heartbeat liveness,
+  optional K8s probe YAML.
+- **Outcome:** Shared check helpers + `health_service.py` and/or `health_grpc_service.py` (`grpc.health.v1`) + optional
+  `deploy/k8s-probes.yaml` (`httpGet` / `grpc`).
+
+### `/docs-quickstart` / `/docs-adapters` / `/docs-helpers` / `/docs-config` / `/docs-errors` / `/docs-testing` /
+`/docs-observability` / `/docs-health-checks`
 
 - **Purpose:** Orient the agent on the matching topic using `skills/archipy-docs/reference.md` first, then live docs
   URLs.
@@ -296,7 +310,8 @@ archipy-plugin/
 └── CHANGELOG.md
 ```
 
-Both Cursor and Claude Code discover `rules/`, `skills/`, and `commands/` automatically when the manifest does not override paths.
+Both Cursor and Claude Code discover `rules/`, `skills/`, and `commands/` automatically when the manifest does not
+override paths.
 
 ## ArchiPy docs map
 
@@ -306,14 +321,15 @@ Both Cursor and Claude Code discover `rules/`, `skills/`, and `commands/` automa
 | `/docs-adapters`, `scaffold-archipy-adapter` | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/), [API adapters](https://syntaxarc.github.io/ArchiPy/api_reference/adapters/)                           |
 | `/docs-helpers`, helper scaffolds            | [Helpers](https://syntaxarc.github.io/ArchiPy/tutorials/helpers/), [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                           |
 | `/docs-config`                               | [Config](https://syntaxarc.github.io/ArchiPy/tutorials/config_management/), [DI](https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/)                      |
-| `/docs-errors`                               | [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/)                                                                                             |
-| `/docs-testing`, `scaffold-archipy-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                         |
-| `/docs-observability`                        | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                                                                                               |
+| `/docs-errors`                               | [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/)                                                                                            |
+| `/docs-testing`, `scaffold-archipy-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                        |
+| `/docs-observability`                        | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                                                                                              |
 | `archipy-docs` / `reference.md`              | [Docs home](https://syntaxarc.github.io/ArchiPy/), [API reference](https://syntaxarc.github.io/ArchiPy/api_reference/)                                                     |
 
 ## Developing / contributing
 
-1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy` (Claude Code).
+1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy`
+   (Claude Code).
 2. Edit rules (`.mdc` frontmatter: `description`, `alwaysApply` / `globs`), skills (`name` + `description` matching
    folder name), or commands (`name` + `description`).
 3. Reload the editor window after changes.
@@ -330,6 +346,7 @@ Both Cursor and Claude Code discover `rules/`, `skills/`, and `commands/` automa
 - Do not add API tokens or credentials to the plugin tree.
 
 Publish:
+
 - Cursor: [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish)
 - Claude Code: `/plugin marketplace add SyntaxArc/archipy-plugin`
 

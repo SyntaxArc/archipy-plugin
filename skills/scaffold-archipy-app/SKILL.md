@@ -53,12 +53,15 @@ features/                  # optional — /scaffold-bdd
 .env.example
 ```
 
-4. Write `app_config.py` with `customize()` setting `self.FASTAPI.PROJECT_NAME` (and related defaults) + `BaseConfig.set_global`.
+4. Write `app_config.py` with `customize()` setting `self.FASTAPI.PROJECT_NAME` (and related defaults) +
+   `BaseConfig.set_global`.
 5. Add a minimal domain DTO + error subclassing ArchiPy base errors.
 6. **When extras include `fastapi` (or user wants HTTP):** emit root `manage.py`:
-   - `create_app()` uses `AppUtils.create_fastapi_app()` and includes domain routers.
-   - `uvicorn.run` binds from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`) — never hardcode host/port.
-7. Document next steps: `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-bdd`, `/docs-quickstart`.
+    - `create_app()` uses `AppUtils.create_fastapi_app()` and includes domain routers.
+    - `uvicorn.run` binds from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`,
+      `FORWARDED_ALLOW_IPS`) — never hardcode host/port.
+7. Document next steps: `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-bdd`, `/scaffold-health-checks`,
+   `/docs-quickstart`.
 
 ## Constraints
 

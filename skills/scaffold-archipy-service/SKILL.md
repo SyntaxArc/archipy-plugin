@@ -53,7 +53,8 @@ app = AppUtils.create_fastapi_app()
 app.include_router(create_user_v1_router(container))
 ```
 
-uvicorn in `manage.py` from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`).
+uvicorn in `manage.py` from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`,
+`FORWARDED_ALLOW_IPS`).
 
 ## Constraints
 

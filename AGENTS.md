@@ -12,14 +12,15 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 
 ## Prefer plugin entry points
 
-| Need | Command / skill |
-|------|-----------------|
-| New app tree | `/scaffold-app` |
-| Full domain slice | `/scaffold-domain` |
-| Adapter / logic / service / BDD | `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`, `/scaffold-bdd` |
-| Helpers | `/scaffold-utils`, `/scaffold-decorator`, `/scaffold-interceptor` |
-| Redis search | `/redis-search` (full-text, vector, caching) |
-| Docs | `/docs-quickstart`, `/docs-adapters`, `/docs-helpers`, `/docs-config`, `/docs-errors`, `/docs-testing`, `/docs-observability` |
+| Need                            | Command / skill                                                                                                               |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| New app tree                    | `/scaffold-app`                                                                                                               |
+| Full domain slice               | `/scaffold-domain`                                                                                                            |
+| Adapter / logic / service / BDD | `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`, `/scaffold-bdd`                                                  |
+| Helpers                         | `/scaffold-utils`, `/scaffold-decorator`, `/scaffold-interceptor`                                                             |
+| Redis search                    | `/redis-search` (full-text, vector, caching)                                                                                  |
+| Health checks                   | `/scaffold-health-checks`, `/docs-health-checks`                                                                              |
+| Docs                            | `/docs-quickstart`, `/docs-adapters`, `/docs-helpers`, `/docs-config`, `/docs-errors`, `/docs-testing`, `/docs-observability` |
 
 Bundled cheat sheet: `skills/archipy-docs/reference.md`.
 

@@ -40,7 +40,8 @@ features/
 .env.test                            # infra mode — REDIS__IMAGE, POSTGRES__IMAGE, …
 ```
 
-Model after ArchiPy `features/` + docs tutorial (consumer-slim — no library gRPC/Temporal special cases unless the app needs them).
+Model after ArchiPy `features/` + docs tutorial (consumer-slim — no library gRPC/Temporal special cases unless the app
+needs them).
 
 ---
 
@@ -259,7 +260,8 @@ Copy **pattern** from ArchiPy `features/test_containers.py`, not the full multi-
 
 1. `TAG_CONTAINER_MAP` (`needs-redis` → `redis`, …)
 2. `ContainerManager` with `register`, `get_container`, `start_containers`, `extract_containers_from_tags`, `stop_all`
-3. Only register containers the app actually tests (e.g. one `RedisTestContainer` Singleton that starts `RedisContainer`, patches `BaseConfig.global_config().REDIS`)
+3. Only register containers the app actually tests (e.g. one `RedisTestContainer` Singleton that starts
+   `RedisContainer`, patches `BaseConfig.global_config().REDIS`)
 
 Do **not** paste ArchiPy’s entire container catalogue or gRPC test servers.
 

@@ -10,6 +10,7 @@ description: >-
 ## Overview
 
 Redis provides powerful search capabilities through modules:
+
 - **RediSearch**: Full-text search with advanced querying
 - **Redis Vector Search**: Similarity search for embeddings/AI
 - **Search Caching**: Patterns for caching search results

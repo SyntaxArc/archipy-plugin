@@ -1,6 +1,6 @@
 ---
 description: BDD testing for ArchiPy apps — Behave, ScenarioContext, testcontainers
-globs: "**/features/**/*"
+globs: **/features/**/*
 alwaysApply: false
 ---
 

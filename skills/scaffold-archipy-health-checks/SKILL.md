@@ -22,8 +22,9 @@ Ask the user for:
 
 Health checks are app code. ArchiPy does not ship stock HTTP routes or a stock gRPC `Health` servicer.
 
-**Probe semantics** (liveness vs readiness vs startup, K8s notes, common mistakes): keep
-`../archipy-docs/reference.md` § Health checks as the source of truth — do not invent alternate probe meanings.
+**Probe semantics** (liveness vs readiness vs startup, K8s notes, common mistakes, FastAPI sketches): keep
+`../archipy-docs/reference.md` § Health checks as the source of truth — do not invent alternate probe meanings or
+duplicate endpoint sketches here.
 
 ```bash
 uv add "archipy[fastapi]"   # HTTP probes
@@ -73,68 +74,24 @@ Share readiness helpers across transports. Keep business rules out of transport 
 
 ## FastAPI (`health_service.py`)
 
-- Export a thin router for:
-    - `GET /health/live`
-    - `GET /health/ready`
+- Export a thin router for `GET /health/live` and `GET /health/ready`.
 - Return `200` healthy, `503` not ready / unhealthy.
 - Wire with `include_router` into `manage.py` / app factory.
-
-### Liveness (HTTP)
-
-- Ask: "Is process alive enough to restart if broken?"
-- Keep simple and fast. No DB / Redis / downstream checks.
-- Safe default:
-
-```python
-@router.get("/health/live")
-async def liveness() -> dict[str, str | float]:
-    return {
-        "status": "ok",
-        "uptime_seconds": time.monotonic() - start_time,
-    }
-```
-
+- Liveness: process-only, no deps. Readiness: deps + warm-up + shutdown, timeouts, per-check detail.
 - Optional heartbeat mode for deadlock detection only when user asks.
-
-### Readiness (HTTP)
-
-- Ask: "Can this instance serve traffic right now?"
-- Dependency checks here, not in liveness. Include warm-up + shutdown state.
-- Per-check detail required:
-
-```python
-{
-    "status": "not_ready",
-    "checks": {
-        "database": {"healthy": False, "error": "..."},
-        "cache": {"healthy": True},
-        "warm_up": {"healthy": True, "detail": "initialization complete"},
-    },
-}
-```
-
-- Each dependency check must use a timeout. Return `503` when any check fails.
+- Code sketches and payload shapes: `../archipy-docs/reference.md` § Health checks → FastAPI endpoints.
 
 ## gRPC (`health_grpc_service.py`)
 
 Use the standard gRPC Health Checking Protocol (`grpc.health.v1.Health`) via `grpcio-health-checking`.
 
-### Service names
-
-Register at least:
-
-| Service name  | Role                                            |
-|---------------|-------------------------------------------------|
-| `""` (empty)  | Overall server readiness (default Check target) |
-| `"readiness"` | Explicit readiness (deps + warm-up + shutdown)  |
-| `"liveness"`  | Process-only liveness (no dependency checks)    |
-
-Map status:
-
-- Ready / alive → `HealthCheckResponse.SERVING`
-- Not ready / shutting down / failed deps → `HealthCheckResponse.NOT_SERVING`
+Register at least `""` (overall), `"readiness"`, and `"liveness"`. Map ready/alive → `SERVING`, not ready →
+`NOT_SERVING`. Full service-name table and update rules: `../archipy-docs/reference.md` § Health checks → gRPC Health
+protocol.
 
 ### Wire sketch
+
+**`""` and `"readiness"` start `NOT_SERVING`** until warm-up + deps are healthy:
 
 ```python
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
@@ -145,159 +102,47 @@ def register_health_servicer(server, container) -> health.HealthServicer:
     health_servicer = health.HealthServicer()
     health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
 
-    health_servicer.set("", health_pb2.HealthCheckResponse.SERVING)
     health_servicer.set("liveness", health_pb2.HealthCheckResponse.SERVING)
     health_servicer.set("readiness", health_pb2.HealthCheckResponse.NOT_SERVING)
+    health_servicer.set("", health_pb2.HealthCheckResponse.NOT_SERVING)
     return health_servicer
 ```
 
-### Status update rules
+### Status update rules (summary)
 
-- On warm-up complete + deps healthy: set `""` and `"readiness"` to `SERVING`.
-- On dep failure: set `""` and `"readiness"` to `NOT_SERVING`. Never flip `"liveness"` for dep failures.
-- Keep `"liveness"` at `SERVING` unless the process itself is broken (optional heartbeat).
-- Refresh readiness from shared check helpers on a short interval or on notable state changes — do not run slow dep
-  checks inside every `Check` if that starves the server; prefer background updater calling `set()`.
-- On `SIGTERM`: set readiness/`""` to `NOT_SERVING`, then call `health_servicer.enter_graceful_shutdown()` so future
-  `set()` calls are ignored.
-
-### Async gRPC
-
-- Same Health protocol and service-name rules.
-- Register on the async server from `AppUtils.create_async_grpc_app`.
-- Keep status updates thread-/task-safe; do not block the event loop on dep checks.
+- Warm-up complete + deps healthy → set `""` and `"readiness"` to `SERVING`.
+- Dep failure → `""` / `"readiness"` to `NOT_SERVING`; never flip `"liveness"` for dep failures.
+- Prefer background updater calling `set()` over slow checks inside every `Check`.
+- On `SIGTERM`: set readiness/`""` to `NOT_SERVING`, then `health_servicer.enter_graceful_shutdown()`.
+- Async gRPC: same protocol/names; register on `AppUtils.create_async_grpc_app`; keep updates task-safe.
 
 ## Startup probes
 
-Protect slow-starting services from premature liveness failures.
-
 - HTTP: point startup at `/health/live`.
-- gRPC: point startup at service `"liveness"` (or `""` only if overall starts as SERVING early — prefer `"liveness"`).
-
-```yaml
-# HTTP
-startupProbe:
-  httpGet:
-    path: /health/live
-    port: 8080
-  failureThreshold: 20
-  periodSeconds: 5
-  timeoutSeconds: 3
-
-# gRPC
-startupProbe:
-  grpc:
-    port: 50051
-    service: liveness
-  failureThreshold: 20
-  periodSeconds: 5
-  timeoutSeconds: 3
-```
+- gRPC: point startup at service `"liveness"` (prefer over `""`).
 
 ## Kubernetes probe YAML
 
-When requested, emit `deploy/k8s-probes.yaml` matching the chosen transport (s).
+When requested, emit `deploy/k8s-probes.yaml` matching the chosen transport(s).
 
-### HTTP shape
+**Copy templates from `reference/`, adapt ports to config:**
 
-```yaml
-lifecycle:
-  preStop:
-    exec:
-      command: ["sleep", "5"]
+| Transport | Template |
+|-----------|----------|
+| HTTP | `reference/k8s-probes-http.yaml` |
+| gRPC | `reference/k8s-probes-grpc.yaml` |
 
-startupProbe:
-  httpGet:
-    path: /health/live
-    port: 8080
-  failureThreshold: 20
-  periodSeconds: 5
-  timeoutSeconds: 3
-
-livenessProbe:
-  httpGet:
-    path: /health/live
-    port: 8080
-  periodSeconds: 10
-  failureThreshold: 3
-  timeoutSeconds: 3
-
-readinessProbe:
-  httpGet:
-    path: /health/ready
-    port: 8080
-  periodSeconds: 5
-  failureThreshold: 3
-  successThreshold: 2
-  timeoutSeconds: 3
-```
-
-### gRPC shape
-
-```yaml
-lifecycle:
-  preStop:
-    exec:
-      command: ["sleep", "5"]
-
-startupProbe:
-  grpc:
-    port: 50051
-    service: liveness
-  failureThreshold: 20
-  periodSeconds: 5
-  timeoutSeconds: 3
-
-livenessProbe:
-  grpc:
-    port: 50051
-    service: liveness
-  periodSeconds: 10
-  failureThreshold: 3
-  timeoutSeconds: 3
-
-readinessProbe:
-  grpc:
-    port: 50051
-    service: readiness
-  periodSeconds: 5
-  failureThreshold: 3
-  successThreshold: 2
-  timeoutSeconds: 3
-```
-
-Use `config.GRPC.SERVE_PORT` / `config.FASTAPI.SERVE_PORT` values — never hardcode ports in app code; YAML may show
+Use `config.GRPC.SERVE_PORT` / `config.FASTAPI.SERVE_PORT` — never hardcode ports in app code; YAML may show
 placeholders matching config.
 
-Rules for both:
-
-- `readinessProbe.successThreshold: 2`
-- `failureThreshold: 3` default
-- `timeoutSeconds` ≥ slowest readiness check timeout
-- `preStop` sleep for short drain window
+Rules: `readinessProbe.successThreshold: 2`, `failureThreshold: 3` default, `timeoutSeconds` ≥ slowest readiness
+check timeout, `preStop` sleep for short drain window.
 
 ## Graceful shutdown
 
 - On `SIGTERM`, fail readiness immediately (HTTP `503` / gRPC `NOT_SERVING`).
-- Give Kubernetes a short window to stop routing.
-- Then exit after in-flight requests finish.
-
-HTTP:
-
-```python
-if shutdown_event.is_set():
-    return JSONResponse(status_code=503, content={"status": "shutting_down"})
-```
-
-gRPC:
-
-```python
-health_servicer.set("", health_pb2.HealthCheckResponse.NOT_SERVING)
-health_servicer.set("readiness", health_pb2.HealthCheckResponse.NOT_SERVING)
-health_servicer.enter_graceful_shutdown()
-```
-
-Use app shutdown delay and/or K8s `preStop` sleep.
+- Give Kubernetes a short window to stop routing, then exit after in-flight requests finish.
+- Details: `../archipy-docs/reference.md` § Health checks → Graceful shutdown.
 
 ## Common mistakes
 

@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-07-28
+
+### Fixed
+
+- Extras names: `postgres-sqlalchemy(-async)` → published `postgres`, `sqlalchemy`, `sqlalchemy-async`
+- Symbol names: `JWTUtils`, `ttl_cache_decorator`, `_decorator` suffixes, `capture_span` / `capture_transaction`,
+  `grpc_rate_limit_decorator`
+- Utils import guidance: use full submodule paths (package `__init__` does not re-export)
+- `@atomic` shorthand clarified — real API is `*_sqlalchemy_atomic_decorator`
+- `redis-search` rewritten on `RedisAdapter.search_index()` / search DTOs (no raw `client.ft()` templates);
+  fixed broken `ensure_index` and undefined domain error
+- gRPC health: `""` / `"readiness"` start `NOT_SERVING` until warm-up
+
+### Changed
+
+- Progressive disclosure: BDD / health-checks / redis-search templates moved under skill `reference/`
+- Trimmed always-on `architecture-for-apps.mdc` layer dumps; shortened hook `HARD_RULES`
+- Narrowed adapters glob to `**/repositories/**/adapters/**/*.py`; anchored models globs; unquoted rule globs
+- Hook warning wording for non-repository `adapters/` paths
+- Expanded `archipy-docs/reference.md` to all published extras + SessionManagerRegistry, atomic family,
+  entities, pagination DTOs, utils facade, rate-limit/metric interceptors, Observability; health labeled as
+  plugin convention
+
+### Added
+
+- Extended `scripts/check_catalog.py`: rules table, command→skill refs, logo path, manifest parity,
+  CHANGELOG version, skill descriptions
+- `tests/` for catalog + hygiene scripts
+- CI: Python 3.14, unit tests, markdown link check
+- Issue/PR templates, Dependabot
+
 ## [0.6.0] - 2026-07-28
 
 ### Added

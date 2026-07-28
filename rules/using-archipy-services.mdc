@@ -1,6 +1,6 @@
 ---
 description: ArchiPy app services — thin transport, AppUtils, uvicorn via FastAPIConfig
-globs: "**/services/**/*.py,**/manage.py"
+globs: **/services/**/*.py,**/manage.py
 alwaysApply: false
 ---
 

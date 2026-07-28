@@ -1,6 +1,6 @@
 ---
 description: ArchiPy app models — DTOs, entities, errors naming and layout
-globs: "**/models/**/*.py"
+globs: **/models/entities/**/*.py,**/models/errors/**/*.py,**/models/types/**/*.py,**/models/dtos/**/*.py
 alwaysApply: false
 ---
 

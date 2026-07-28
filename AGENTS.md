@@ -7,7 +7,7 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 ## Essentials
 
 - Python **3.14+**, package manager **`uv`**
-- Call flow: `services → logics (@atomic) → repositories → adapters → ArchiPy`
+- Call flow: `services → logics (atomic UoW) → repositories → adapters → ArchiPy`
 - Import direction: `configs ← models ← helpers ← repositories / logics / services`
 
 ## Prefer plugin entry points
@@ -20,7 +20,7 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 | Helpers                         | `/scaffold-utils`, `/scaffold-decorator`, `/scaffold-interceptor`                                                             |
 | Redis search                    | `/redis-search` (full-text, vector, caching)                                                                                  |
 | Health checks                   | `/scaffold-health-checks`, `/docs-health-checks`                                                                              |
-| Docs                            | `/docs-quickstart`, `/docs-adapters`, `/docs-helpers`, `/docs-config`, `/docs-errors`, `/docs-testing`, `/docs-observability` |
+| Docs                            | `/docs-quickstart`, `/docs-adapters`, `/docs-helpers`, `/docs-config`, `/docs-errors`, `/docs-testing`, `/docs-observability`, `/docs-health-checks` |
 
 Bundled cheat sheet: `skills/archipy-docs/reference.md`.
 

@@ -26,7 +26,7 @@ description: >-
 | Health checks     | Bundled `reference.md` (HTTP + gRPC) + `/scaffold-health-checks`       |
 | Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/          |
 | Testing           | https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/ + `/scaffold-bdd` |
-| Observability     | https://syntaxarc.github.io/ArchiPy/tutorials/observability/           |
+| Observability     | Bundled `reference.md` § Observability + https://syntaxarc.github.io/ArchiPy/tutorials/observability/ |
 | Redis search      | Bundled `reference.md` + `/redis-search`                               |
 | API reference     | https://syntaxarc.github.io/ArchiPy/api_reference/                     |
 

@@ -26,13 +26,14 @@ Before every PR that touches skills/commands/AGENTS/README:
 
 1. Every `/command` listed in `AGENTS.md` has a matching `commands/<name>.md`.
 2. Every `skills/<name>/SKILL.md` frontmatter `name:` matches the folder name.
-3. README `### Skills (N)` / `### Commands (N)` counts match disk; tables list every skill/command.
-4. Atomic UoW decorator name stays `postgres_sqlalchemy_atomic_decorator` (not legacy `sqlalchemy_atomic`).
+3. README `### Rules (N)` / `### Skills (N)` / `### Commands (N)` counts match disk; tables list every entry.
+4. Atomic UoW decorator name stays `postgres_sqlalchemy_atomic_decorator` (not a fictional `@atomic` API).
 
 Run:
 
 ```bash
 python3 scripts/check_catalog.py
+python3 -m unittest discover -s tests -v
 ```
 
 ## Dual IDE parity
@@ -52,7 +53,7 @@ All four must share the same SemVer string.
 
 1. Update `CHANGELOG.md` (Keep a Changelog).
 2. Bump all four JSON versions together.
-3. Run `python3 scripts/check_catalog.py`.
+3. Run `python3 scripts/check_catalog.py` and `python3 -m unittest discover -s tests -v`.
 4. Open a focused PR; conventional commits (`feat`, `fix`, `docs`, `chore`, …).
 
 ## Hooks

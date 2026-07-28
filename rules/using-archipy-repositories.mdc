@@ -1,6 +1,6 @@
 ---
 description: ArchiPy app repositories — domain adapters, orchestration, cache-aside
-globs: "**/repositories/**/*.py"
+globs: **/repositories/**/*.py
 alwaysApply: false
 ---
 

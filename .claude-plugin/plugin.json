@@ -1,6 +1,6 @@
 {
   "name": "archipy",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Rules, skills, and commands for building apps with ArchiPy",
   "author": {
     "name": "SyntaxArc"

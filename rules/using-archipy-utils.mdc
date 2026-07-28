@@ -1,6 +1,6 @@
 ---
 description: ArchiPy helpers/utils — pure utilities, AppUtils FastAPI/gRPC factories
-globs: "**/helpers/utils/**/*.py"
+globs: **/helpers/utils/**/*.py
 alwaysApply: false
 ---
 
@@ -13,7 +13,9 @@ Helpers stay **pure**: no database calls, no network I/O, no constructing adapte
 Before writing a custom util, check whether ArchiPy already provides it under `archipy.helpers.utils`:
 
 - `TracingUtils`, `RateLimitUtils`
-- `DatetimeUtils`, `StringUtils`, `JwtUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`
+- `DatetimeUtils`, `StringUtils`, `JWTUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`
+- Also: `BaseUtils`, `TOTPUtils`, `KeycloakUtils`, `PrometheusUtils`
+- Import from concrete submodules (e.g. `archipy.helpers.utils.jwt_utils`) — package `__init__` does not re-export
 - `AppUtils` — FastAPI / gRPC app factories (see below)
 
 ## AppUtils (FastAPI + gRPC)
@@ -39,7 +41,7 @@ Rules:
 - Enable features via config flags (e.g. `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock ArchiPy middleware/interceptors.
 - Custom gRPC interceptors: pass `customized_interceptors=`; do not bypass the exception interceptor.
 
-Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/interceptors/
+Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
 
 ## Custom Utils
 

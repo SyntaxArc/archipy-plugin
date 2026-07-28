@@ -5,13 +5,14 @@ description: Open ArchiPy observability guidance (tracing, metrics, APM)
 
 # /docs-observability
 
-Use the **archipy-docs** skill (`skills/archipy-docs/reference.md`) plus live observability docs.
+Use the **archipy-docs** skill and the Observability section of `skills/archipy-docs/reference.md`.
 
 Cover:
 
-- Tracing / timing decorators and `TracingUtils`
-- FastAPI/gRPC metrics and interceptors via AppUtils auto-registration
-- Config flags for APM / rate-limit / middleware
+- Tracing: `TracingUtils`, `capture_span` / `capture_transaction`
+- Metrics: `PrometheusUtils`, metric interceptors (`archipy[prometheus]` required to import)
+- APM / Sentry extras and AppUtils config flags
+- Timing: `timing_decorator`
 
 Live docs:
 

@@ -1,0 +1,29 @@
+lifecycle:
+  preStop:
+    exec:
+      command: ["sleep", "5"]
+
+startupProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  failureThreshold: 20
+  periodSeconds: 5
+  timeoutSeconds: 3
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  periodSeconds: 5
+  failureThreshold: 3
+  successThreshold: 2
+  timeoutSeconds: 3

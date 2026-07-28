@@ -4,42 +4,58 @@ Condensed patterns for **apps that depend on** PyPI `archipy`. Prefer live docs 
 
 https://syntaxarc.github.io/ArchiPy/
 
+Verified against `archipy` 4.17.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
+and `archipy.configs` package `__init__` files do not re-export symbols.
+
 ## Install
 
 ```bash
 # Python 3.14+ and uv
 uv add "archipy[redis]"
 uv add "archipy[dependency-injection]"
-uv add "archipy[postgres-sqlalchemy]"
+uv add "archipy[postgres,sqlalchemy]"          # sync Postgres + SQLAlchemy
+uv add "archipy[postgres,sqlalchemy-async]"    # async Postgres + SQLAlchemy
 uv add "archipy[fastapi]"   # HTTP + AppUtils.create_fastapi_app
 uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
-# Combine extras as needed: uv add "archipy[redis,dependency-injection]"
+# Combine extras: uv add "archipy[redis,dependency-injection,fastapi]"
 ```
 
-Common extras (non-exhaustive): see matrix below. Full list on PyPI / docs.
+### Extras matrix (published)
 
-### Extras matrix
-
-| Extra                       | Use                                                                |
-|-----------------------------|--------------------------------------------------------------------|
-| `redis`                     | Redis adapter + config                                             |
-| `fakeredis`                 | Richer Redis mock for BDD                                          |
-| `postgres-sqlalchemy`       | Sync Postgres SQLAlchemy + `@postgres_sqlalchemy_atomic_decorator` |
-| `postgres-sqlalchemy-async` | Async Postgres SQLAlchemy + async atomic                           |
-| `kafka`                     | Kafka producer/consumer adapters                                   |
-| `scylladb`                  | ScyllaDB / Cassandra adapter                                       |
-| `minio`                     | MinIO / S3-compatible object storage                               |
-| `keycloak`                  | Keycloak auth adapter                                              |
-| `fastapi`                   | FastAPI + `AppUtils.create_fastapi_app`                            |
-| `grpc`                      | gRPC + `create_grpc_app` / `create_async_grpc_app`                 |
-| `dependency-injection`      | `dependency-injector` container helpers                            |
-| `behave`                    | Behave BDD helpers for apps                                        |
+| Extra | Use |
+|-------|-----|
+| `redis` | Redis adapter + RediSearch (`search_index`) + config |
+| `fakeredis` | Richer Redis mock for BDD |
+| `postgres` | `psycopg` driver / pool |
+| `sqlalchemy` | Sync SQLAlchemy + atomic decorators |
+| `sqlalchemy-async` | Async SQLAlchemy + async atomic |
+| `aiosqlite` | SQLite async driver |
+| `starrocks` | StarRocks sync SQLAlchemy |
+| `starrocks-async` | StarRocks async SQLAlchemy |
+| `kafka` | Kafka producer/consumer adapters |
+| `scylladb` | ScyllaDB / Cassandra adapter |
+| `minio` | MinIO / S3-compatible object storage |
+| `keycloak` | Keycloak auth adapter + `KeycloakUtils` |
+| `elasticsearch` | Elasticsearch adapter |
+| `elasticsearch-async` | Async Elasticsearch adapter |
+| `elastic-apm` | Elastic APM integration |
+| `fastapi` | FastAPI + `AppUtils.create_fastapi_app` |
+| `grpc` | gRPC + `create_grpc_app` / `create_async_grpc_app` (+ `grpcio-health-checking`) |
+| `dependency-injection` | `dependency-injector` container helpers |
+| `behave` | Behave BDD helpers for apps |
+| `testcontainers` | Testcontainers for `@needs-*` infra BDD |
+| `temporalio` | Temporal adapter, worker, runtime |
+| `prometheus` | Prometheus metrics (+ metric interceptors) |
+| `sentry` | Sentry integration |
+| `jwt` | JWT encode/decode (`JWTUtils`) |
+| `cache` | Cache helpers |
+| `scheduler` | Scheduler helpers |
+| `parsian-ipg` / `parsian-ipg-async` | Parsian payment gateway |
+| `saman-ipg` | Saman payment gateway |
 
 Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`,
 `/scaffold-bdd`, `/scaffold-health-checks`, `/redis-search`, plus helper scaffolds (`utils` / `decorator` /
 `interceptor`).
-
-See PyPI / docs for the full extras matrix.
 
 ## Project layout (apps)
 
@@ -59,7 +75,7 @@ my_app/
 │       ├── adapters/              # domain wrappers (e.g. user_db_adapter.py)
 │       └── {domain}_repository.py
 ├── logics/
-│   └── {domain}/         # @atomic unit of work
+│   └── {domain}/         # unit of work (atomic decorators)
 └── services/
     └── {domain}/v{n}/    # versioned HTTP/gRPC
 features/                 # Behave BDD (optional)
@@ -67,16 +83,23 @@ features/                 # Behave BDD (optional)
 
 Import direction: `configs ← models ← helpers ← repositories / logics / services`.
 
-Call flow: `services → logics (@atomic) → repositories → adapters → ArchiPy`.
+Call flow: `services → logics (atomic UoW) → repositories → adapters → ArchiPy`.
+
+> **Plugin shorthand:** docs sometimes write `@atomic` to mean
+> `postgres_sqlalchemy_atomic_decorator` / `async_postgres_sqlalchemy_atomic_decorator`
+> (or the sqlite/starrocks/generic twins). There is **no** decorator named `atomic`.
 
 Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 
 ## DTO naming
 
-| Kind                            | Pattern                                                           | Example                    |
-|---------------------------------|-------------------------------------------------------------------|----------------------------|
-| Domain input / output           | `{Op}InputDTO` / `{Op}OutputDTO`                                  | `UserRegistrationInputDTO` |
-| Repo command / query / response | `{Action}CommandDTO` / `{Action}QueryDTO` / `{Domain}ResponseDTO` | `CreateUserCommandDTO`     |
+| Kind | Pattern | Example |
+|------|---------|---------|
+| Domain input / output | `{Op}InputDTO` / `{Op}OutputDTO` | `UserRegistrationInputDTO` |
+| Repo command / query / response | `{Action}CommandDTO` / `{Action}QueryDTO` / `{Domain}ResponseDTO` | `CreateUserCommandDTO` |
+
+Also available under `archipy.models.dtos`: pagination / sort / search-input DTOs (`range_dtos` and related),
+and a protobuf DTO base for gRPC payloads. Prefer those before inventing page/cursor shapes.
 
 ## BaseConfig
 
@@ -91,7 +114,7 @@ class AppConfig(BaseConfig):
         self.FASTAPI.RELOAD = self.ENVIRONMENT == EnvironmentType.LOCAL
 
 config = AppConfig()
-BaseConfig.set_global(config)
+BaseConfig.set_global(config)  # auto-invokes customize()
 ```
 
 - Env vars override defaults (`FASTAPI__SERVE_PORT`, …); document keys in `.env.example`.
@@ -101,10 +124,10 @@ BaseConfig.set_global(config)
 
 `config.FASTAPI` drives `AppUtils.create_fastapi_app` **and** uvicorn — never hardcode host/port/reload:
 
-| Area       | Fields                                                  |
-|------------|---------------------------------------------------------|
-| Serve      | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT`   |
-| Proxy      | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`                  |
+| Area | Fields |
+|------|--------|
+| Serve | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT` |
+| Proxy | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS` |
 | App / docs | `PROJECT_NAME`, `OPENAPI_URL`, `DOCS_URL`, `RE_DOC_URL` |
 
 ```python
@@ -122,6 +145,9 @@ uvicorn.run(
 
 gRPC bind (parallel): `config.GRPC.SERVE_HOST`, `config.GRPC.SERVE_PORT`.
 
+Also: `FastAPIRateLimitConfig` for FastAPI rate-limit settings; enable gRPC rate-limit via
+`GRPC_RATE_LIMIT.IS_ENABLED`.
+
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/config_management/
 
 ## Adapters (sketch)
@@ -136,13 +162,85 @@ Domain wrappers live under `repositories/{domain}/adapters/` (e.g. `user_db_adap
 Prefer thin wrappers around ArchiPy adapters. Map **specific** client errors to domain errors with `raise ... from e`.
 Keep sync/async as separate classes. Inject ports into logics/repos.
 
+### Adapter families (library)
+
+Use ArchiPy before inventing clients — extras as above:
+
+| Family | Notes |
+|--------|-------|
+| Redis (+ RediSearch) | `RedisAdapter.search_index(name)` → handle; see `/redis-search` |
+| Postgres / SQLite / StarRocks SQLAlchemy | sync + async adapters; pair with atomic decorators |
+| Kafka, ScyllaDB, MinIO, Keycloak | dedicated adapters |
+| Elasticsearch (+ async) | search / document APIs |
+| Email | email adapter |
+| Temporal | adapter + `worker.py` / `runtime.py` |
+| Parsian / Saman IPG | Iranian payment gateways |
+
+### Redis Search (library API)
+
+```python
+from archipy.adapters.redis.adapters import RedisAdapter
+from archipy.models.dtos.redis.search.index_schema_dto import (
+    IndexSchemaDTO,
+    TagFieldConfig,
+    TextFieldConfig,
+)
+from archipy.models.dtos.redis.search.search_query_dto import SearchQueryDTO
+from archipy.models.types.redis_search_types import RedisIndexType
+
+redis = RedisAdapter()
+handle = redis.search_index("products")
+# redis.list_search_indexes()
+
+schema = IndexSchemaDTO(
+    fields=[
+        TextFieldConfig(name="title"),
+        TagFieldConfig(name="category"),
+    ],
+    index_type=RedisIndexType.HASH,
+)
+handle.create_index(schema, prefix="product:")
+handle.upsert_hash("product:1", {"title": "Redis Guide", "category": "books"})
+result = handle.search(SearchQueryDTO(query="@title:Redis", offset=0, limit=20))
+```
+
+Do **not** call raw `client.ft()` in app adapters when the handle API covers the case. DTOs live under
+`archipy.models.dtos.redis.search.*`; types under `archipy.models.types.redis_search_types`.
+
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/adapters/
+
+## Entities (SQLAlchemy)
+
+Prefer ArchiPy base entities:
+
+```python
+from archipy.models.entities.sqlalchemy.base_entities import BaseEntity
+```
+
+App entities subclass library bases (`UpdatableEntity`, `DeletableEntity`, …); keep I/O out of `models/`.
+
+## SessionManagerRegistry + atomic family
+
+Atomic decorators resolve the active SQLAlchemy session through
+`archipy.adapters.base.sqlalchemy.session_manager_registry.SessionManagerRegistry`.
+Register the app's session manager at bootstrap; BDD hooks call `SessionManagerRegistry.reset()` after each scenario.
+
+| Decorator | Extra / stack |
+|-----------|---------------|
+| `postgres_sqlalchemy_atomic_decorator` | `postgres` + `sqlalchemy` |
+| `async_postgres_sqlalchemy_atomic_decorator` | `postgres` + `sqlalchemy-async` |
+| `sqlite_sqlalchemy_atomic_decorator` / `async_sqlite_…` | SQLite stacks |
+| `starrocks_sqlalchemy_atomic_decorator` / `async_starrocks_…` | StarRocks stacks |
+| `sqlalchemy_atomic_decorator` | Generic SQLAlchemy |
+
+Import from `archipy.helpers.decorators.sqlalchemy_atomic` (lazy-loaded via
+`archipy.helpers.decorators` `__getattr__` so SQLAlchemy is not a hard import).
 
 ## Logics (unit of work)
 
 - Domain DTO in → domain DTO out; no FastAPI/gRPC imports.
-- Public methods: `@postgres_sqlalchemy_atomic_decorator` (or async twin) when using Postgres SQLAlchemy.
-- May call other domain logics; **never** another domain’s repository.
+- Public methods: decorate with the matching `*_sqlalchemy_atomic_decorator` when using SQLAlchemy.
+- May call other domain logics (nested atomic reuses the open session); **never** another domain's repository.
 
 ## AppUtils (FastAPI + gRPC)
 
@@ -150,18 +248,20 @@ Live: https://syntaxarc.github.io/ArchiPy/tutorials/adapters/
 from archipy.helpers.utils.app_utils import AppUtils
 from archipy.configs.base_config import BaseConfig
 
-app = AppUtils.create_fastapi_app()              # reads FASTAPI config
-server = AppUtils.create_grpc_app(BaseConfig.global_config())       # sync
+app = AppUtils.create_fastapi_app()              # config optional; reads global FASTAPI
+server = AppUtils.create_grpc_app(BaseConfig.global_config())       # sync — config required
 # server = AppUtils.create_async_grpc_app(config)                   # async
 ```
 
 Do not hand-roll bare `FastAPI()` / `grpc.server()` when extras are installed. Prefer config flags for stock
 middleware/interceptors (`FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`).
+Custom gRPC interceptors: `customized_interceptors=` on the gRPC factories.
 
-## Health checks (liveness/readiness/startup)
+## Health checks (plugin convention)
 
-ArchiPy apps should expose app-level health so infrastructure can route traffic correctly — FastAPI HTTP routes and/or
-the standard gRPC Health Checking Protocol. Scaffold with `/scaffold-health-checks`.
+> **Not a library API.** ArchiPy does not ship HTTP `/health/*` routes or a stock gRPC Health servicer.
+> These are **plugin/app conventions** for consumer apps. Scaffold with `/scaffold-health-checks`.
+> The `grpc` extra does include `grpcio-health-checking` so apps can register `grpc.health.v1.Health`.
 
 ### Probe types
 
@@ -214,11 +314,13 @@ Prefer `grpcio-health-checking` (`grpc.health.v1.Health`) — do not invent a cu
 
 Register service names:
 
-| Service       | Meaning                                        |
-|---------------|------------------------------------------------|
-| `""` (empty)  | Overall readiness (default Check target)       |
+| Service | Meaning |
+|---------|---------|
+| `""` (empty) | Overall readiness (default Check target) |
 | `"readiness"` | Explicit readiness (deps + warm-up + shutdown) |
-| `"liveness"`  | Process-only liveness (no dependency checks)   |
+| `"liveness"` | Process-only liveness (no dependency checks) |
+
+Initial status at register time — **`""` and `"readiness"` start `NOT_SERVING`** until warm-up + deps are healthy:
 
 ```python
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
@@ -260,8 +362,6 @@ readinessProbe:
 
 ### Graceful shutdown
 
-Combine readiness with shutdown signals:
-
 1. Receive `SIGTERM`
 2. Make readiness fail immediately (HTTP `503` / gRPC `NOT_SERVING`)
 3. Wait briefly so in-flight requests drain
@@ -275,23 +375,28 @@ Optionally add Kubernetes `preStop` sleep for extra safety.
 - Returning healthy while dependencies are down (HTTP `200` or gRPC `SERVING`)
 - Hand-rolling a custom gRPC health RPC instead of `grpc.health.v1.Health`
 - Mixing sync and async gRPC servicers on one server
+- Starting `""` as `SERVING` before warm-up completes
 - Not testing probe behavior under failure
 
 ## Utils
 
-Prefer ArchiPy utils under `archipy.helpers.utils`:
+Prefer ArchiPy utils. Import from the **concrete submodule** (package `__init__` does not re-export):
 
-| Util             | Typical use                  |
-|------------------|------------------------------|
-| `TracingUtils`   | tracing helpers              |
-| `RateLimitUtils` | rate limiting                |
-| `DatetimeUtils`  | datetime helpers             |
-| `StringUtils`    | string helpers               |
-| `JwtUtils`       | JWT encode/decode            |
-| `PasswordUtils`  | password hashing             |
-| `FileUtils`      | file helpers                 |
-| `ErrorUtils`     | error helpers                |
-| `AppUtils`       | FastAPI / gRPC app factories |
+| Util | Import path | Typical use |
+|------|-------------|-------------|
+| `AppUtils` | `archipy.helpers.utils.app_utils` | FastAPI / gRPC app factories |
+| `BaseUtils` | `archipy.helpers.utils.base_utils` | Shared facade helpers |
+| `TracingUtils` | `archipy.helpers.utils.tracing_utils` | tracing helpers |
+| `RateLimitUtils` | `archipy.helpers.utils.rate_limit_utils` | rate limiting |
+| `DatetimeUtils` | `archipy.helpers.utils.datetime_utils` | datetime helpers |
+| `StringUtils` | `archipy.helpers.utils.string_utils` | string helpers |
+| `JWTUtils` | `archipy.helpers.utils.jwt_utils` | JWT encode/decode (`jwt` extra) |
+| `PasswordUtils` | `archipy.helpers.utils.password_utils` | password hashing |
+| `FileUtils` | `archipy.helpers.utils.file_utils` | file helpers |
+| `ErrorUtils` | `archipy.helpers.utils.error_utils` | error helpers |
+| `TOTPUtils` | `archipy.helpers.utils.totp_utils` | TOTP |
+| `KeycloakUtils` | `archipy.helpers.utils.keycloak_utils` | Keycloak helpers |
+| `PrometheusUtils` | `archipy.helpers.utils.prometheus_utils` | Prometheus helpers |
 
 Custom utils: pure only — no DB/network/adapter construction.
 
@@ -299,13 +404,13 @@ Custom utils: pure only — no DB/network/adapter construction.
 
 Prefer ArchiPy under `archipy.helpers.decorators`:
 
-| Decorator area               | Examples                                                                             |
-|------------------------------|--------------------------------------------------------------------------------------|
-| Cache                        | `ttl_cache`                                                                          |
-| Transactions (on **logics**) | `postgres_sqlalchemy_atomic_decorator`, `async_postgres_sqlalchemy_atomic_decorator` |
-| Observability                | tracing, timing                                                                      |
-| Resilience                   | retry, timeout                                                                       |
-| Other                        | singleton, rate-limit                                                                |
+| Area | Symbols |
+|------|---------|
+| Cache | `ttl_cache_decorator` (`archipy.helpers.decorators.cache`) |
+| Transactions (on **logics**) | `postgres_sqlalchemy_atomic_decorator`, `async_postgres_sqlalchemy_atomic_decorator`, plus sqlite/starrocks/generic twins |
+| Observability | `capture_span`, `capture_transaction` (+ `async_capture_span`, `async_capture_transaction`); `timing_decorator` |
+| Resilience | `retry_decorator`, `timeout_decorator` |
+| Other | `singleton_decorator`, `grpc_rate_limit_decorator` (gRPC only) |
 
 No concrete adapter imports at module level in custom decorators.
 
@@ -314,7 +419,30 @@ No concrete adapter imports at module level in custom decorators.
 Prefer ArchiPy under `archipy.helpers.interceptors` (FastAPI / gRPC). Cross-cutting only. Prefer AppUtils
 auto-registration for stock hooks; wire custom via DI / `customized_interceptors=` — not business logic.
 
+### Rate-limit and metric interceptors
+
+- FastAPI rate-limit: config via `FastAPIRateLimitConfig`; prefer AppUtils / config flags over manual wiring.
+- gRPC rate-limit: `GRPC_RATE_LIMIT.IS_ENABLED` + `grpc_rate_limit_decorator` / stock interceptors.
+- **Metric interceptors require `archipy[prometheus]`** — they import `prometheus_client` at module import time.
+  Without the extra, importing those modules fails.
+
 Live helpers overview: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
+
+## Observability
+
+Combine library pieces rather than inventing a parallel stack:
+
+| Concern | ArchiPy pieces | Extra |
+|---------|----------------|-------|
+| Tracing / APM | `TracingUtils`, `capture_span` / `capture_transaction`, Elastic APM hooks | `elastic-apm` |
+| Metrics | `PrometheusUtils`, metric interceptors | `prometheus` |
+| Errors / events | Sentry integration | `sentry` |
+| Timing | `timing_decorator` | — |
+
+Wire via `AppUtils` + config flags when possible. Health probes (above) are complementary but separate —
+probes answer infra routing; observability answers product/ops insight.
+
+Live: https://syntaxarc.github.io/ArchiPy/tutorials/observability/
 
 ## Dependency injection
 
@@ -349,16 +477,17 @@ features/
 - Behave (not pytest); `uv add "archipy[behave]"`; infra also `archipy[testcontainers]`.
 - Isolate with `ScenarioContext` + pool; hooks in `environment.py` (see `/scaffold-bdd`).
 - Tag infra `@needs-*`; skip with `behave --tags=~@needs-redis`.
+- Reset `SessionManagerRegistry` after scenarios.
 - Do not copy ArchiPy-core gRPC/Temporal environment blocks unless the app needs them.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
 
 ## Quickstart path
 
-1. `uv init` + `uv add "archipy[redis,fastapi]"`
+1. `uv init` + `uv add "archipy[redis,fastapi,postgres,sqlalchemy]"` (pick extras you need)
 2. `AppConfig` + `set_global` (customize `FASTAPI`)
 3. `AppUtils.create_fastapi_app` + domain adapters under `repositories/`
-4. Add logics (`@atomic`) / services / optional `features/`
+4. Add logics (`*_sqlalchemy_atomic_decorator`) / services / optional `features/`
 
 Live: https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/
 

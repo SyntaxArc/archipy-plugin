@@ -12,7 +12,7 @@ description: >-
 Ask the user for:
 
 1. Domain name (e.g. `order`)
-2. ArchiPy extras to install/use (e.g. `redis`, `postgres-sqlalchemy`, `fastapi`)
+2. ArchiPy extras to install/use (e.g. `redis`, `postgres`, `sqlalchemy`, `fastapi`)
 3. Transport: FastAPI (default) or gRPC
 
 ## Compose — do not fork templates

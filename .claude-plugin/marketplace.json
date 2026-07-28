@@ -8,7 +8,7 @@
       "name": "archipy",
       "source": ".",
       "description": "Rules, skills, and commands for building apps with ArchiPy",
-      "version": "0.6.0"
+      "version": "0.7.0"
     }
   ]
 }

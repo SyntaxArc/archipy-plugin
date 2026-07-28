@@ -33,46 +33,24 @@ Optional app-local helpers (prefer `archipy.helpers` first): `helpers/{utils,dec
 ## Call Flow
 
 ```text
-services → logics (@atomic) → repositories → adapters → ArchiPy
+services → logics (atomic UoW) → repositories → adapters → ArchiPy
 ```
+
+> Plugin shorthand `@atomic` means a real `*_sqlalchemy_atomic_decorator` — there is no decorator named `atomic`.
 
 ## Layer Rules
 
-### `models/`
-- Data structures only — no business logic, no I/O.
-- Prefer ArchiPy base entities/errors where applicable; subclass domain errors from ArchiPy `BaseError` hierarchy.
-- DTOs: Pydantic `BaseModel`.
-  - Public: `dtos/{domain}/domain/v{n}/` (versioned).
-  - Internal: `dtos/{domain}/repository/` (never versioned).
-- Naming detail lives in the models rule when editing `models/**`.
+Layer details live in the matching `using-archipy-*.mdc` / `config-and-di.mdc` / `testing-bdd-for-apps.mdc` rules when
+those files are open. This always-on rule keeps only the global map:
 
-### `repositories/`
-- Each domain owns its data access under `repositories/{domain}/`.
-- `adapters/` — domain-specific wrappers around ArchiPy base adapters; entity construction and query building.
-- `{domain}_repository.py` — orchestrates adapters, cache-aside, maps results to response DTOs.
-- Prefer ArchiPy adapters via extras (`uv add "archipy[redis]"`) before inventing clients.
-- Catch infrastructure exceptions at the boundary and re-raise as domain errors with `raise ... from e`.
-- Never import or call repositories from a different domain.
-
-### `logics/`
-- Pure business rules: domain DTO in → domain DTO out; framework-agnostic (no FastAPI/gRPC imports).
-- Unit of work: public methods use `@postgres_sqlalchemy_atomic_decorator` (or `async_postgres_sqlalchemy_atomic_decorator`) when Postgres SQLAlchemy is in play.
-- May call other domain logics (nested `@atomic` reuses the session); **never** another domain’s repository.
-
-### `services/`
-- Thin transport: HTTP/gRPC → domain InputDTO → logic → OutputDTO.
-- Version in path: `services/{domain}/v{n}/`. No business rules / `@atomic` here.
-
-### `helpers/` (optional)
-- Pure utilities only — no database calls, no network I/O, no adapter construction.
-- Sub-packages: `utils/`, `decorators/`, `interceptors/`.
-- Prefer ArchiPy helpers before writing custom ones.
-- Decorators and interceptors must not import concrete adapter implementations at module level.
-
-### `configs/`
-- Extend `archipy.configs.base_config.BaseConfig`.
-- Call `BaseConfig.set_global(config)` once at bootstrap.
-- No hardcoded secrets — document required vars in `.env.example`.
+- **models/** — data only (no I/O, no business rules).
+- **repositories/** — domain data access; adapters under `repositories/{domain}/adapters/`; no cross-domain repo calls;
+  map driver errors with `raise ... from e`.
+- **logics/** — business rules + UoW (`*_sqlalchemy_atomic_decorator`); may call other logics; never other domains'
+  repositories; no FastAPI/gRPC.
+- **services/** — thin transport; versioned `v{n}/`; no UoW / business rules.
+- **helpers/** — pure only; prefer ArchiPy; no adapter construction at module level.
+- **configs/** — extend `BaseConfig`; `set_global` once; no secrets in code.
 
 ## Import Direction (one-way)
 

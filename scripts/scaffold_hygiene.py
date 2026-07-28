@@ -9,17 +9,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Top-level app adapters package (forbidden). Domain adapters under repositories/*/adapters/ are OK.
-TOP_LEVEL_ADAPTERS_RE = re.compile(
-    r"(^|/)adapters/[^/]+\.py$",
-)
+# Any adapters/*.py outside repositories/{domain}/adapters/ is forbidden for ArchiPy apps.
+ADAPTERS_FILE_RE = re.compile(r"(^|/)adapters/[^/]+\.py$")
 REPO_ADAPTERS_RE = re.compile(r"(^|/)repositories/[^/]+/adapters/")
 
 HARD_RULES = (
-    "ArchiPy app hard rules: call flow services → logics → repositories → adapters → ArchiPy. "
-    "Import direction: configs ← models ← helpers ← repositories / logics / services. "
-    "Domain adapters live under repositories/{domain}/adapters/ — never invent a top-level app adapters/ package. "
-    "Prefer plugin scaffolds (/scaffold-*, /redis-search) and skills/archipy-docs/reference.md."
+    "ArchiPy apps: follow architecture-for-apps rule + skills/archipy-docs/reference.md. "
+    "Domain adapters under repositories/{domain}/adapters/ only. Prefer /scaffold-* commands."
 )
 
 
@@ -41,7 +37,7 @@ def _is_forbidden_adapters_path(file_path: str) -> bool:
     normalized = file_path.replace("\\", "/")
     if REPO_ADAPTERS_RE.search(normalized):
         return False
-    return bool(TOP_LEVEL_ADAPTERS_RE.search(normalized))
+    return bool(ADAPTERS_FILE_RE.search(normalized))
 
 
 def _paths_from_payload(payload: dict[str, Any]) -> list[str]:
@@ -76,8 +72,8 @@ def handle_post_tool_use(payload: dict[str, Any]) -> dict[str, Any]:
     for path in _paths_from_payload(payload):
         if _is_forbidden_adapters_path(path):
             warnings.append(
-                f"ArchiPy hygiene: `{Path(path).as_posix()}` looks like a top-level adapters/ file. "
-                "Move domain adapters to repositories/{domain}/adapters/ instead."
+                f"ArchiPy hygiene: `{Path(path).as_posix()}` is under adapters/ but not "
+                "repositories/{domain}/adapters/. Move domain adapters there."
             )
     if not warnings:
         return {}

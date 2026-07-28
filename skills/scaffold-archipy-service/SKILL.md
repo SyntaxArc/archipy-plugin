@@ -34,7 +34,7 @@ services/<domain>/v{n}/
 
 - Thin router: request → domain `*InputDTO` → logic → `*OutputDTO`.
 - Export `create_router(container)` (or equivalent) for `manage.py` / app factory.
-- Map domain errors to HTTP status; no business rules / `@atomic` here.
+- Map domain errors to HTTP status; no business rules / atomic UoW decorators here.
 
 ### gRPC
 

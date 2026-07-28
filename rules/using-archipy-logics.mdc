@@ -1,6 +1,6 @@
 ---
 description: ArchiPy app logics — business rules, unit of work, domain isolation
-globs: "**/logics/**/*.py"
+globs: **/logics/**/*.py
 alwaysApply: false
 ---
 
@@ -30,7 +30,7 @@ class UserRegistrationLogic:
 ```
 
 - Async stack: `async_postgres_sqlalchemy_atomic_decorator`.
-- Nested `@atomic` calls reuse the open session — logics may call other logics.
+- Nested atomic-decorator calls reuse the open session — logics may call other logics.
 
 ## Domain Isolation
 
@@ -50,5 +50,5 @@ class UserRegistrationLogic:
 ## Do Not
 
 - Put HTTP status mapping or router code here (that belongs in `services/`).
-- Skip `@atomic` on write/read paths that need a SQLAlchemy session when Postgres is in use.
+- Skip `*_sqlalchemy_atomic_decorator` on write/read paths that need a SQLAlchemy session when SQLAlchemy is in use.
 - Construct Redis/DB clients inside logic classes.

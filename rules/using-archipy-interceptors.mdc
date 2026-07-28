@@ -1,6 +1,6 @@
 ---
 description: ArchiPy helpers/interceptors — cross-cutting hooks; prefer AppUtils auto-register
-globs: "**/helpers/interceptors/**/*.py"
+globs: **/helpers/interceptors/**/*.py
 alwaysApply: false
 ---
 

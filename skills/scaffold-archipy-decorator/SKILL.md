@@ -2,7 +2,8 @@
 name: scaffold-archipy-decorator
 description: >-
   Scaffold or wire a helpers/decorators module for an ArchiPy app. Prefer ArchiPy
-  decorators (ttl_cache, postgres_sqlalchemy_atomic_decorator, tracing, …) before custom ones.
+  decorators (ttl_cache_decorator, postgres_sqlalchemy_atomic_decorator,
+  capture_span / capture_transaction, …) before custom ones.
 ---
 
 # Scaffold ArchiPy Decorator
@@ -23,10 +24,11 @@ Ask:
 
 Examples:
 
-- `from archipy.helpers.decorators.cache import ttl_cache`
+- `from archipy.helpers.decorators.cache import ttl_cache_decorator`
 - `from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator`
 - `from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator`
-- tracing / timeout / retry / singleton under `archipy.helpers.decorators`
+- `capture_span` / `capture_transaction`, `timeout_decorator`, `retry_decorator`, `singleton_decorator`,
+  `timing_decorator`, `grpc_rate_limit_decorator` under `archipy.helpers.decorators`
 
 Show correct usage on a sample function; do not reimplement. UoW decorators belong on **logics**, not services/repositories.
 

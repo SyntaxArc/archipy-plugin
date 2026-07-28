@@ -1,6 +1,6 @@
 ---
 description: ArchiPy helpers/decorators — prefer ArchiPy decorators; UoW on logics
-globs: "**/helpers/decorators/**/*.py"
+globs: **/helpers/decorators/**/*.py
 alwaysApply: false
 ---
 
@@ -12,11 +12,14 @@ Helpers stay **pure**: no database calls, no network I/O, no constructing adapte
 
 Before writing a custom decorator, prefer ArchiPy under `archipy.helpers.decorators`:
 
-- `ttl_cache` — caching (`archipy.helpers.decorators.cache`)
+- `ttl_cache_decorator` — caching (`archipy.helpers.decorators.cache`)
 - Unit of work (apply on **logics**, not repositories):
   - `postgres_sqlalchemy_atomic_decorator`
   - `async_postgres_sqlalchemy_atomic_decorator`
-- tracing / timing / timeout / retry / singleton / rate-limit decorators
+  - also `sqlite_` / `starrocks_` / generic `sqlalchemy_atomic_decorator` twins
+- Observability: `capture_span`, `capture_transaction` (+ async twins); `timing_decorator`
+- Resilience: `retry_decorator`, `timeout_decorator`
+- Other: `singleton_decorator`, `grpc_rate_limit_decorator` (gRPC only)
 
 ## Custom Decorators
 

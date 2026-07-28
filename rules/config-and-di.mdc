@@ -1,6 +1,6 @@
 ---
 description: ArchiPy BaseConfig, FastAPIConfig/uvicorn, and DI container wiring
-globs: "**/configs/**/*.py"
+globs: **/configs/**/*.py
 alwaysApply: false
 ---
 

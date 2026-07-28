@@ -1,6 +1,6 @@
 ---
 description: Using and writing adapters in ArchiPy apps — extras, ports, mocks, boundary errors
-globs: "**/adapters/**/*.py"
+globs: **/repositories/**/adapters/**/*.py
 alwaysApply: false
 ---
 
@@ -14,7 +14,7 @@ Install the matching extra and use the shipped adapter:
 
 ```bash
 uv add "archipy[redis]"
-# examples: postgres-sqlalchemy, kafka, scylladb, minio, keycloak, ...
+# examples: postgres, sqlalchemy, sqlalchemy-async, kafka, scylladb, minio, keycloak, ...
 ```
 
 ```python

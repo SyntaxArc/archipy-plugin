@@ -13,13 +13,13 @@ Ask the user for:
 
 1. Domain name (e.g. `user`)
 2. Logic name / file stem (e.g. `user_registration` → `user_registration_logic.py`)
-3. Sync or async atomic (default sync if `postgres-sqlalchemy`; async if `postgres-sqlalchemy-async`)
+3. Sync or async atomic (default sync if `postgres`+`sqlalchemy`; async if `postgres`+`sqlalchemy-async`)
 
 ## Prefer ArchiPy
 
 ```bash
-uv add "archipy[postgres-sqlalchemy]"
-# or: uv add "archipy[postgres-sqlalchemy-async]"
+uv add "archipy[postgres,sqlalchemy]"
+# or: uv add "archipy[postgres,sqlalchemy-async]"
 ```
 
 ## Generate
@@ -65,7 +65,7 @@ Create missing domain DTO stubs under `models/dtos/<domain>/domain/v1/` if they 
 
 - No FastAPI / gRPC imports.
 - May call other domain logics; **never** another domain’s repository.
-- No `@atomic` on repositories or services — only logics.
+- No atomic / UoW decorators on repositories or services — only logics.
 - Wire via DI in `configs/containers.py`.
 
 ## Docs

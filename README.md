@@ -77,12 +77,12 @@ Then restart Claude Code or run `/reload-plugins`.
 | Rule file                        | Applies when                          |
 |----------------------------------|---------------------------------------|
 | `architecture-for-apps.mdc`      | Always                                |
-| `using-archipy-adapters.mdc`     | `**/adapters/**/*.py`                 |
+| `using-archipy-adapters.mdc`     | `**/repositories/**/adapters/**/*.py` |
 | `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`            |
 | `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`       |
 | `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py`     |
 | `config-and-di.mdc`              | `**/configs/**/*.py`                  |
-| `using-archipy-models.mdc`       | `**/models/**/*.py`                   |
+| `using-archipy-models.mdc`       | `**/models/{entities,errors,types,dtos}/**/*.py` |
 | `using-archipy-repositories.mdc` | `**/repositories/**/*.py`             |
 | `using-archipy-logics.mdc`       | `**/logics/**/*.py`                   |
 | `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py` |
@@ -95,7 +95,7 @@ Then restart Claude Code or run `/reload-plugins`.
 | `scaffold-archipy-app`           | Bootstrap a new ArchiPy-based service layout                              |
 | `scaffold-archipy-domain`        | Full domain slice (models, repo, logic, service)                          |
 | `scaffold-archipy-adapter`       | Add domain adapter under `repositories/{domain}/adapters/`                |
-| `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `@atomic`                          |
+| `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator` |
 | `scaffold-archipy-service`       | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
 | `scaffold-archipy-bdd`           | Behave `features/` stub                                                   |
 | `scaffold-archipy-utils`         | Wire or create `helpers/utils`                                            |
@@ -188,7 +188,8 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
 ### `/scaffold-decorator`
 
-- **Purpose:** Prefer ArchiPy decorators (`ttl_cache`, `postgres_sqlalchemy_atomic_decorator`, tracing, …).
+- **Purpose:** Prefer ArchiPy decorators (`ttl_cache_decorator`, `postgres_sqlalchemy_atomic_decorator`,
+  `capture_span` / `capture_transaction`, …).
 - **Asks:** Purpose; sync/async; built-in vs custom.
 - **Outcome:** Usage snippet or `helpers/decorators/<name>.py` with example.
 
@@ -275,13 +276,13 @@ DTOs/entities/errors layout and naming (`*InputDTO` / `*CommandDTO` / …).
 Domain data access; adapters under `repositories/{domain}/adapters/`.
 
 - **Do:** Orchestrate in `{domain}_repository.py`; map to repository DTOs; isolate domains.
-- **Don’t:** Call another domain’s repository; put `@atomic` here.
+- **Don’t:** Call another domain’s repository; put atomic / UoW decorators here.
 
 ### `using-archipy-logics`
 
 Business rules + unit of work; domain isolation.
 
-- **Do:** Domain DTO in/out; `@atomic` on public methods; call other logics for cross-domain.
+- **Do:** Domain DTO in/out; `*_sqlalchemy_atomic_decorator` on public methods; call other logics for cross-domain.
 - **Don’t:** Import another domain’s repository; import FastAPI/gRPC.
 
 ### `using-archipy-services`
@@ -289,7 +290,7 @@ Business rules + unit of work; domain isolation.
 Thin transport; AppUtils bootstrap; uvicorn from `FastAPIConfig`.
 
 - **Do:** Map errors to HTTP/gRPC status; version routers under `v{n}/`.
-- **Don’t:** Put `@atomic` or business rules in services; hardcode host/port.
+- **Don’t:** Put atomic / UoW decorators or business rules in services; hardcode host/port.
 
 ### `testing-bdd-for-apps`
 

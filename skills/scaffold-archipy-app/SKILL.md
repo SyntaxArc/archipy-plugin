@@ -13,7 +13,7 @@ description: >-
 Ask the user for:
 
 1. Python package name (e.g. `my_app`)
-2. ArchiPy extras to install (e.g. `redis`, `dependency-injection`, `postgres-sqlalchemy`, `fastapi`)
+2. ArchiPy extras to install (e.g. `redis`, `dependency-injection`, `postgres`, `sqlalchemy`, `fastapi`)
 3. Optional: first domain name (default `user`)
 
 ## Steps

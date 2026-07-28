@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
       - name: Check catalog and version sync
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
       - name: Run script unit tests
@@ -36,11 +36,10 @@ jobs:
       - name: Check markdown links
         uses: lycheeverse/lychee-action@v2
         with:
-          # Config lives in lychee.toml (include_mail, exclude_path, accept).
+          # lychee.toml auto-loaded (include_mail, accept). Inputs only below.
           args: >-
             --verbose
             --no-progress
-            --config lychee.toml
             README.md
             AGENTS.md
             CONTRIBUTING.md

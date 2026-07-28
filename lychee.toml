@@ -1,0 +1,6 @@
+# Lychee link checker — https://lychee.cli.rs/
+include_mail = false
+exclude_path = [".git"]
+
+# Skip GitHub rate-limit noise when unauthenticated; action still passes GITHUB_TOKEN.
+accept = ["200", "429"]

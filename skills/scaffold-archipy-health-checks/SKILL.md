@@ -22,6 +22,9 @@ Ask the user for:
 
 Health checks are app code. ArchiPy does not ship stock HTTP routes or a stock gRPC `Health` servicer.
 
+**Probe semantics** (liveness vs readiness vs startup, K8s notes, common mistakes): keep
+`../archipy-docs/reference.md` § Health checks as the source of truth — do not invent alternate probe meanings.
+
 ```bash
 uv add "archipy[fastapi]"   # HTTP probes
 uv add "archipy[grpc]"      # gRPC server; also need grpcio-health-checking
@@ -298,11 +301,9 @@ Use app shutdown delay and/or K8s `preStop` sleep.
 
 ## Common mistakes
 
-- Putting dependency checks in liveness (HTTP path or gRPC `"liveness"` service)
-- Returning healthy while dependencies are down (HTTP `200` or gRPC `SERVING`)
-- No timeout on dependency checks
-- No warm-up or shutdown awareness
-- Hand-rolling a custom gRPC health RPC instead of `grpc.health.v1.Health`
+See `../archipy-docs/reference.md` § Health checks → Common mistakes. Also avoid:
+
+- No warm-up or shutdown awareness in readiness helpers
 - Mixing sync and async gRPC health / domain servicers on one server
 - Not testing failure behavior by taking down dependencies
 

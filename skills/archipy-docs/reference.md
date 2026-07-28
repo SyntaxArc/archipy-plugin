@@ -36,7 +36,8 @@ Common extras (non-exhaustive): see matrix below. Full list on PyPI / docs.
 | `behave`                    | Behave BDD helpers for apps                                        |
 
 Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`,
-`/scaffold-bdd`, plus helper scaffolds (`utils` / `decorator` / `interceptor`).
+`/scaffold-bdd`, `/scaffold-health-checks`, `/redis-search`, plus helper scaffolds (`utils` / `decorator` /
+`interceptor`).
 
 See PyPI / docs for the full extras matrix.
 

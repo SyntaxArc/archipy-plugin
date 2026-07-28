@@ -25,6 +25,9 @@ description: >-
 | DI                | https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/    |
 | Health checks     | Bundled `reference.md` (HTTP + gRPC) + `/scaffold-health-checks`       |
 | Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/          |
+| Testing           | https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/ + `/scaffold-bdd` |
+| Observability     | https://syntaxarc.github.io/ArchiPy/tutorials/observability/           |
+| Redis search      | Bundled `reference.md` + `/redis-search`                               |
 | API reference     | https://syntaxarc.github.io/ArchiPy/api_reference/                     |
 
 4. Prefer PyPI `archipy` APIs — do not assume the ArchiPy monorepo is on disk.

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-28
+
+### Added
+
+- Command: `/redis-search` (was skill-only; now slash entry matches `AGENTS.md`)
+- Concrete stubs in `redis-search`, `scaffold-archipy-domain` (DTO/error), and helper skills (utils / decorator / interceptor)
+- `scripts/check_catalog.py` + GitHub Actions CI for version/catalog sync
+- `hooks/hooks.json` + `scripts/scaffold_hygiene.py` (session hard-rules context; warn on top-level `adapters/`)
+- `CONTRIBUTING.md` for this plugin (dual IDE version bump + catalog checklist)
+
+### Changed
+
+- README catalog: Skills (12), Commands (19); docs map includes redis-search and health
+- Decorator skill/command: `postgres_sqlalchemy_atomic_decorator` (replace legacy `sqlalchemy_atomic` wording)
+- `archipy-docs` topic table: Testing, Observability, Redis search
+- Health skill + config rule point at `reference.md` for canonical BaseConfig / health probe prose
+
 ## [0.5.0] - 2026-07-27
 
 ### Added

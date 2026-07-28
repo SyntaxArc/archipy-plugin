@@ -64,6 +64,8 @@ uv add "archipy[dependency-injection]"
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/config_management/ · https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/
 
+Bundled cheat sheet (BaseConfig + FastAPIConfig/uvicorn sketches): `skills/archipy-docs/reference.md` § BaseConfig.
+
 ## Do Not
 
 - Scatter `os.environ` reads outside config.

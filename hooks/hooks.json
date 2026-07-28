@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/scripts/scaffold_hygiene.py\" sessionStart"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/scripts/scaffold_hygiene.py\" postToolUse",
+        "matcher": "Write|StrReplace|EditNotebook"
+      }
+    ]
+  }
+}

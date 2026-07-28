@@ -88,7 +88,7 @@ Then restart Claude Code or run `/reload-plugins`.
 | `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py` |
 | `testing-bdd-for-apps.mdc`       | `**/features/**/*`                    |
 
-### Skills (11)
+### Skills (12)
 
 | Skill                            | When to use                                                               |
 |----------------------------------|---------------------------------------------------------------------------|
@@ -102,9 +102,10 @@ Then restart Claude Code or run `/reload-plugins`.
 | `scaffold-archipy-decorator`     | Wire or create `helpers/decorators`                                       |
 | `scaffold-archipy-interceptor`   | Wire or create `helpers/interceptors`                                     |
 | `scaffold-archipy-health-checks` | Scaffold FastAPI/gRPC health checks and optional K8s probe YAML           |
+| `redis-search`                   | RediSearch full-text, vector search, and search-cache adapters            |
 | `archipy-docs`                   | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
 
-### Commands (18)
+### Commands (19)
 
 | Command                   | Action                                               |
 |---------------------------|------------------------------------------------------|
@@ -118,6 +119,7 @@ Then restart Claude Code or run `/reload-plugins`.
 | `/scaffold-decorator`     | Run scaffold-archipy-decorator                       |
 | `/scaffold-interceptor`   | Run scaffold-archipy-interceptor                     |
 | `/scaffold-health-checks` | Scaffold FastAPI/gRPC health + K8s probe YAML        |
+| `/redis-search`           | Scaffold Redis full-text / vector / search-cache     |
 | `/docs-quickstart`        | Quickstart + bundled reference                       |
 | `/docs-adapters`          | Adapter patterns + docs links                        |
 | `/docs-helpers`           | Utils / decorators / interceptors                    |
@@ -186,7 +188,7 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
 ### `/scaffold-decorator`
 
-- **Purpose:** Prefer ArchiPy decorators (`ttl_cache`, atomic, tracing, …).
+- **Purpose:** Prefer ArchiPy decorators (`ttl_cache`, `postgres_sqlalchemy_atomic_decorator`, tracing, …).
 - **Asks:** Purpose; sync/async; built-in vs custom.
 - **Outcome:** Usage snippet or `helpers/decorators/<name>.py` with example.
 
@@ -203,6 +205,12 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
   optional K8s probe YAML.
 - **Outcome:** Shared check helpers + `health_service.py` and/or `health_grpc_service.py` (`grpc.health.v1`) + optional
   `deploy/k8s-probes.yaml` (`httpGet` / `grpc`).
+
+### `/redis-search`
+
+- **Purpose:** Add Redis full-text (RediSearch), vector, or search-cache adapters under a domain repository.
+- **Asks:** Search type, domain, data structure, sync/async, patterns.
+- **Outcome:** `repositories/<domain>/adapters/<domain>_*_adapter.py` (+ repository stub) wired via DI.
 
 ### `/docs-quickstart` / `/docs-adapters` / `/docs-helpers` / `/docs-config` / `/docs-errors` / `/docs-testing` /
 `/docs-observability` / `/docs-health-checks`
@@ -300,18 +308,21 @@ archipy-plugin/
 ├── .cursor-plugin/
 │   ├── plugin.json          # Cursor plugin manifest
 │   └── marketplace.json     # Cursor marketplace catalog
+├── hooks/                   # Plugin hooks (hooks.json)
+├── scripts/                 # Catalog checks + hook scripts
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
 ├── commands/                # Slash commands
 ├── assets/logo.jpg
 ├── AGENTS.md
+├── CONTRIBUTING.md
 ├── README.md
 ├── LICENSE
 └── CHANGELOG.md
 ```
 
-Both Cursor and Claude Code discover `rules/`, `skills/`, and `commands/` automatically when the manifest does not
-override paths.
+Both Cursor and Claude Code discover `rules/`, `skills/`, `commands/`, and `hooks/` automatically when the manifest does
+not override paths.
 
 ## ArchiPy docs map
 
@@ -319,14 +330,18 @@ override paths.
 |----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `/docs-quickstart`, `scaffold-archipy-app`   | [Quickstart](https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/), [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/) |
 | `/docs-adapters`, `scaffold-archipy-adapter` | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/), [API adapters](https://syntaxarc.github.io/ArchiPy/api_reference/adapters/)                           |
+| `/redis-search`                              | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/) + bundled Redis search skill stubs                                                                     |
 | `/docs-helpers`, helper scaffolds            | [Helpers](https://syntaxarc.github.io/ArchiPy/tutorials/helpers/), [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                           |
 | `/docs-config`                               | [Config](https://syntaxarc.github.io/ArchiPy/tutorials/config_management/), [DI](https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/)                      |
 | `/docs-errors`                               | [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/)                                                                                            |
 | `/docs-testing`, `scaffold-archipy-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                        |
 | `/docs-observability`                        | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                                                                                              |
+| `/docs-health-checks`, health scaffold       | Bundled `reference.md` Health checks + `/scaffold-health-checks`                                                                                                           |
 | `archipy-docs` / `reference.md`              | [Docs home](https://syntaxarc.github.io/ArchiPy/), [API reference](https://syntaxarc.github.io/ArchiPy/api_reference/)                                                     |
 
 ## Developing / contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist (version bump across four JSON files, catalog sync, CI).
 
 1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy`
    (Claude Code).
@@ -334,13 +349,14 @@ override paths.
    folder name), or commands (`name` + `description`).
 3. Reload the editor window after changes.
 4. Keep consumer focus: apps using PyPI `archipy`, not ArchiPy monorepo maintainers.
-5. Open a PR with a clear summary; update `CHANGELOG.md` for user-facing changes.
-6. Bump `version` in both `.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json` when publishing a release.
+5. Run `python scripts/check_catalog.py` before opening a PR.
+6. Open a PR with a clear summary; update `CHANGELOG.md` for user-facing changes.
+7. Bump `version` in both `plugin.json` **and** both `marketplace.json` files when publishing a release.
 
 ## Marketplace / security
 
 - This repository is **open source** (MIT).
-- v0.2 ships **no MCP servers** and **no plugin variables / secrets**.
+- Ships **no MCP servers** and **no plugin variables / secrets**. Bundled hooks are hygiene-only (no network).
 - Cursor Marketplace submissions are **manually reviewed**; updates are re-reviewed.
 - Claude Code marketplace: `/plugin marketplace add SyntaxArc/archipy-plugin`
 - Do not add API tokens or credentials to the plugin tree.
@@ -364,4 +380,4 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [ArchiPy documentation](https://syntaxarc.github.io/ArchiPy/)
 - Contributing to **ArchiPy core** → use
   the [ArchiPy CONTRIBUTING](https://github.com/SyntaxArc/ArchiPy/blob/master/CONTRIBUTING.md) guide
-- Contributing to **this plugin** → PRs against this repository
+- Contributing to **this plugin** → [CONTRIBUTING.md](CONTRIBUTING.md)

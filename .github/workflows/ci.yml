@@ -37,7 +37,7 @@ jobs:
             --verbose
             --no-progress
             --exclude-path .git
-            --exclude-mail
+            --include-mail=false
             README.md
             AGENTS.md
             CONTRIBUTING.md

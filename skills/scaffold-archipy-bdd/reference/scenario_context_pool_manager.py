@@ -1,7 +1,6 @@
-from uuid import UUID
-
 from archipy.helpers.metaclasses.singleton import Singleton
 from features.scenario_context import ScenarioContext
+from uuid import UUID
 
 
 class ScenarioContextPoolManager(metaclass=Singleton):

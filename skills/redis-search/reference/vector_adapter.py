@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-
 from archipy.adapters.redis.adapters import RedisAdapter
 from archipy.adapters.redis.search_ports import RedisSearchHandlePort
 from archipy.models.dtos.redis.search.index_schema_dto import (
@@ -18,7 +17,6 @@ from archipy.models.types.redis_search_types import (
     VectorAlgorithm,
     VectorDistanceMetric,
 )
-
 from my_app.models.errors.product_errors import ProductSearchError
 
 logger = logging.getLogger(__name__)

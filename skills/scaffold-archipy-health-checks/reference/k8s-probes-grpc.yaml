@@ -1,7 +1,7 @@
 lifecycle:
   preStop:
     exec:
-      command: ["sleep", "5"]
+      command: [ "sleep", "5" ]
 
 startupProbe:
   grpc:

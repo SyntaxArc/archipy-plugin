@@ -74,19 +74,19 @@ Then restart Claude Code or run `/reload-plugins`.
 
 ### Rules (11)
 
-| Rule file                        | Applies when                          |
-|----------------------------------|---------------------------------------|
-| `architecture-for-apps.mdc`      | Always                                |
-| `using-archipy-adapters.mdc`     | `**/repositories/**/adapters/**/*.py` |
-| `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`            |
-| `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`       |
-| `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py`     |
-| `config-and-di.mdc`              | `**/configs/**/*.py`                  |
+| Rule file                        | Applies when                                     |
+|----------------------------------|--------------------------------------------------|
+| `architecture-for-apps.mdc`      | Always                                           |
+| `using-archipy-adapters.mdc`     | `**/repositories/**/adapters/**/*.py`            |
+| `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`                       |
+| `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`                  |
+| `using-archipy-interceptors.mdc` | `**/helpers/interceptors/**/*.py`                |
+| `config-and-di.mdc`              | `**/configs/**/*.py`                             |
 | `using-archipy-models.mdc`       | `**/models/{entities,errors,types,dtos}/**/*.py` |
-| `using-archipy-repositories.mdc` | `**/repositories/**/*.py`             |
-| `using-archipy-logics.mdc`       | `**/logics/**/*.py`                   |
-| `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py` |
-| `testing-bdd-for-apps.mdc`       | `**/features/**/*`                    |
+| `using-archipy-repositories.mdc` | `**/repositories/**/*.py`                        |
+| `using-archipy-logics.mdc`       | `**/logics/**/*.py`                              |
+| `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py`            |
+| `testing-bdd-for-apps.mdc`       | `**/features/**/*`                               |
 
 ### Skills (12)
 
@@ -95,7 +95,7 @@ Then restart Claude Code or run `/reload-plugins`.
 | `scaffold-archipy-app`           | Bootstrap a new ArchiPy-based service layout                              |
 | `scaffold-archipy-domain`        | Full domain slice (models, repo, logic, service)                          |
 | `scaffold-archipy-adapter`       | Add domain adapter under `repositories/{domain}/adapters/`                |
-| `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator` |
+| `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator`    |
 | `scaffold-archipy-service`       | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
 | `scaffold-archipy-bdd`           | Behave `features/` stub                                                   |
 | `scaffold-archipy-utils`         | Wire or create `helpers/utils`                                            |
@@ -214,6 +214,7 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 - **Outcome:** `repositories/<domain>/adapters/<domain>_*_adapter.py` (+ repository stub) wired via DI.
 
 ### `/docs-quickstart` / `/docs-adapters` / `/docs-helpers` / `/docs-config` / `/docs-errors` / `/docs-testing` /
+
 `/docs-observability` / `/docs-health-checks`
 
 - **Purpose:** Orient the agent on the matching topic using `skills/archipy-docs/reference.md` first, then live docs

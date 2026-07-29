@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable
-from typing import Any
-
 from archipy.adapters.redis.adapters import RedisAdapter
-
+from collections.abc import Callable
 from my_app.models.errors.product_errors import ProductSearchError
+from typing import Any
 
 
 class ProductSearchCacheAdapter:
@@ -27,10 +25,10 @@ class ProductSearchCacheAdapter:
         return f"{self.KEY_PREFIX}{digest}"
 
     def get_or_set(
-        self,
-        query: str,
-        filters: dict[str, Any],
-        producer: Callable[[], list[dict[str, Any]]],
+            self,
+            query: str,
+            filters: dict[str, Any],
+            producer: Callable[[], list[dict[str, Any]]],
     ) -> list[dict[str, Any]]:
         """Return cached search hits or compute, store, and return them."""
         key = self._cache_key(query, filters)

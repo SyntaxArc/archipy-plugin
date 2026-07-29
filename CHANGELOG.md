@@ -2,8 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
+to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.7.0] - 2026-07-28
 
@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `grpc_rate_limit_decorator`
 - Utils import guidance: use full submodule paths (package `__init__` does not re-export)
 - `@atomic` shorthand clarified — real API is `*_sqlalchemy_atomic_decorator`
-- `redis-search` rewritten on `RedisAdapter.search_index()` / search DTOs (no raw `client.ft()` templates);
-  fixed broken `ensure_index` and undefined domain error
+- `redis-search` rewritten on `RedisAdapter.search_index()` / search DTOs (no raw `client.ft()` templates); fixed broken
+  `ensure_index` and undefined domain error
 - gRPC health: `""` / `"readiness"` start `NOT_SERVING` until warm-up
 
 ### Changed
@@ -24,14 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trimmed always-on `architecture-for-apps.mdc` layer dumps; shortened hook `HARD_RULES`
 - Narrowed adapters glob to `**/repositories/**/adapters/**/*.py`; anchored models globs; unquoted rule globs
 - Hook warning wording for non-repository `adapters/` paths
-- Expanded `archipy-docs/reference.md` to all published extras + SessionManagerRegistry, atomic family,
-  entities, pagination DTOs, utils facade, rate-limit/metric interceptors, Observability; health labeled as
-  plugin convention
+- Expanded `archipy-docs/reference.md` to all published extras + SessionManagerRegistry, atomic family, entities,
+  pagination DTOs, utils facade, rate-limit/metric interceptors, Observability; health labeled as plugin convention
 
 ### Added
 
-- Extended `scripts/check_catalog.py`: rules table, command→skill refs, logo path, manifest parity,
-  CHANGELOG version, skill descriptions
+- Extended `scripts/check_catalog.py`: rules table, command→skill refs, logo path, manifest parity, CHANGELOG version,
+  skill descriptions
 - `tests/` for catalog + hygiene scripts
 - CI: Python 3.14, unit tests, markdown link check
 - Issue/PR templates, Dependabot
@@ -41,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Command: `/redis-search` (was skill-only; now slash entry matches `AGENTS.md`)
-- Concrete stubs in `redis-search`, `scaffold-archipy-domain` (DTO/error), and helper skills (utils / decorator / interceptor)
+- Concrete stubs in `redis-search`, `scaffold-archipy-domain` (DTO/error), and helper skills (utils / decorator /
+  interceptor)
 - `scripts/check_catalog.py` + GitHub Actions CI for version/catalog sync
 - `hooks/hooks.json` + `scripts/scaffold_hygiene.py` (session hard-rules context; warn on top-level `adapters/`)
 - `CONTRIBUTING.md` for this plugin (dual IDE version bump + catalog checklist)

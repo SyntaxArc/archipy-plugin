@@ -1,7 +1,7 @@
 # Contributing to archipy-plugin
 
-Consumer plugin for apps that depend on PyPI [`archipy`](https://pypi.org/project/archipy/).
-This repo is **not** for maintaining the ArchiPy library itself.
+Consumer plugin for apps that depend on PyPI [`archipy`](https://pypi.org/project/archipy/). This repo is **not** for
+maintaining the ArchiPy library itself.
 
 For ArchiPy core changes, use the
 [ArchiPy CONTRIBUTING](https://github.com/SyntaxArc/ArchiPy/blob/master/CONTRIBUTING.md) guide.
@@ -40,10 +40,10 @@ python3 -m unittest discover -s tests -v
 
 Keep Cursor and Claude manifests in sync:
 
-| File | Field |
-|------|--------|
-| `.cursor-plugin/plugin.json` | `version` |
-| `.claude-plugin/plugin.json` | `version` |
+| File                              | Field                |
+|-----------------------------------|----------------------|
+| `.cursor-plugin/plugin.json`      | `version`            |
+| `.claude-plugin/plugin.json`      | `version`            |
 | `.cursor-plugin/marketplace.json` | `plugins[0].version` |
 | `.claude-plugin/marketplace.json` | `plugins[0].version` |
 
@@ -58,9 +58,9 @@ All four must share the same SemVer string.
 
 ## Hooks
 
-Plugin hooks live in `hooks/hooks.json` and scripts under `scripts/`. They remind agents about import
-direction and warn on top-level `adapters/` paths. Prefer `${CURSOR_PLUGIN_ROOT}` in hook commands so paths
-resolve from the plugin install location.
+Plugin hooks live in `hooks/hooks.json` and scripts under `scripts/`. They remind agents about import direction and warn
+on top-level `adapters/` paths. Prefer `${CURSOR_PLUGIN_ROOT}` in hook commands so paths resolve from the plugin install
+location.
 
 ## Scope reminders
 

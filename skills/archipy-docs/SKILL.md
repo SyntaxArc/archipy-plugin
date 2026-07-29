@@ -14,21 +14,21 @@ description: >-
 2. Answer from the reference when possible (cite section names).
 3. If the topic is missing or version-sensitive, point to the matching live doc:
 
-| Topic             | URL                                                                    |
-|-------------------|------------------------------------------------------------------------|
-| Docs home         | https://syntaxarc.github.io/ArchiPy/                                   |
-| Quickstart        | https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/        |
-| Project structure | https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/ |
-| Adapters          | https://syntaxarc.github.io/ArchiPy/tutorials/adapters/                |
-| Helpers           | https://syntaxarc.github.io/ArchiPy/tutorials/helpers/                 |
-| Config            | https://syntaxarc.github.io/ArchiPy/tutorials/config_management/       |
-| DI                | https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/    |
-| Health checks     | Bundled `reference.md` (HTTP + gRPC) + `/scaffold-health-checks`       |
-| Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/          |
-| Testing           | https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/ + `/scaffold-bdd` |
+| Topic             | URL                                                                                                   |
+|-------------------|-------------------------------------------------------------------------------------------------------|
+| Docs home         | https://syntaxarc.github.io/ArchiPy/                                                                  |
+| Quickstart        | https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/                                       |
+| Project structure | https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/                                |
+| Adapters          | https://syntaxarc.github.io/ArchiPy/tutorials/adapters/                                               |
+| Helpers           | https://syntaxarc.github.io/ArchiPy/tutorials/helpers/                                                |
+| Config            | https://syntaxarc.github.io/ArchiPy/tutorials/config_management/                                      |
+| DI                | https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/                                   |
+| Health checks     | Bundled `reference.md` (HTTP + gRPC) + `/scaffold-health-checks`                                      |
+| Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/                                         |
+| Testing           | https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/ + `/scaffold-bdd`                     |
 | Observability     | Bundled `reference.md` § Observability + https://syntaxarc.github.io/ArchiPy/tutorials/observability/ |
-| Redis search      | Bundled `reference.md` + `/redis-search`                               |
-| API reference     | https://syntaxarc.github.io/ArchiPy/api_reference/                     |
+| Redis search      | Bundled `reference.md` + `/redis-search`                                                              |
+| API reference     | https://syntaxarc.github.io/ArchiPy/api_reference/                                                    |
 
 4. Prefer PyPI `archipy` APIs — do not assume the ArchiPy monorepo is on disk.
 

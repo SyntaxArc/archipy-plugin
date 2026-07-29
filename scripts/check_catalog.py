@@ -216,7 +216,7 @@ def check_readme_catalog() -> list[str]:
 
     skills_section = ""
     if skills_header and commands_header:
-        skills_section = readme[skills_header.end() : commands_header.start()]
+        skills_section = readme[skills_header.end(): commands_header.start()]
     readme_skills = README_SKILL_ROW_RE.findall(skills_section)
     missing = sorted(set(skills_on_disk) - set(readme_skills))
     extra = sorted(set(readme_skills) - set(skills_on_disk))
@@ -227,7 +227,7 @@ def check_readme_catalog() -> list[str]:
 
     rules_section = ""
     if rules_header and skills_header:
-        rules_section = readme[rules_header.end() : skills_header.start()]
+        rules_section = readme[rules_header.end(): skills_header.start()]
     readme_rules = README_RULE_ROW_RE.findall(rules_section)
     missing_rules = sorted(set(rules_on_disk) - set(readme_rules))
     extra_rules = sorted(set(readme_rules) - set(rules_on_disk))

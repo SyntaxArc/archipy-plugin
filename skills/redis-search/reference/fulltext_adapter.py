@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-
 from archipy.adapters.redis.adapters import RedisAdapter
 from archipy.adapters.redis.search_ports import RedisSearchHandlePort
 from archipy.models.dtos.redis.search.index_schema_dto import (
@@ -15,7 +14,6 @@ from archipy.models.dtos.redis.search.index_schema_dto import (
 from archipy.models.dtos.redis.search.search_query_dto import SearchQueryDTO
 from archipy.models.dtos.redis.search.search_result_dto import SearchResultDTO
 from archipy.models.types.redis_search_types import RedisIndexType
-
 # Define under models/errors/ for the domain — do not leave this import dangling.
 from my_app.models.errors.product_errors import ProductSearchError
 

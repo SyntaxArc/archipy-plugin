@@ -123,20 +123,20 @@ def register_health_servicer(server, container) -> health.HealthServicer:
 
 ## Kubernetes probe YAML
 
-When requested, emit `deploy/k8s-probes.yaml` matching the chosen transport(s).
+When requested, emit `deploy/k8s-probes.yaml` matching the chosen transport (s).
 
 **Copy templates from `reference/`, adapt ports to config:**
 
-| Transport | Template |
-|-----------|----------|
-| HTTP | `reference/k8s-probes-http.yaml` |
-| gRPC | `reference/k8s-probes-grpc.yaml` |
+| Transport | Template                         |
+|-----------|----------------------------------|
+| HTTP      | `reference/k8s-probes-http.yaml` |
+| gRPC      | `reference/k8s-probes-grpc.yaml` |
 
 Use `config.GRPC.SERVE_PORT` / `config.FASTAPI.SERVE_PORT` — never hardcode ports in app code; YAML may show
 placeholders matching config.
 
-Rules: `readinessProbe.successThreshold: 2`, `failureThreshold: 3` default, `timeoutSeconds` ≥ slowest readiness
-check timeout, `preStop` sleep for short drain window.
+Rules: `readinessProbe.successThreshold: 2`, `failureThreshold: 3` default, `timeoutSeconds` ≥ slowest readiness check
+timeout, `preStop` sleep for short drain window.
 
 ## Graceful shutdown
 

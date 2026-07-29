@@ -63,8 +63,8 @@ class ScenarioContext:
             if hasattr(self.async_adapter, "close") and not hasattr(self.async_adapter, "session_manager"):
                 await self.async_adapter.close()
             elif hasattr(self.async_adapter, "session_manager") and hasattr(
-                self.async_adapter.session_manager,
-                "engine",
+                    self.async_adapter.session_manager,
+                    "engine",
             ):
                 await self.async_adapter.session_manager.remove_session()
                 await self.async_adapter.session_manager.engine.dispose()

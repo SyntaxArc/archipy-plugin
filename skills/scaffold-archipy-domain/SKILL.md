@@ -95,7 +95,8 @@ class OrderInvalidArgumentError(InvalidArgumentError):
     """Raised when order input fails domain validation."""
 ```
 
-Naming: `*InputDTO` / `*OutputDTO` for domain; `*CommandDTO` / `*QueryDTO` for repository. Prefer ArchiPy `BaseError` hierarchy — adjust base classes to what the installed `archipy` version exports.
+Naming: `*InputDTO` / `*OutputDTO` for domain; `*CommandDTO` / `*QueryDTO` for repository. Prefer ArchiPy `BaseError`
+hierarchy — adjust base classes to what the installed `archipy` version exports.
 
 ## Outcome checklist
 

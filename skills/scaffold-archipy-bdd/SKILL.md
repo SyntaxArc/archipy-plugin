@@ -45,12 +45,12 @@ needs them).
 
 **Copy templates from `reference/`, adapt package imports, create only if missing:**
 
-| Destination | Template |
-|-------------|----------|
-| `features/scenario_context.py` | `reference/scenario_context.py` |
+| Destination                                 | Template                                     |
+|---------------------------------------------|----------------------------------------------|
+| `features/scenario_context.py`              | `reference/scenario_context.py`              |
 | `features/scenario_context_pool_manager.py` | `reference/scenario_context_pool_manager.py` |
-| `features/test_helpers.py` | `reference/test_helpers.py` |
-| `features/environment.py` | `reference/environment.py` |
+| `features/test_helpers.py`                  | `reference/test_helpers.py`                  |
+| `features/environment.py`                   | `reference/environment.py`                   |
 
 Uncomment / wire `ContainerManager` in `environment.py` when mode is infra.
 

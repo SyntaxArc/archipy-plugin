@@ -30,7 +30,8 @@ Examples:
 - `capture_span` / `capture_transaction`, `timeout_decorator`, `retry_decorator`, `singleton_decorator`,
   `timing_decorator`, `grpc_rate_limit_decorator` under `archipy.helpers.decorators`
 
-Show correct usage on a sample function; do not reimplement. UoW decorators belong on **logics**, not services/repositories.
+Show correct usage on a sample function; do not reimplement. UoW decorators belong on **logics**, not
+services/repositories.
 
 ## Custom decorator
 

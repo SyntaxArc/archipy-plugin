@@ -4,7 +4,9 @@ about: Report incorrect plugin guidance or broken scaffolds
 labels: bug
 ---
 
-**Plugin version** (from `.cursor-plugin/plugin.json`):
+**Plugin version** (from `.cursor-plugin/plugin.json` or `.claude-plugin/plugin.json`):
+
+**IDE** (Cursor / Claude Code):
 
 **What went wrong**
 

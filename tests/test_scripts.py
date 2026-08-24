@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -65,6 +66,41 @@ class HygieneTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertIn("additional_context", payload)
         self.assertIn("repositories/{domain}/adapters", payload["additional_context"])
+        self.assertNotIn("# Architecture for ArchiPy Apps", payload["additional_context"])
+
+    def test_claude_session_start_injects_architecture_rule(self) -> None:
+        env = os.environ.copy()
+        env["CLAUDE_PLUGIN_ROOT"] = str(ROOT)
+        result = subprocess.run(
+            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), "SessionStart"],
+            cwd=ROOT,
+            input="{}",
+            capture_output=True,
+            text=True,
+            check=False,
+            env=env,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        context = payload["additional_context"]
+        self.assertIn("# Architecture for ArchiPy Apps", context)
+        self.assertIn("services → logics", context)
+
+    def test_claude_post_tool_use_injects_glob_rule(self) -> None:
+        env = os.environ.copy()
+        env["CLAUDE_PLUGIN_ROOT"] = str(ROOT)
+        result = subprocess.run(
+            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), "PostToolUse"],
+            cwd=ROOT,
+            input=json.dumps({"tool_input": {"path": "logics/user/user_logic.py"}}),
+            capture_output=True,
+            text=True,
+            check=False,
+            env=env,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertIn("Unit of Work", payload["additional_context"])
 
 
 if __name__ == "__main__":

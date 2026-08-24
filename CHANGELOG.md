@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-08-24
+
+### Added
+
+- Claude Code hook schema in `hooks/claude-hooks.json` (`SessionStart` / `PostToolUse`)
+- Claude session/post-tool hooks inject `.mdc` rule bodies (Claude Code does not load Cursor rules)
+- Explicit `skills` / `commands` / `hooks` paths in both plugin manifests; Cursor also sets `rules`
+
+### Changed
+
+- Plugin description and keywords cover Cursor and Claude Code
+- Cursor keeps `hooks/hooks.json`; Claude manifest points at `hooks/claude-hooks.json`
+
 ## [0.7.0] - 2026-07-28
 
 ### Fixed

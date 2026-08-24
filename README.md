@@ -310,7 +310,7 @@ archipy-plugin/
 ├── .cursor-plugin/
 │   ├── plugin.json          # Cursor plugin manifest
 │   └── marketplace.json     # Cursor marketplace catalog
-├── hooks/                   # Plugin hooks (hooks.json)
+├── hooks/                   # Cursor hooks.json + Claude claude-hooks.json
 ├── scripts/                 # Catalog checks + hook scripts
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
@@ -323,8 +323,9 @@ archipy-plugin/
 └── CHANGELOG.md
 ```
 
-Both Cursor and Claude Code discover `rules/`, `skills/`, `commands/`, and `hooks/` automatically when the manifest does
-not override paths.
+Cursor loads `rules/` (`.mdc`), `skills/`, `commands/`, and `hooks/hooks.json`. Claude Code loads `skills/`, `commands/`,
+and `hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules; the Claude session hook injects
+always-on rule text, and the post-tool hook injects glob-matched rules.
 
 ## ArchiPy docs map
 

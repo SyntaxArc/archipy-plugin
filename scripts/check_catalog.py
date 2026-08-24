@@ -94,6 +94,16 @@ def check_manifest_parity() -> list[str]:
             logo_path = ROOT / str(logo)
             if not logo_path.is_file():
                 errors.append(f"{path.relative_to(ROOT)} logo missing: {logo}")
+    cursor = _load_json(ROOT / ".cursor-plugin" / "plugin.json")
+    claude = _load_json(ROOT / ".claude-plugin" / "plugin.json")
+    if cursor.get("hooks") != "./hooks/hooks.json":
+        errors.append("Cursor plugin.json hooks must be ./hooks/hooks.json")
+    if claude.get("hooks") != "./hooks/claude-hooks.json":
+        errors.append("Claude plugin.json hooks must be ./hooks/claude-hooks.json")
+    if not (ROOT / "hooks" / "hooks.json").is_file():
+        errors.append("missing hooks/hooks.json")
+    if not (ROOT / "hooks" / "claude-hooks.json").is_file():
+        errors.append("missing hooks/claude-hooks.json")
     return errors
 
 

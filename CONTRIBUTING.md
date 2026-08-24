@@ -49,6 +49,8 @@ Keep Cursor and Claude manifests in sync:
 
 All four must share the same SemVer string.
 
+`hooks` paths **must differ**: Cursor `./hooks/hooks.json`, Claude Code `./hooks/claude-hooks.json`.
+
 ## Release checklist
 
 1. Update `CHANGELOG.md` (Keep a Changelog).
@@ -58,9 +60,13 @@ All four must share the same SemVer string.
 
 ## Hooks
 
-Plugin hooks live in `hooks/hooks.json` and scripts under `scripts/`. They remind agents about import direction and warn
-on top-level `adapters/` paths. Prefer `${CURSOR_PLUGIN_ROOT}` in hook commands so paths resolve from the plugin install
-location.
+Plugin hooks:
+
+- Cursor: `hooks/hooks.json` (`sessionStart`, `postToolUse`) via `${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}`
+- Claude Code: `hooks/claude-hooks.json` (`SessionStart`, `PostToolUse`) via `${CLAUDE_PLUGIN_ROOT}`
+
+Claude Code does not load `.mdc` rules. `scripts/scaffold_hygiene.py SessionStart` / `PostToolUse` injects matching
+rule bodies. Do not point both manifests at the same hooks file — schemas differ.
 
 ## Scope reminders
 

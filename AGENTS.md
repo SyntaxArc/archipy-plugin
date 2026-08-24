@@ -1,4 +1,6 @@
-# ArchiPy Cursor Plugin — Agent Instructions
+# ArchiPy Plugin — Agent Instructions
+
+Works in **Cursor** and **Claude Code**.
 
 Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/project/archipy/).
 

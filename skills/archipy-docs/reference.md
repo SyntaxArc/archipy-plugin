@@ -4,7 +4,7 @@ Condensed patterns for **apps that depend on** PyPI `archipy`. Prefer live docs 
 
 https://syntaxarc.github.io/ArchiPy/
 
-Verified against `archipy` 5.1.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
+Verified against `archipy` 5.2.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
 and `archipy.configs` package `__init__` files do not re-export symbols.
 
 > **ArchiPy 5.x:** OpenTelemetry replaces the removed Sentry, Elastic APM, and Prometheus integrations. Use
@@ -263,8 +263,10 @@ server = AppUtils.create_grpc_app(BaseConfig.global_config())       # sync — c
 ```
 
 Do not hand-roll bare `FastAPI()` / `grpc.server()` when extras are installed. Prefer config flags for stock
-middleware/interceptors (`FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`). Custom gRPC interceptors:
-`customized_interceptors=` on the gRPC factories.
+middleware/interceptors (`OTEL.IS_ENABLED` / `OTEL.TRACES_ENABLED` / `OTEL.METRICS_ENABLED`,
+`FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`). gRPC AppUtils installs traces and
+`rpc.server.duration` metrics independently. Custom gRPC interceptors: `customized_interceptors=` on the gRPC
+factories.
 
 ## Health checks (plugin convention)
 
@@ -431,7 +433,11 @@ auto-registration for stock hooks; wire custom via DI / `customized_interceptors
 ### Instrumentation and rate limiting
 
 - FastAPI: `AppUtils.create_fastapi_app` auto-instruments through `archipy[otel-fastapi]` when `OTEL.IS_ENABLED`.
-- gRPC: AppUtils factories insert OTel contrib server interceptors through `archipy[otel-grpc]`.
+- gRPC traces: AppUtils factories insert the contrib OTel server interceptor through `archipy[otel-grpc]` when
+  `OTEL.TRACES_ENABLED`.
+- gRPC metrics: AppUtils also prepends ArchiPy `GrpcServerOtelMetricsInterceptor` /
+  `AsyncGrpcServerOtelMetricsInterceptor` (`rpc.server.duration`) when `OTEL.METRICS_ENABLED` — independent of
+  traces.
 - gRPC rate-limit: `GRPC_RATE_LIMIT.IS_ENABLED` + `grpc_rate_limit_decorator` / stock interceptors.
 - FastAPI rate-limit handlers were removed in 5.0; use `fastapi-redis-sdk`.
 
@@ -441,13 +447,13 @@ Live helpers overview: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
 
 Combine library pieces rather than inventing a parallel stack:
 
-| Concern         | ArchiPy pieces                                                                            | Extra                          |
-|-----------------|-------------------------------------------------------------------------------------------|--------------------------------|
-| Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation  | `otel` + `otel-fastapi`/`otel-grpc` |
-| Metrics         | `measure_duration` / `count_calls` (+ async twins), `METRICS_EXPORTER` (`otlp`\|`pull`) | `otel` + stack-specific extra  |
-| Logs            | OTLP logging configured through `BaseConfig.OTEL`                                        | `otel`                         |
-| Errors          | `BaseUtils.capture_exception` records on the current span                                | `otel`                         |
-| Timing only     | `timing_decorator`                                                                        | —                              |
+| Concern         | ArchiPy pieces                                                                                          | Extra                          |
+|-----------------|---------------------------------------------------------------------------------------------------------|--------------------------------|
+| Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation               | `otel` + `otel-fastapi`/`otel-grpc` |
+| Metrics         | `measure_duration` / `count_calls` (+ async twins), AppUtils gRPC `rpc.server.duration`, `METRICS_EXPORTER` (`otlp`\|`pull`) | `otel` (+ `otel-grpc` for RPC) |
+| Logs            | `LOGS_EXPORTER` (`console`\|`otlp`); default console splits INFO/DEBUG → stdout, WARNING+ → stderr     | `otel`                         |
+| Errors          | `BaseUtils.capture_exception` records on the current span                                               | `otel`                         |
+| Timing only     | `timing_decorator`                                                                                      | —                              |
 
 Configure through nested settings, not SDK autoconfiguration:
 
@@ -459,15 +465,23 @@ OTEL__PROTOCOL=grpc
 OTEL__TRACES_ENABLED=true
 OTEL__METRICS_ENABLED=true
 OTEL__METRICS_EXPORTER=otlp
+OTEL__METRICS_PULL_HOST=0.0.0.0
+OTEL__METRICS_PULL_PORT=8200
+OTEL__SYSTEM_METRICS_ENABLED=true
 OTEL__LOGS_ENABLED=true
 OTEL__LOGS_EXPORTER=console
 OTEL__TRACES_SAMPLE_RATIO=0.1
 OTEL__LOGS_LEVEL=WARNING
 ```
 
+- Unique exporters: set `OTEL__METRICS_EXPORTER=pull` for scrape-only metrics on
+  `METRICS_PULL_HOST:METRICS_PULL_PORT/metrics` (do not dual-export). Set `OTEL__LOGS_EXPORTER=otlp` to push logs.
+- `SYSTEM_METRICS_ENABLED=false` disables process/system metrics when metrics are otherwise on.
+- Prefer `WARNING` or higher for exported production logs when using OTLP.
+
 Call `OtelUtils.init_otel_if_needed(config)` after `BaseConfig.set_global(config)` and **before** DI constructs
 SQLAlchemy engines, Kafka clients, or ScyllaDB sessions. AppUtils repeats initialization safely and auto-instruments
-FastAPI/gRPC when their matching extras are installed. Prefer `WARNING` or higher for exported production logs.
+FastAPI/gRPC when their matching extras are installed.
 
 Health probes (above) are complementary but separate — probes answer infra routing; observability answers product/ops
 insight. Use `/scaffold-observability` for a repository-aware setup.

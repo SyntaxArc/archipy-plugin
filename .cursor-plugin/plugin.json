@@ -1,6 +1,6 @@
 {
   "name": "archipy",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Cursor and Claude Code plugin: rules, skills, and commands for building apps with ArchiPy",
   "author": {
     "name": "SyntaxArc"

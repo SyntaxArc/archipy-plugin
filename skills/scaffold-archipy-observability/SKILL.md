@@ -85,6 +85,10 @@ Kafka clients, ScyllaDB sessions, and logs created during bootstrap.
 
 - FastAPI: `AppUtils.create_fastapi_app(config)` with `archipy[otel-fastapi]`.
 - gRPC server: `create_grpc_app` / `create_async_grpc_app` with `archipy[otel-grpc]`.
+  - Traces: contrib server interceptor when `OTEL.TRACES_ENABLED`.
+  - Metrics: ArchiPy `GrpcServerOtelMetricsInterceptor` /
+    `AsyncGrpcServerOtelMetricsInterceptor` records `rpc.server.duration` when
+    `OTEL.METRICS_ENABLED` (works without traces).
 - gRPC clients: `OtelUtils.grpc_client_interceptors()` / `async_grpc_client_interceptors()`.
 - Traces: `trace_root`, `trace_span`, `async_trace_root`, `async_trace_span`, `trace_class`.
 - Metrics: `measure_duration`, `async_measure_duration`, `count_calls`, `async_count_calls`.

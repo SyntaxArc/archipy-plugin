@@ -30,7 +30,7 @@ Prefer ArchiPy factories — do **not** hand-roll bare `FastAPI()` / `grpc.serve
 | Method | Use |
 |--------|-----|
 | `AppUtils.create_fastapi_app(config?)` | HTTP app; middleware/exception handlers plus OTel instrumentation through `archipy[otel-fastapi]` |
-| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception, optional OTel, and gRPC rate-limit interceptors |
+| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception, optional OTel traces + ArchiPy `rpc.server.duration` metrics, and gRPC rate-limit interceptors |
 | `AppUtils.create_async_grpc_app(config)` | Async gRPC (`grpc.aio`); equivalent async interceptor setup |
 
 Rules:
@@ -38,8 +38,9 @@ Rules:
 - Pass `BaseConfig.global_config()` (or injected config); do not duplicate middleware/interceptor setup AppUtils already does.
 - **FastAPI + uvicorn always driven by `config.FASTAPI` (`FastAPIConfig`)** — never hardcode host/port/reload/proxy settings.
 - Sync servicers → `create_grpc_app`; async servicers → `create_async_grpc_app` — do not mix.
-- Enable features through config (for example `OTEL.IS_ENABLED`, `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, and
-  `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock ArchiPy middleware/interceptors.
+- Enable features through config (for example `OTEL.IS_ENABLED`, `OTEL.TRACES_ENABLED`, `OTEL.METRICS_ENABLED`,
+  `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, and `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock
+  ArchiPy middleware/interceptors. gRPC metrics install does not require traces.
 - Custom gRPC interceptors: pass `customized_interceptors=`; do not bypass the exception interceptor.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/

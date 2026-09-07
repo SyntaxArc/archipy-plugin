@@ -10,11 +10,10 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Domain name (e.g. `user`)
-2. API version (default `v1`)
-3. Transport: FastAPI (default) or gRPC (sync vs async)
+1. Inspect existing transports, domain DTOs/logics, app bootstrap, DI wiring, and service tests.
+2. Infer domain, API version, framework, and sync/async style when established by the repository.
+3. Ask only for unresolved choices. Default to `v1` and FastAPI only when no project convention exists.
+4. Preserve existing routes, servicers, and bootstrap code; integrate without overwriting.
 
 ## Prefer ArchiPy
 
@@ -62,7 +61,14 @@ uvicorn in `manage.py` from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOA
 - Do not re-implement CORS/exception handlers/stock gRPC interceptors AppUtils already wires.
 - Wire logic via DI container.
 
+## Verify
+
+1. Run the repository's formatter and linter on generated Python.
+2. Run focused transport tests without starting a long-lived server.
+3. Confirm route/servicer registration, DTO mapping, domain-error mapping, and DI resolution.
+4. Report files, dependency changes, and commands run.
+
 ## Docs
 
 - https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
-- https://syntaxarc.github.io/ArchiPy/tutorials/helpers/interceptors/
+- https://syntaxarc.github.io/ArchiPy/tutorials/helpers/

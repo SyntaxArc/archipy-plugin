@@ -10,10 +10,10 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Feature name / file stem (e.g. `user_registration`)
-2. Mode: **mocks only** vs **infra** (`@needs-*` + testcontainers)
+1. Inspect existing `features/`, Behave config, scenario context, tags, containers, and the behavior being tested.
+2. Infer naming and reuse shared support files. Ask only for an unresolved feature name or whether real infrastructure is
+   required; default to mocks.
+3. Never overwrite shared support files. Merge missing hooks/registrations while preserving project-specific behavior.
 
 ## Prefer ArchiPy
 
@@ -42,6 +42,10 @@ features/
 
 Model after ArchiPy `features/` + docs tutorial (consumer-slim — no library gRPC/Temporal special cases unless the app
 needs them).
+
+Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
+(`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-bdd/` or `$CLAUDE_PLUGIN_ROOT/skills/scaffold-archipy-bdd/`). These are
+plugin templates, not app-relative paths. Copy and adapt them into the app; never edit the plugin copies.
 
 **Copy templates from `reference/`, adapt package imports, create only if missing:**
 
@@ -78,6 +82,13 @@ Do **not** paste ArchiPy’s entire container catalogue or gRPC test servers.
 - No shared mutable globals across scenarios.
 - Dispose context after each scenario; `stop_all` after feature/all when using containers.
 - Consumer apps: slim templates — library `environment.py` gRPC/Temporal blocks are ArchiPy-core specific.
+
+## Verify
+
+1. Run the generated feature in mocks mode.
+2. For infra mode, run the narrow tagged scenario only when its required container runtime is available.
+3. Confirm scenario context is isolated and disposed on both success and failure.
+4. Report files, tags, dependency changes, and commands run.
 
 ## Docs
 

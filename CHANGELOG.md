@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-09-07
+
+### Added
+
+- `/scaffold-observability` command and `scaffold-archipy-observability` skill for ArchiPy 5.x OpenTelemetry setup,
+  stack-specific extras, bootstrap ordering, decorators, and test guidance
+- Consumer app rules for Python style, strict typing, security, `uv` tooling, contribution workflow, and rule precedence
+- Catalog guards for skill quality, command/skill prompt parity, referenced templates, required rules, rule frontmatter,
+  and ArchiPy 5.x API drift
+
+### Changed
+
+- Scaffolding skills now inspect existing projects first, ask only unresolved choices, preserve files, and require
+  focused verification
+- Slash commands now read their complete skills and follow the same inspect-first workflow
+- Bundled reference and observability guidance now target ArchiPy 5.1 OpenTelemetry APIs and `otel*` extras
+- Layer rules now align DTOs, adapter/repository error boundaries, AppUtils error mapping, config sources, BDD workflow,
+  and Claude Code rule injection with current ArchiPy conventions
+- Plugin-template paths are resolved from Cursor/Claude plugin roots and copied into consumer apps
+
+### Fixed
+
+- Removed stale ArchiPy 4.x `TracingUtils`, Prometheus, Sentry, Elastic APM, and capture-decorator recommendations
+- Removed redundant direct `grpcio-health-checking` installation when `archipy[grpc]` already provides it
+- Corrected service helper documentation link and DTO examples to use ArchiPy `BaseDTO`
+
+### Tests
+
+- Added regression coverage for verification loops, inspect-first commands, template references, ArchiPy API drift,
+  and injection of all always-on consumer rules
+
 ## [0.8.0] - 2026-08-24
 
 ### Added

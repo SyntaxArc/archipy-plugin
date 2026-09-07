@@ -72,11 +72,17 @@ Then restart Claude Code or run `/reload-plugins`.
 
 ## What’s included
 
-### Rules (11)
+### Rules (17)
 
 | Rule file                        | Applies when                                     |
 |----------------------------------|--------------------------------------------------|
+| `rules-index-for-apps.mdc`       | Always                                           |
 | `architecture-for-apps.mdc`      | Always                                           |
+| `python-code-style-for-apps.mdc` | Always                                           |
+| `security-for-apps.mdc`          | Always                                           |
+| `tooling-for-apps.mdc`           | Always                                           |
+| `contributing-for-apps.mdc`      | Always                                           |
+| `typing-for-apps.mdc`            | `**/*.py`                                        |
 | `using-archipy-adapters.mdc`     | `**/repositories/**/adapters/**/*.py`            |
 | `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`                       |
 | `using-archipy-decorators.mdc`   | `**/helpers/decorators/**/*.py`                  |
@@ -88,7 +94,7 @@ Then restart Claude Code or run `/reload-plugins`.
 | `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py`            |
 | `testing-bdd-for-apps.mdc`       | `**/features/**/*`                               |
 
-### Skills (12)
+### Skills (13)
 
 | Skill                            | When to use                                                               |
 |----------------------------------|---------------------------------------------------------------------------|
@@ -102,10 +108,11 @@ Then restart Claude Code or run `/reload-plugins`.
 | `scaffold-archipy-decorator`     | Wire or create `helpers/decorators`                                       |
 | `scaffold-archipy-interceptor`   | Wire or create `helpers/interceptors`                                     |
 | `scaffold-archipy-health-checks` | Scaffold FastAPI/gRPC health checks and optional K8s probe YAML           |
+| `scaffold-archipy-observability` | Configure ArchiPy 5.x OpenTelemetry and stack instrumentation             |
 | `redis-search`                   | RediSearch full-text, vector search, and search-cache adapters            |
 | `archipy-docs`                   | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
 
-### Commands (19)
+### Commands (20)
 
 | Command                   | Action                                               |
 |---------------------------|------------------------------------------------------|
@@ -119,6 +126,7 @@ Then restart Claude Code or run `/reload-plugins`.
 | `/scaffold-decorator`     | Run scaffold-archipy-decorator                       |
 | `/scaffold-interceptor`   | Run scaffold-archipy-interceptor                     |
 | `/scaffold-health-checks` | Scaffold FastAPI/gRPC health + K8s probe YAML        |
+| `/scaffold-observability` | Configure OpenTelemetry traces, metrics, and logs    |
 | `/redis-search`           | Scaffold Redis full-text / vector / search-cache     |
 | `/docs-quickstart`        | Quickstart + bundled reference                       |
 | `/docs-adapters`          | Adapter patterns + docs links                        |
@@ -189,7 +197,7 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 ### `/scaffold-decorator`
 
 - **Purpose:** Prefer ArchiPy decorators (`ttl_cache_decorator`, `postgres_sqlalchemy_atomic_decorator`,
-  `capture_span` / `capture_transaction`, …).
+  `trace_span` / `trace_root`, `measure_duration` / `count_calls`, …).
 - **Asks:** Purpose; sync/async; built-in vs custom.
 - **Outcome:** Usage snippet or `helpers/decorators/<name>.py` with example.
 
@@ -207,6 +215,13 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 - **Outcome:** Shared check helpers + `health_service.py` and/or `health_grpc_service.py` (`grpc.health.v1`) + optional
   `deploy/k8s-probes.yaml` (`httpGet` / `grpc`).
 
+### `/scaffold-observability`
+
+- **Purpose:** Configure ArchiPy 5.x OpenTelemetry traces, metrics, logs, and stack-specific instrumentation.
+- **Asks:** Only unresolved signals, OTLP endpoint/protocol, service name, sampling, and log-level choices.
+- **Outcome:** Matching `otel*` extras, `OTEL__*` config documentation, early `OtelUtils` bootstrap, and focused
+  verification.
+
 ### `/redis-search`
 
 - **Purpose:** Add Redis full-text (RediSearch), vector, or search-cache adapters under a domain repository.
@@ -217,8 +232,8 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 
 `/docs-observability` / `/docs-health-checks`
 
-- **Purpose:** Orient the agent on the matching topic using `skills/archipy-docs/reference.md` first, then live docs
-  URLs.
+- **Purpose:** Orient the agent using the bundled ArchiPy 5.x reference and live docs; version-sensitive topics use live
+  docs first.
 - **Outcome:** Short guidance + links; may suggest a `/scaffold-*` follow-up.
 
 ## Rules deep dive
@@ -229,6 +244,13 @@ Always-on layer map, call flow (`services → logics → repositories → adapte
 
 - **Do:** Keep models free of I/O; UoW on logics; cross-domain via logics only.
 - **Don’t:** Import repositories/adapters from `models/`; invent a top-level app `adapters/` package.
+
+### Cross-cutting app rules
+
+`python-code-style-for-apps`, `typing-for-apps`, `security-for-apps`, `tooling-for-apps`, and
+`contributing-for-apps` carry the consumer-safe parts of ArchiPy's core standards: Python 3.14 style, complete typing,
+runtime-evaluated type safety, secrets/logging controls, parameterized queries, `uv`, and focused PR workflow. App
+tooling wins when stricter; library-only Make targets and per-file exemptions are not copied.
 
 ### `using-archipy-adapters`
 
@@ -338,7 +360,7 @@ always-on rule text, and the post-tool hook injects glob-matched rules.
 | `/docs-config`                               | [Config](https://syntaxarc.github.io/ArchiPy/tutorials/config_management/), [DI](https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/)                      |
 | `/docs-errors`                               | [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/)                                                                                            |
 | `/docs-testing`, `scaffold-archipy-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                        |
-| `/docs-observability`                        | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                                                                                              |
+| `/docs-observability`, OTel scaffold         | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/) + `/scaffold-observability`                                                                  |
 | `/docs-health-checks`, health scaffold       | Bundled `reference.md` Health checks + `/scaffold-health-checks`                                                                                                           |
 | `archipy-docs` / `reference.md`              | [Docs home](https://syntaxarc.github.io/ArchiPy/), [API reference](https://syntaxarc.github.io/ArchiPy/api_reference/)                                                     |
 

@@ -25,6 +25,30 @@ features/
 
 Extras: `uv add "archipy[behave]"`; infra also `uv add "archipy[testcontainers]"`.
 
+## Behavior-First Loop
+
+Name the public seam first (service endpoint, logic API, repository/adapter port, or public helper). Test observable
+behavior, not private methods or driver call counts.
+
+Work in vertical slices:
+
+1. Add one scenario and run it red for the expected reason.
+2. Implement only enough behavior to make it green.
+3. Add the next scenario; refactor after green.
+
+Expected values must be independent literals/examples, not values recomputed with the production algorithm.
+
+```gherkin
+# Good: observable app behavior
+Scenario: Register a new user
+  When I register "user@example.com"
+  Then registration succeeds with status "pending"
+
+# Bad: implementation coupling
+Scenario: Repository calls insert once
+  Then the private database adapter insert method was called once
+```
+
 ## Lifecycle (environment.py)
 
 1. `before_all` — `TestConfig` / `set_global`, `ScenarioContextPoolManager`, optional `ContainerManager`
@@ -39,6 +63,7 @@ Prefer `/scaffold-bdd` templates over copying ArchiPy-core gRPC/Temporal hooks.
 
 - Inject mocks (e.g. `RedisMock`) or real adapters via scenario context.
 - Never share mutable globals across scenarios.
+- Mocks and real adapters must satisfy the same port; assert through that public port.
 
 ## Infrastructure Tags
 
@@ -49,12 +74,41 @@ Feature: ...
 
 `ContainerManager.extract_containers_from_tags` → `start_containers`. Register only containers the app tests.
 
+Standard tag/container keys:
+
+| Tag | Container |
+|-----|-----------|
+| `@needs-postgres` | postgres |
+| `@needs-mysql` | mysql |
+| `@needs-kafka` | kafka |
+| `@needs-elasticsearch` | elasticsearch |
+| `@needs-minio` | minio |
+| `@needs-keycloak` | keycloak |
+| `@needs-redis` | redis |
+| `@needs-redis-cluster` | redis-cluster |
+| `@needs-scylladb` | scylladb |
+| `@needs-starrocks` | starrocks |
+| `@needs-temporal` | temporal |
+| `@needs-vault` | vault |
+
 ```bash
 uv run behave --tags=~@needs-redis
 ```
+
+Do not invent a `@needs-*` tag without adding its container mapping.
+
+## Async Steps
+
+Behave 1.3.3 supports native `async def` steps. Await async APIs directly; never call `asyncio.run()` inside a step.
+Use `asyncio.run()` only in synchronous lifecycle/cleanup callbacks that cannot be async.
+
+Step functions may remain unannotated when `features/` is excluded from app lint/type checks. Typical Ruff exemptions
+for Behave steps are `ANN001`, `ANN201`, `ARG001`, `PLR0913`, and `F811`; production helpers remain fully typed.
 
 ## Do Not
 
 - Share adapter/DB state across scenarios without cleanup.
 - Use pytest as the primary ArchiPy app test style.
 - Paste the full ArchiPy library `test_containers.py` catalogue into an app.
+- Spy on private methods or duplicate production calculations in assertions.
+- Write a complete feature horizontally before making one scenario pass.

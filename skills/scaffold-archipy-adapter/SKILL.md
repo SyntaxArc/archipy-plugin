@@ -10,13 +10,14 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Domain name (e.g. `user`, `order`)
-2. Adapter purpose / file stem (e.g. `db`, `cache` → `user_db_adapter.py`)
-3. Sync or async (or both as separate classes)
-4. Whether an in-memory mock is needed for BDD
-5. Whether this wraps an existing ArchiPy adapter or a new external client
+1. Inspect `pyproject.toml`, the target domain, neighboring adapters, ports, DI wiring, and tests.
+2. Infer installed extras, naming, sync/async style, and existing ArchiPy integration.
+3. Ask only for unresolved choices:
+   - Domain and adapter purpose
+   - Sync or async when the repository does not establish one
+   - In-memory mock when testing requirements are unclear
+   - New external client when ArchiPy has no matching adapter
+4. Preserve existing adapters and contracts. Extend compatible code; do not overwrite.
 
 ## Prefer ArchiPy
 
@@ -49,6 +50,13 @@ repositories/<domain>/
 - No business logic in adapters — map data and talk to infrastructure only.
 - Do **not** create a top-level `adapters/<name>/` package — domain adapters live under repositories.
 - Wire via DI in `configs/containers.py`.
+
+## Verify
+
+1. Run the repository's formatter and linter on generated Python.
+2. Run focused adapter/repository tests with mocks; do not require live infrastructure unless the project already does.
+3. Confirm imports, port conformance, exception chaining, and DI wiring.
+4. Report files, dependency changes, and commands run.
 
 ## Docs
 

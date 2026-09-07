@@ -9,11 +9,11 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Domain name (e.g. `user`)
-2. Logic name / file stem (e.g. `user_registration` → `user_registration_logic.py`)
-3. Sync or async atomic (default sync if `postgres`+`sqlalchemy`; async if `postgres`+`sqlalchemy-async`)
+1. Inspect the target domain's DTOs, repository contract, neighboring logics, DI wiring, and tests.
+2. Infer naming and sync/async style from existing code and installed extras.
+3. Ask only for an unresolved domain/use-case name or transaction choice. Default to sync for
+   `postgres` + `sqlalchemy` and async for `postgres` + `sqlalchemy-async`.
+4. Preserve existing use cases; do not overwrite logic or DTO files.
 
 ## Prefer ArchiPy
 
@@ -67,6 +67,13 @@ Create missing domain DTO stubs under `models/dtos/<domain>/domain/v1/` if they 
 - May call other domain logics; **never** another domain’s repository.
 - No atomic / UoW decorators on repositories or services — only logics.
 - Wire via DI in `configs/containers.py`.
+
+## Verify
+
+1. Run the repository's formatter and linter on generated Python.
+2. Add or run focused tests for success, business-rule failure, and rollback-relevant failure.
+3. Confirm DTO boundaries, repository injection, decorator choice, and DI wiring.
+4. Report files and commands run.
 
 ## Docs
 

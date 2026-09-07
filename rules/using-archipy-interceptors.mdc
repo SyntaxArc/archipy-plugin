@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Using ArchiPy Interceptors
 
-Helpers stay **pure**: no database calls, no constructing adapters, no domain business rules.
+Helpers stay **pure**: no database/network I/O, no constructing adapters, no domain business rules.
 
 ## Role
 
@@ -18,8 +18,11 @@ Use ArchiPy interceptors under `archipy.helpers.interceptors` (FastAPI / gRPC) b
 
 Prefer **AppUtils** auto-registration for stock interceptors/middleware:
 
-- FastAPI: `AppUtils.create_fastapi_app` wires CORS, GZip, TrustedHost, HTTPS redirect, metrics, APM from `FASTAPI` config.
-- gRPC: `create_grpc_app` / `create_async_grpc_app` append exception + optional trace/metric/rate-limit interceptors from config.
+- FastAPI: `AppUtils.create_fastapi_app` wires middleware/exception handlers and instruments through
+  `archipy[otel-fastapi]` when `OTEL.IS_ENABLED`.
+- gRPC: `create_grpc_app` / `create_async_grpc_app` append exception, optional OTel contrib, and gRPC rate-limit
+  interceptors. Metric/trace interceptor packages from ArchiPy 4.x no longer exist.
+- FastAPI rate limiting is not shipped by ArchiPy 5.x; use `fastapi-redis-sdk` when required.
 
 Do not manually re-wire stock ArchiPy interceptors unless customizing beyond config flags.
 
@@ -31,9 +34,11 @@ Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/interceptors/
 - Keep them framework-aware but business-logic-free.
 - Wire via DI container, framework registration, or `customized_interceptors=` on gRPC AppUtils — do not have adapters import interceptors at module level to register themselves.
 - Sync and async variants stay separate when both exist.
+- Raise/map through `archipy.models.errors`; do not invent ad-hoc exception classes or leak framework/driver errors.
 
 ## Do Not
 
 - Embed use-case logic inside interceptors.
+- Call databases or downstream services directly; inject context already resolved at the appropriate boundary.
 - Perform multi-step domain writes here (that belongs in `logics/` with atomic boundaries).
 - Leak infrastructure exceptions — map to domain/HTTP/gRPC errors at the appropriate boundary.

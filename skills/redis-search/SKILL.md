@@ -19,15 +19,16 @@ Redis search via ArchiPy (`archipy[redis]`):
 Canonical layout and ArchiPy constraints: `../archipy-docs/reference.md` (Adapters + Redis Search). Templates:
 `reference/fulltext_adapter.py`, `reference/vector_adapter.py`, `reference/search_cache_adapter.py`.
 
+Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
+(`$CURSOR_PLUGIN_ROOT/skills/redis-search/` or `$CLAUDE_PLUGIN_ROOT/skills/redis-search/`). These are plugin templates,
+not app-relative paths. Copy and adapt them into the app; never edit the plugin copies.
+
 ## Before writing files
 
-Ask the user for:
-
-1. Search type: full-text, vector, or caching
-2. Domain name (e.g. `product`, `document`)
-3. Data structure to index (HASH vs JSON)
-4. Search patterns needed (autocomplete, faceted search, …)
-5. Sync or async (or both as separate classes)
+1. Inspect the domain, Redis config/adapters, DTOs, index naming, key prefixes, DI wiring, and tests.
+2. Infer data structure, sync/async style, and existing search conventions.
+3. Ask only for unresolved choices: search type, domain, query behavior, and vector dimension/metric when applicable.
+4. Preserve existing indexes and adapters. Treat schema or prefix changes as migrations; do not silently replace them.
 
 ## Prefer ArchiPy
 
@@ -83,6 +84,13 @@ logics own invalidation rules.
 - Do **not** create a top-level `adapters/<name>/` package — domain adapters live under repositories.
 - Prefer ArchiPy search handle API; only drop to raw Redis for operations the handle does not cover.
 - Use specific exceptions; always `raise ... from e`.
+
+## Verify
+
+1. Run formatter/linter and focused tests for index creation, query mapping, empty results, and mapped failures.
+2. For vector search, verify encoded vector dimension and distance metric match the schema.
+3. Run live Redis tests only when the project already provides tagged/containerized infrastructure.
+4. Report files, schema assumptions, dependency changes, and commands run.
 
 ## Docs
 

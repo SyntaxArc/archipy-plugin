@@ -36,6 +36,10 @@ logger.info("Config loaded for environment: %s", config.ENVIRONMENT)
 - Read elsewhere via `BaseConfig.global_config()`.
 - Document required env vars in `.env.example`; never commit secrets.
 - Env overrides use nested delimiter: `FASTAPI__PROJECT_NAME`, `FASTAPI__SERVE_PORT`, …
+- Preserve ArchiPy's settings-source priority: secret files → Vault → pyproject → TOML → environment → `.env` →
+  defaults. Do not add scattered `os.environ` reads that bypass it.
+- Raise `ConfigurationError` / `InvalidArgumentError` from `archipy.models.errors` for config validation failures;
+  do not invent ad-hoc config exceptions.
 
 ## FastAPIConfig (`config.FASTAPI`)
 
@@ -61,6 +65,8 @@ uv add "archipy[dependency-injection]"
 - Wire in `configs/containers.py` as providers: **ports → adapters → repositories → logics → services**.
 - Depend on **ports** in business code; override providers in tests with mocks.
 - Import `app_config` inside the container module so `set_global` runs before wiring.
+- When OTel is enabled, call `OtelUtils.init_otel_if_needed(config)` after `set_global` and before the container creates
+  SQLAlchemy engines, Kafka clients, ScyllaDB sessions, or other instrumented adapters.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/config_management/ · https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/
 

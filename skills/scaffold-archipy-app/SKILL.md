@@ -10,11 +10,14 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Python package name (e.g. `my_app`)
-2. ArchiPy extras to install (e.g. `redis`, `dependency-injection`, `postgres`, `sqlalchemy`, `fastapi`)
-3. Optional: first domain name (default `user`)
+1. Inspect the workspace for `pyproject.toml`, existing packages, config, and source layout.
+2. Infer the package name and installed extras when they already exist.
+3. Ask only for unresolved choices:
+   - Python package name
+   - ArchiPy extras to install
+   - Optional first domain name (default `user`)
+4. If files already exist, merge compatible additions and preserve project conventions. Never replace an existing
+   application tree without explicit approval.
 
 ## Steps
 
@@ -68,6 +71,13 @@ features/                  # optional — /scaffold-bdd
 - Double quotes, Google-style docstrings, `X | Y` typing.
 - No secrets in code; list env keys in `.env.example`.
 - Do not copy ArchiPy library maintainer tooling (graphify, library BDD internals).
+
+## Verify
+
+1. Run the repository's formatter and linter on generated Python.
+2. Import the package and app factory without starting network services.
+3. Run existing targeted tests, if present.
+4. Report created/updated files, installed extras, and commands run.
 
 ## Docs
 

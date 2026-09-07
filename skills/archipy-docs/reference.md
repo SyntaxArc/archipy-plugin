@@ -4,8 +4,11 @@ Condensed patterns for **apps that depend on** PyPI `archipy`. Prefer live docs 
 
 https://syntaxarc.github.io/ArchiPy/
 
-Verified against `archipy` 4.17.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
+Verified against `archipy` 5.1.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
 and `archipy.configs` package `__init__` files do not re-export symbols.
+
+> **ArchiPy 5.x:** OpenTelemetry replaces the removed Sentry, Elastic APM, and Prometheus integrations. Use
+> `BaseConfig.OTEL`, `OtelUtils`, `trace_root` / `trace_span`, and the `otel*` extras described below.
 
 ## Install
 
@@ -38,15 +41,21 @@ uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
 | `keycloak`                          | Keycloak auth adapter + `KeycloakUtils`                                         |
 | `elasticsearch`                     | Elasticsearch adapter                                                           |
 | `elasticsearch-async`               | Async Elasticsearch adapter                                                     |
-| `elastic-apm`                       | Elastic APM integration                                                         |
 | `fastapi`                           | FastAPI + `AppUtils.create_fastapi_app`                                         |
 | `grpc`                              | gRPC + `create_grpc_app` / `create_async_grpc_app` (+ `grpcio-health-checking`) |
 | `dependency-injection`              | `dependency-injector` container helpers                                         |
 | `behave`                            | Behave BDD helpers for apps                                                     |
 | `testcontainers`                    | Testcontainers for `@needs-*` infra BDD                                         |
 | `temporalio`                        | Temporal adapter, worker, runtime                                               |
-| `prometheus`                        | Prometheus metrics (+ metric interceptors)                                      |
-| `sentry`                            | Sentry integration                                                              |
+| `otel`                              | OpenTelemetry SDK + OTLP traces, metrics, and logs                              |
+| `otel-fastapi`                      | FastAPI OpenTelemetry instrumentation                                            |
+| `otel-grpc`                         | gRPC OpenTelemetry instrumentation                                               |
+| `otel-sqlalchemy`                   | SQLAlchemy OpenTelemetry instrumentation                                         |
+| `otel-redis`                        | Redis OpenTelemetry instrumentation                                              |
+| `otel-elasticsearch`                | Elasticsearch OpenTelemetry instrumentation                                      |
+| `otel-kafka`                        | Kafka OpenTelemetry instrumentation                                              |
+| `otel-scylladb`                     | ScyllaDB OpenTelemetry instrumentation                                           |
+| `otel-minio`                        | MinIO/botocore OpenTelemetry instrumentation                                     |
 | `jwt`                               | JWT encode/decode (`JWTUtils`)                                                  |
 | `cache`                             | Cache helpers                                                                   |
 | `scheduler`                         | Scheduler helpers                                                               |
@@ -145,8 +154,8 @@ uvicorn.run(
 
 gRPC bind (parallel): `config.GRPC.SERVE_HOST`, `config.GRPC.SERVE_PORT`.
 
-Also: `FastAPIRateLimitConfig` for FastAPI rate-limit settings; enable gRPC rate-limit via
-`GRPC_RATE_LIMIT.IS_ENABLED`.
+ArchiPy 5.x does not ship FastAPI rate limiting; use `fastapi-redis-sdk` when needed. gRPC rate limiting remains
+available through `GRPC_RATE_LIMIT.IS_ENABLED`.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/config_management/
 
@@ -386,7 +395,7 @@ Prefer ArchiPy utils. Import from the **concrete submodule** (package `__init__`
 |-------------------|------------------------------------------|---------------------------------|
 | `AppUtils`        | `archipy.helpers.utils.app_utils`        | FastAPI / gRPC app factories    |
 | `BaseUtils`       | `archipy.helpers.utils.base_utils`       | Shared facade helpers           |
-| `TracingUtils`    | `archipy.helpers.utils.tracing_utils`    | tracing helpers                 |
+| `OtelUtils`       | `archipy.helpers.utils.otel_utils`       | OpenTelemetry provider lifecycle |
 | `RateLimitUtils`  | `archipy.helpers.utils.rate_limit_utils` | rate limiting                   |
 | `DatetimeUtils`   | `archipy.helpers.utils.datetime_utils`   | datetime helpers                |
 | `StringUtils`     | `archipy.helpers.utils.string_utils`     | string helpers                  |
@@ -396,7 +405,6 @@ Prefer ArchiPy utils. Import from the **concrete submodule** (package `__init__`
 | `ErrorUtils`      | `archipy.helpers.utils.error_utils`      | error helpers                   |
 | `TOTPUtils`       | `archipy.helpers.utils.totp_utils`       | TOTP                            |
 | `KeycloakUtils`   | `archipy.helpers.utils.keycloak_utils`   | Keycloak helpers                |
-| `PrometheusUtils` | `archipy.helpers.utils.prometheus_utils` | Prometheus helpers              |
 
 Custom utils: pure only — no DB/network/adapter construction.
 
@@ -408,7 +416,8 @@ Prefer ArchiPy under `archipy.helpers.decorators`:
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | Cache                        | `ttl_cache_decorator` (`archipy.helpers.decorators.cache`)                                                                |
 | Transactions (on **logics**) | `postgres_sqlalchemy_atomic_decorator`, `async_postgres_sqlalchemy_atomic_decorator`, plus sqlite/starrocks/generic twins |
-| Observability                | `capture_span`, `capture_transaction` (+ `async_capture_span`, `async_capture_transaction`); `timing_decorator`           |
+| Observability                | `trace_span`, `trace_root`, `async_trace_span`, `async_trace_root`, `trace_class`; `timing_decorator`                    |
+| Metrics                      | `measure_duration`, `async_measure_duration`, `count_calls`, `async_count_calls`                                        |
 | Resilience                   | `retry_decorator`, `timeout_decorator`                                                                                    |
 | Other                        | `singleton_decorator`, `grpc_rate_limit_decorator` (gRPC only)                                                            |
 
@@ -419,12 +428,12 @@ No concrete adapter imports at module level in custom decorators.
 Prefer ArchiPy under `archipy.helpers.interceptors` (FastAPI / gRPC). Cross-cutting only. Prefer AppUtils
 auto-registration for stock hooks; wire custom via DI / `customized_interceptors=` — not business logic.
 
-### Rate-limit and metric interceptors
+### Instrumentation and rate limiting
 
-- FastAPI rate-limit: config via `FastAPIRateLimitConfig`; prefer AppUtils / config flags over manual wiring.
+- FastAPI: `AppUtils.create_fastapi_app` auto-instruments through `archipy[otel-fastapi]` when `OTEL.IS_ENABLED`.
+- gRPC: AppUtils factories insert OTel contrib server interceptors through `archipy[otel-grpc]`.
 - gRPC rate-limit: `GRPC_RATE_LIMIT.IS_ENABLED` + `grpc_rate_limit_decorator` / stock interceptors.
-- **Metric interceptors require `archipy[prometheus]`** — they import `prometheus_client` at module import time. Without
-  the extra, importing those modules fails.
+- FastAPI rate-limit handlers were removed in 5.0; use `fastapi-redis-sdk`.
 
 Live helpers overview: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
 
@@ -432,15 +441,34 @@ Live helpers overview: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
 
 Combine library pieces rather than inventing a parallel stack:
 
-| Concern         | ArchiPy pieces                                                            | Extra         |
-|-----------------|---------------------------------------------------------------------------|---------------|
-| Tracing / APM   | `TracingUtils`, `capture_span` / `capture_transaction`, Elastic APM hooks | `elastic-apm` |
-| Metrics         | `PrometheusUtils`, metric interceptors                                    | `prometheus`  |
-| Errors / events | Sentry integration                                                        | `sentry`      |
-| Timing          | `timing_decorator`                                                        | —             |
+| Concern         | ArchiPy pieces                                                                            | Extra                          |
+|-----------------|-------------------------------------------------------------------------------------------|--------------------------------|
+| Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation  | `otel` + `otel-fastapi`/`otel-grpc` |
+| Metrics         | `measure_duration` / `count_calls` (+ async twins), OTLP export                          | `otel` + stack-specific extra  |
+| Logs            | OTLP logging configured through `BaseConfig.OTEL`                                        | `otel`                         |
+| Errors          | `BaseUtils.capture_exception` records on the current span                                | `otel`                         |
+| Timing only     | `timing_decorator`                                                                        | —                              |
 
-Wire via `AppUtils` + config flags when possible. Health probes (above) are complementary but separate — probes answer
-infra routing; observability answers product/ops insight.
+Configure through nested settings, not SDK autoconfiguration:
+
+```bash
+OTEL__IS_ENABLED=true
+OTEL__SERVICE_NAME=my-service
+OTEL__OTLP_ENDPOINT=http://localhost:4317
+OTEL__PROTOCOL=grpc
+OTEL__TRACES_ENABLED=true
+OTEL__METRICS_ENABLED=true
+OTEL__LOGS_ENABLED=true
+OTEL__TRACES_SAMPLE_RATIO=0.1
+OTEL__LOGS_LEVEL=WARNING
+```
+
+Call `OtelUtils.init_otel_if_needed(config)` after `BaseConfig.set_global(config)` and **before** DI constructs
+SQLAlchemy engines, Kafka clients, or ScyllaDB sessions. AppUtils repeats initialization safely and auto-instruments
+FastAPI/gRPC when their matching extras are installed. Prefer `WARNING` or higher for exported production logs.
+
+Health probes (above) are complementary but separate — probes answer infra routing; observability answers product/ops
+insight. Use `/scaffold-observability` for a repository-aware setup.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/observability/
 

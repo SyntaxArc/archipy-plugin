@@ -28,9 +28,33 @@ FRONTMATTER_DESC_RE = re.compile(
     r"^description:\s*(?:>-\s*)?(.*?)(?=\n[a-zA-Z_]+\s*:|\n---)",
     re.MULTILINE | re.DOTALL,
 )
+SKILL_NAME_RE = re.compile(r"^[a-z0-9-]{1,64}$")
+REFERENCE_FILE_RE = re.compile(r"`(reference/[A-Za-z0-9_.\-/]+)`")
+ARCHIPY_REFERENCE_VERSION_RE = re.compile(r"Verified against `archipy` (\d+)\.(\d+)\.x")
 COMMAND_SKILL_RE = re.compile(r"Follow the \*\*([a-z0-9-]+)\*\* skill", re.IGNORECASE)
 DOCS_SKILL_RE = re.compile(r"Use the \*\*([a-z0-9-]+)\*\* skill", re.IGNORECASE)
 CHANGELOG_VERSION_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.MULTILINE)
+
+ARCHIPY_5_REMOVED_GUIDANCE = (
+    "`elastic-apm`",
+    "`prometheus`",
+    "`sentry`",
+    "`TracingUtils`",
+    "`PrometheusUtils`",
+    "`capture_span`",
+    "`capture_transaction`",
+    "`FastAPIRateLimitConfig`",
+)
+ARCHIPY_5_REQUIRED_GUIDANCE = ("`OtelUtils`", "`trace_span`", "`otel-fastapi`", "`otel-grpc`")
+REQUIRED_APP_RULES = {
+    "architecture-for-apps.mdc",
+    "contributing-for-apps.mdc",
+    "python-code-style-for-apps.mdc",
+    "rules-index-for-apps.mdc",
+    "security-for-apps.mdc",
+    "tooling-for-apps.mdc",
+    "typing-for-apps.mdc",
+}
 
 
 def _fail(message: str) -> None:
@@ -128,6 +152,29 @@ def check_changelog_version() -> list[str]:
     return errors
 
 
+def _check_archipy_reference_text(text: str) -> list[str]:
+    errors: list[str] = []
+    version = ARCHIPY_REFERENCE_VERSION_RE.search(text)
+    if not version:
+        errors.append("archipy-docs/reference.md missing `Verified against archipy X.Y.x` version")
+    elif int(version.group(1)) < 5:
+        errors.append("archipy-docs/reference.md must target ArchiPy 5.x or newer")
+    for removed in ARCHIPY_5_REMOVED_GUIDANCE:
+        if removed in text:
+            errors.append(f"archipy-docs/reference.md contains removed ArchiPy 5.x guidance: {removed}")
+    for required in ARCHIPY_5_REQUIRED_GUIDANCE:
+        if required not in text:
+            errors.append(f"archipy-docs/reference.md missing ArchiPy 5.x guidance: {required}")
+    return errors
+
+
+def check_archipy_reference() -> list[str]:
+    reference = ROOT / "skills" / "archipy-docs" / "reference.md"
+    if not reference.is_file():
+        return ["missing skills/archipy-docs/reference.md"]
+    return _check_archipy_reference_text(reference.read_text(encoding="utf-8"))
+
+
 def check_agents_commands() -> list[str]:
     errors: list[str] = []
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
@@ -155,9 +202,24 @@ def check_skills() -> list[str]:
         name = match.group(1).strip().strip("\"'")
         if name != skill_dir.name:
             errors.append(f"skill folder `{skill_dir.name}` != frontmatter name `{name}`")
+        if not SKILL_NAME_RE.fullmatch(name):
+            errors.append(f"{skill_dir.name}/SKILL.md has invalid skill name `{name}`")
         desc = FRONTMATTER_DESC_RE.search(text)
-        if not desc or len(desc.group(1).strip()) < 20:
+        description = desc.group(1).strip() if desc else ""
+        if len(description) < 20:
             errors.append(f"{skill_dir.name}/SKILL.md missing or trivial description")
+        elif len(description) > 1024:
+            errors.append(f"{skill_dir.name}/SKILL.md description exceeds 1024 characters")
+        if len(text.splitlines()) > 500:
+            errors.append(f"{skill_dir.name}/SKILL.md exceeds 500 lines; move details to reference files")
+        for reference in REFERENCE_FILE_RE.findall(text):
+            if not (skill_dir / reference).is_file():
+                errors.append(f"{skill_dir.name}/SKILL.md references missing `{reference}`")
+        if name.startswith("scaffold-") or name == "redis-search":
+            if "## Before writing files" not in text:
+                errors.append(f"{skill_dir.name}/SKILL.md missing `## Before writing files` workflow")
+            if "## Verify" not in text:
+                errors.append(f"{skill_dir.name}/SKILL.md missing `## Verify` feedback loop")
     return errors
 
 
@@ -169,12 +231,23 @@ def check_rules() -> list[str]:
     rule_files = sorted(rules_root.glob("*.mdc"))
     if not rule_files:
         errors.append("no rules/*.mdc files")
+    missing_required = sorted(REQUIRED_APP_RULES - {rule.name for rule in rule_files})
+    if missing_required:
+        errors.append(f"missing required app rules: {', '.join(missing_required)}")
     for rule in rule_files:
         text = rule.read_text(encoding="utf-8")
-        if "description:" not in text.split("---", 2)[1] if text.startswith("---") else text[:200]:
-            # crude: require description in frontmatter
-            if not re.search(r"^description:\s*\S", text, re.MULTILINE):
-                errors.append(f"{rule.name} missing frontmatter description")
+        parts = text.split("---", 2)
+        if not text.startswith("---\n") or len(parts) < 3:
+            errors.append(f"{rule.name} missing valid frontmatter")
+            continue
+        frontmatter = parts[1]
+        if not re.search(r"^description:\s*\S", frontmatter, re.MULTILINE):
+            errors.append(f"{rule.name} missing frontmatter description")
+        always_apply = re.search(r"^alwaysApply:\s*(true|false)\s*$", frontmatter, re.MULTILINE)
+        if not always_apply:
+            errors.append(f"{rule.name} missing boolean frontmatter `alwaysApply`")
+        elif always_apply.group(1) == "false" and not re.search(r"^globs:\s*\S", frontmatter, re.MULTILINE):
+            errors.append(f"{rule.name} requires frontmatter globs when alwaysApply is false")
     return errors
 
 
@@ -192,6 +265,11 @@ def check_command_skill_refs() -> list[str]:
         for skill in refs:
             if skill not in skills_on_disk:
                 errors.append(f"commands/{command.name} references missing skill `{skill}`")
+        if command.stem.startswith("scaffold-") or command.stem == "redis-search":
+            if "in full" not in text or "Inspect the workspace" not in text:
+                errors.append(
+                    f"commands/{command.name} must read its skill in full and inspect the workspace"
+                )
     return errors
 
 
@@ -257,6 +335,7 @@ def main() -> int:
     errors.extend(check_versions())
     errors.extend(check_manifest_parity())
     errors.extend(check_changelog_version())
+    errors.extend(check_archipy_reference())
     errors.extend(check_agents_commands())
     errors.extend(check_skills())
     errors.extend(check_rules())

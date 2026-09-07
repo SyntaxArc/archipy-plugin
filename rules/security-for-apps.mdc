@@ -1,0 +1,34 @@
+---
+description: Security rules for ArchiPy apps — secrets, queries, logging, adapter boundaries, suppressions
+alwaysApply: true
+---
+
+# Security for ArchiPy Apps
+
+## Secrets and Logging
+
+- Never hardcode tokens, passwords, private keys, connection credentials, or OTLP authorization headers.
+- Resolve secrets through `BaseConfig` settings sources (environment, secret files, or Vault) and document names only
+  in `.env.example`.
+- Never put secrets in committed `.env` / `.env.test` files; keep committed test values non-sensitive and prefer
+  `.env.example` for required-variable documentation.
+- Do not log credentials, session/JWT tokens, cookies, full authorization headers, or unrestricted request bodies.
+- Trace attributes may include non-sensitive identifiers only; do not capture free-form payloads or secret-like values.
+
+## Inputs and Infrastructure
+
+- Validate external input at service/port boundaries.
+- Use parameterized SQL/CQL and bound query values; never concatenate untrusted values into query text.
+- Map infrastructure failures to domain errors without exposing driver messages, stack traces, hosts, or credentials.
+- Add dependencies with `uv add`; prefer the smallest matching `archipy[...]` extras.
+- Treat network-facing adapters, authentication, cryptography, uploads, and deserialization as security-sensitive.
+
+## Suppressions
+
+- Fix findings before suppressing them.
+- Keep `# nosec`, Ruff `# noqa: S...`, and type suppressions to the smallest line/file scope.
+- Name the rule and explain the false positive beside the suppression.
+- Never blanket-disable Bandit or Ruff security rules for a new package.
+
+Run the app's configured security scan after security-sensitive changes. If none exists, recommend adding Bandit/Ruff
+security checks rather than assuming ArchiPy's library `make security` target is available.

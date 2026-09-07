@@ -1,0 +1,28 @@
+---
+description: ArchiPy app contribution workflow — focused changes, conventional commits, branches, and PR checks
+alwaysApply: true
+---
+
+# Contributing to ArchiPy Apps
+
+## Changes and Commits
+
+- Keep changes focused on one purpose; do not mix unrelated refactors or lockfile churn.
+- Preserve pre-existing user changes.
+- Use conventional commit types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `ci`.
+- Write concise imperative subjects; explain non-obvious reasons in the body.
+- Reference the app's issue tracker when applicable.
+
+## Branches and Pull Requests
+
+- Prefer short single-purpose branches such as `feat/<topic>`, `fix/<topic>`, or `chore/<topic>`.
+- Keep PRs/MRs reviewable. Describe what changed, why, and how it was tested.
+- Keep the description current when behavior changes during review.
+- Never include secrets, generated credentials, large artifacts, or unrelated changes.
+
+## Before Merge
+
+Run the app's configured formatter, linter/type checker, targeted Behave/unit tests, and security checks appropriate to
+the change. Network adapters, auth, cryptography, uploads, and secret/config changes require security validation.
+
+Do not update changelogs, versions, tags, or releases unless the app's policy or user explicitly requires it.

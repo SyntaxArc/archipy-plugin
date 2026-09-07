@@ -1,0 +1,41 @@
+---
+description: Python 3.14 code style for ArchiPy apps — formatting, imports, docstrings, errors, complexity
+alwaysApply: true
+---
+
+# Python Code Style for ArchiPy Apps
+
+Follow the app's configured formatter/linter when stricter. Otherwise use these ArchiPy defaults:
+
+- Python 3.14+ syntax: `X | Y`, `X | None`, `list[str]`, `dict[str, int]`.
+- Double quotes for all strings.
+- Four-space indentation, 120-character maximum lines, final newline.
+- Google-style docstrings on public functions, classes, and methods (`__init__` may omit one).
+- Complete parameter and return annotations on public APIs.
+
+## Imports
+
+Order sections:
+
+1. `from __future__ import ...`
+2. Standard library
+3. Third-party packages
+4. `archipy`
+5. App-local imports
+
+Keep a blank line between sections. Move type-only imports under `TYPE_CHECKING` only when runtime frameworks do not
+evaluate them; Pydantic field types must remain importable at runtime.
+
+## Errors
+
+- Catch specific exceptions. Never use bare `except:`.
+- Preserve context with `raise DomainError(...) from e`.
+- Broad `except Exception` belongs only at an outer infrastructure boundary that maps failures to domain errors.
+- Never leak driver exceptions or internal error details through HTTP/gRPC responses.
+
+## Maintainability
+
+- Keep McCabe complexity below 10 when the app uses ArchiPy's Ruff defaults.
+- Prefer at most five function arguments; group cohesive inputs in DTOs/config objects.
+- Run the repository's formatter, linter, and type checker after edits. Use its configured commands; do not assume the
+  ArchiPy library's `make` targets exist in consumer apps.

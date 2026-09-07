@@ -17,7 +17,9 @@ Before writing a custom decorator, prefer ArchiPy under `archipy.helpers.decorat
   - `postgres_sqlalchemy_atomic_decorator`
   - `async_postgres_sqlalchemy_atomic_decorator`
   - also `sqlite_` / `starrocks_` / generic `sqlalchemy_atomic_decorator` twins
-- Observability: `capture_span`, `capture_transaction` (+ async twins); `timing_decorator`
+- Tracing: `trace_span`, `trace_root`, `async_trace_span`, `async_trace_root`, `trace_class`
+- Metrics: `measure_duration`, `async_measure_duration`, `count_calls`, `async_count_calls`
+- Local timing only: `timing_decorator`
 - Resilience: `retry_decorator`, `timeout_decorator`
 - Other: `singleton_decorator`, `grpc_rate_limit_decorator` (gRPC only)
 
@@ -26,6 +28,8 @@ Before writing a custom decorator, prefer ArchiPy under `archipy.helpers.decorat
 - Live under `helpers/decorators/`.
 - Preserve wrapped function signatures and type hints (`functools.wraps`).
 - Document usage with a short example in the Google-style docstring.
+- Raise `archipy.models.errors` types such as `ConfigurationError` or `InvalidArgumentError` for helper-level
+  configuration/validation failures; do not invent ad-hoc exception classes.
 - Do **not** import concrete adapter implementations at module level. If a decorator needs a port, accept it as an argument or resolve via injected callback/config.
 
 ## Do Not

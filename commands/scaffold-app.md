@@ -5,12 +5,12 @@ description: Scaffold a minimal ArchiPy application package layout
 
 # /scaffold-app
 
-Follow the **scaffold-archipy-app** skill.
+Read and follow the **scaffold-archipy-app** skill in full. Inspect the workspace as directed there; ask only for
+unresolved choices.
 
-1. Ask for package name, ArchiPy extras, and optional first domain.
-2. Generate config, models stub, `repositories/<domain>/` (adapters + repository stub), optional helpers tree, and
+1. Generate config, models stub, `repositories/<domain>/` (adapters + repository stub), optional helpers tree, and
    `.env.example`.
-3. Point the user to `/docs-quickstart` and `/scaffold-adapter` for domain wrappers under
+2. Point the user to `/docs-quickstart` and `/scaffold-adapter` for domain wrappers under
    `repositories/<domain>/adapters/`.
 
 Docs: https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/

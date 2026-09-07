@@ -48,7 +48,12 @@ OTEL__OTLP_ENDPOINT=http://localhost:4317
 OTEL__PROTOCOL=grpc
 OTEL__TRACES_ENABLED=true
 OTEL__METRICS_ENABLED=true
+OTEL__METRICS_EXPORTER=otlp
+OTEL__METRICS_PULL_HOST=0.0.0.0
+OTEL__METRICS_PULL_PORT=8200
+OTEL__SYSTEM_METRICS_ENABLED=true
 OTEL__LOGS_ENABLED=true
+OTEL__LOGS_EXPORTER=console
 OTEL__TRACES_SAMPLE_RATIO=0.1
 OTEL__LOGS_LEVEL=WARNING
 OTEL__FASTAPI_EXCLUDED_URLS=health,docs,redoc,openapi.json
@@ -56,6 +61,8 @@ OTEL__FASTAPI_EXCLUDED_URLS=health,docs,redoc,openapi.json
 
 Use `BaseConfig.OTEL`; ArchiPy builds providers programmatically. Do not rely on OpenTelemetry SDK `OTEL_*`
 autoconfiguration. For `http/protobuf`, use port 4318; ArchiPy appends `/v1/{signal}` when the base endpoint has no path.
+Set `OTEL__METRICS_EXPORTER=pull` for scrape-only metrics. Set `OTEL__LOGS_EXPORTER=otlp` to push logs to a collector
+(default `console` writes INFO/DEBUG to stdout and WARNING+ to stderr).
 
 ## Initialize before adapters
 

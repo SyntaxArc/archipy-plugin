@@ -444,7 +444,7 @@ Combine library pieces rather than inventing a parallel stack:
 | Concern         | ArchiPy pieces                                                                            | Extra                          |
 |-----------------|-------------------------------------------------------------------------------------------|--------------------------------|
 | Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation  | `otel` + `otel-fastapi`/`otel-grpc` |
-| Metrics         | `measure_duration` / `count_calls` (+ async twins), OTLP export                          | `otel` + stack-specific extra  |
+| Metrics         | `measure_duration` / `count_calls` (+ async twins), `METRICS_EXPORTER` (`otlp`\|`pull`) | `otel` + stack-specific extra  |
 | Logs            | OTLP logging configured through `BaseConfig.OTEL`                                        | `otel`                         |
 | Errors          | `BaseUtils.capture_exception` records on the current span                                | `otel`                         |
 | Timing only     | `timing_decorator`                                                                        | —                              |
@@ -458,7 +458,9 @@ OTEL__OTLP_ENDPOINT=http://localhost:4317
 OTEL__PROTOCOL=grpc
 OTEL__TRACES_ENABLED=true
 OTEL__METRICS_ENABLED=true
+OTEL__METRICS_EXPORTER=otlp
 OTEL__LOGS_ENABLED=true
+OTEL__LOGS_EXPORTER=console
 OTEL__TRACES_SAMPLE_RATIO=0.1
 OTEL__LOGS_LEVEL=WARNING
 ```

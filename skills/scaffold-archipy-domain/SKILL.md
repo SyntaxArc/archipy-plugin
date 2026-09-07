@@ -9,15 +9,23 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Domain name (e.g. `order`)
-2. ArchiPy extras to install/use (e.g. `redis`, `postgres`, `sqlalchemy`, `fastapi`)
-3. Transport: FastAPI (default) or gRPC
+1. Inspect `pyproject.toml`, the package tree, neighboring domains, DI containers, and existing tests.
+2. Infer package name, installed extras, naming, transport, and sync/async style from the repository.
+3. Ask only for unresolved choices that materially change the generated slice:
+   - Domain name
+   - Missing infrastructure/extras
+   - Transport when the app does not already establish one (default FastAPI)
+4. Preserve existing files. Extend compatible modules; stop and explain conflicts instead of overwriting them.
 
 ## Compose — do not fork templates
 
-Apply existing skills in order (reuse their constraints and file layouts):
+Before generating files, read these plugin skills in full:
+
+- `../scaffold-archipy-adapter/SKILL.md`
+- `../scaffold-archipy-logic/SKILL.md`
+- `../scaffold-archipy-service/SKILL.md`
+
+Apply their constraints and `Verify` sections in order; do not replace them with summaries:
 
 1. **Models** — stubs below, then flesh via `using-archipy-models` rule
 2. **scaffold-archipy-adapter** — thin wrapper under `repositories/<domain>/adapters/` + `<domain>_repository.py`
@@ -46,10 +54,12 @@ Example shapes (`order` → rename):
 
 ```python
 # models/dtos/order/domain/v1/order_create_input_dto.py
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from archipy.models.dtos.base_dtos import BaseDTO
 
 
-class OrderCreateInputDTO(BaseModel):
+class OrderCreateInputDTO(BaseDTO):
     """Domain input crossing the service → logic boundary."""
 
     customer_id: str = Field(min_length=1)
@@ -59,10 +69,10 @@ class OrderCreateInputDTO(BaseModel):
 
 ```python
 # models/dtos/order/domain/v1/order_create_output_dto.py
-from pydantic import BaseModel
+from archipy.models.dtos.base_dtos import BaseDTO
 
 
-class OrderCreateOutputDTO(BaseModel):
+class OrderCreateOutputDTO(BaseDTO):
     """Domain output returned to the service layer."""
 
     order_id: str
@@ -71,10 +81,10 @@ class OrderCreateOutputDTO(BaseModel):
 
 ```python
 # models/dtos/order/repository/order_create_command_dto.py
-from pydantic import BaseModel
+from archipy.models.dtos.base_dtos import BaseDTO
 
 
-class OrderCreateCommandDTO(BaseModel):
+class OrderCreateCommandDTO(BaseDTO):
     """Repository write command — mapped from domain input inside the logic."""
 
     customer_id: str
@@ -95,8 +105,8 @@ class OrderInvalidArgumentError(InvalidArgumentError):
     """Raised when order input fails domain validation."""
 ```
 
-Naming: `*InputDTO` / `*OutputDTO` for domain; `*CommandDTO` / `*QueryDTO` for repository. Prefer ArchiPy `BaseError`
-hierarchy — adjust base classes to what the installed `archipy` version exports.
+Naming: `*InputDTO` / `*OutputDTO` for domain; `*CommandDTO` / `*QueryDTO` for repository. Prefer ArchiPy `BaseDTO`
+and the exported `BaseError` hierarchy. Verify imports against the app's installed ArchiPy version before writing.
 
 ## Outcome checklist
 
@@ -113,6 +123,13 @@ hierarchy — adjust base classes to what the installed `archipy` version export
 - Cross-domain: logics may call other logics; never another domain’s repository.
 - Double quotes, Google-style docstrings, Python 3.14+ typing.
 - Do **not** invent a top-level app `adapters/` package.
+
+## Verify
+
+1. Run the repository's formatter and linter on generated Python.
+2. Run targeted domain tests; add a focused test when behavior, mapping, or error handling was added.
+3. Confirm imports and DI wiring resolve without constructing production infrastructure.
+4. Report created/updated files, dependency changes, and commands run.
 
 ## Docs
 

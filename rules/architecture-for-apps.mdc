@@ -44,8 +44,8 @@ Layer details live in the matching `using-archipy-*.mdc` / `config-and-di.mdc` /
 those files are open. This always-on rule keeps only the global map:
 
 - **models/** — data only (no I/O, no business rules).
-- **repositories/** — domain data access; adapters under `repositories/{domain}/adapters/`; no cross-domain repo calls;
-  map driver errors with `raise ... from e`.
+- **repositories/** — domain data access; adapters under `repositories/{domain}/adapters/`; no cross-domain repo calls.
+  Domain adapters map driver errors with `raise ... from e`; repository orchestrators consume domain-facing errors.
 - **logics/** — business rules + UoW (`*_sqlalchemy_atomic_decorator`); may call other logics; never other domains'
   repositories; no FastAPI/gRPC.
 - **services/** — thin transport; versioned `v{n}/`; no UoW / business rules.
@@ -63,7 +63,5 @@ configs  ←  models  ←  helpers  ←  repositories / logics / services
 
 ## Python Conventions (apps)
 
-- Python 3.14+: `X | Y`, `list[str]`, `dict[str, int]`.
-- Double quotes for strings.
-- Google-style docstrings on public functions/classes.
-- Specific exceptions; always `raise ... from e`.
+Canonical formatting, imports, errors, and complexity: `python-code-style-for-apps.mdc`. Strict typing:
+`typing-for-apps.mdc`. Security and secrets: `security-for-apps.mdc`. Precedence: `rules-index-for-apps.mdc`.

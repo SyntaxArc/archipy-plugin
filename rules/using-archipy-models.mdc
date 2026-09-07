@@ -32,13 +32,25 @@ models/
 | Repository query | `{Action}QueryDTO` | `GetUserByIdQueryDTO` |
 | Repository response | `{Domain}ResponseDTO` | `UserResponseDTO` |
 
-DTOs use Pydantic `BaseModel`. Prefer ArchiPy base entities where applicable.
+DTOs should extend `archipy.models.dtos.base_dtos.BaseDTO` for ArchiPy's shared Pydantic configuration. Use plain
+Pydantic `BaseModel` only when the app needs deliberately different model behavior. Prefer ArchiPy base entities where
+applicable.
+
+`BaseDTO` is frozen, strips surrounding string whitespace, validates defaults, and supports `from_attributes`. Do not
+mutate DTO instances after validation.
 
 ## Errors
 
 - Subclass ArchiPy errors from `archipy.models.errors` (e.g. `AlreadyExistsError`, `NotFoundError`).
+- Prefer an existing exported error over creating a near-duplicate.
+- Custom `BaseError` subclasses define stable `code`, localized `message_en` / `message_fa`, and transport
+  `http_status` / `grpc_status` class attributes.
+- Pass context through constructor arguments / `additional_data`; do not mutate error codes or messages per instance.
 - Raise with context: `raise NotFoundError(...) from e`.
 - Never raise bare `Exception` for domain failures.
+- Group app-specific errors by concern under `models/errors/` (for example `validation_errors.py`,
+  `resource_errors.py`, and `business_errors.py`) and subclass the closest ArchiPy error.
+- Export public app errors from `models/errors/__init__.py` when other layers consume them.
 - With `AppUtils.create_fastapi_app` exception handlers, ArchiPy errors map to HTTP status automatically — see https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/
 
 ## Do Not

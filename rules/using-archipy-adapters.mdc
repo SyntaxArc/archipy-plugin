@@ -57,8 +57,9 @@ Implementations and mocks must satisfy the same port.
 
 ## Boundary Errors
 
-Catch **specific** client/driver errors and map to domain errors with `raise ... from e`. Never bare
-`except Exception` unless the client exposes no typed root error:
+Catch **specific** client/driver errors and map to domain errors with `raise ... from e`. A broad `except Exception`
+is allowed only at the outermost infrastructure boundary when the client exposes no typed root error; add a narrow
+`# noqa: BLE001` reason. Never use bare `except:`:
 
 ```python
 try:
@@ -68,6 +69,12 @@ except KafkaError as e:
 ```
 
 Never leak raw driver exceptions into logics/services.
+
+## Optional Dependencies
+
+Install the matching ArchiPy extra and import adapter dependencies normally. Do not hide missing extras behind lazy
+imports inside adapter methods; a missing integration dependency should fail clearly at import/bootstrap time.
+Function-scoped imports are reserved for a documented circular-import or cross-extra exception.
 
 ## Sync vs Async
 

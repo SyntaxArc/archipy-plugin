@@ -10,13 +10,11 @@ description: >-
 
 ## Before writing files
 
-Ask the user for:
-
-1. Python package name
-2. Transport: FastAPI (HTTP), gRPC (sync or async), or both
-3. Dependencies to check in readiness (`postgres`, `redis`, downstream HTTP/gRPC, custom)
-4. Optional: heartbeat-based liveness deadlock detection for HTTP (`yes` / `no`)
-5. Optional: emit `deploy/k8s-probes.yaml` (`yes` / `no`)
+1. Inspect package/config, current transports, app lifecycle, dependency adapters, DI wiring, deployment manifests, and
+   existing health endpoints.
+2. Infer package name, transport, ports, and readiness dependencies from the repository.
+3. Ask only for unresolved choices: dependencies to include, heartbeat deadlock detection, or Kubernetes YAML.
+4. Preserve existing health routes and manifests; merge compatible additions instead of overwriting.
 
 ## Prefer ArchiPy
 
@@ -28,13 +26,7 @@ duplicate endpoint sketches here.
 
 ```bash
 uv add "archipy[fastapi]"   # HTTP probes
-uv add "archipy[grpc]"      # gRPC server; also need grpcio-health-checking
-```
-
-For gRPC health protocol:
-
-```bash
-uv add grpcio-health-checking
+uv add "archipy[grpc]"      # gRPC server + grpcio-health-checking
 ```
 
 Prefer existing app bootstrap:
@@ -60,6 +52,11 @@ Do not hand-roll bare `FastAPI()` / `grpc.server()` when AppUtils is in use. Do 
 styles on one server.
 
 ## Generate
+
+Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
+(`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-health-checks/` or
+`$CLAUDE_PLUGIN_ROOT/skills/scaffold-archipy-health-checks/`). These are plugin templates, not app-relative paths. Copy
+and adapt them into the app; never edit the plugin copies.
 
 ```text
 <package>/services/health/v1/
@@ -159,6 +156,13 @@ See `../archipy-docs/reference.md` § Health checks → Common mistakes. Also av
 - No secrets in code; list env keys separately when needed
 - Prefer FastAPI `JSONResponse` for HTTP probes; prefer `grpcio-health-checking` for gRPC
 - Suggest `/docs-health-checks` for explanation and `/docs-observability` for metrics / tracing follow-up
+
+## Verify
+
+1. Run formatter/linter and focused health tests without starting a long-lived server.
+2. Test healthy, dependency failure, timeout, warm-up, and shutdown states.
+3. Validate generated Kubernetes YAML and confirm probe ports/paths/service names match app config.
+4. Report files, dependencies, and commands run.
 
 ## Beyond Kubernetes
 

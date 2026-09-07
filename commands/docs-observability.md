@@ -1,6 +1,6 @@
 ---
 name: docs-observability
-description: Open ArchiPy observability guidance (tracing, metrics, APM)
+description: Open ArchiPy OpenTelemetry guidance (traces, metrics, logs)
 ---
 
 # /docs-observability
@@ -9,9 +9,10 @@ Use the **archipy-docs** skill and the Observability section of `skills/archipy-
 
 Cover:
 
-- Tracing: `TracingUtils`, `capture_span` / `capture_transaction`
-- Metrics: `PrometheusUtils`, metric interceptors (`archipy[prometheus]` required to import)
-- APM / Sentry extras and AppUtils config flags
+- OpenTelemetry: `BaseConfig.OTEL` + `OtelUtils`
+- Tracing: `trace_root` / `trace_span` (+ async twins)
+- Metrics: `measure_duration` / `count_calls` (+ async twins)
+- AppUtils instrumentation through `archipy[otel-fastapi]` / `archipy[otel-grpc]`
 - Timing: `timing_decorator`
 
 Live docs:

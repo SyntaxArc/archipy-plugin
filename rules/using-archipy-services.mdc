@@ -14,7 +14,8 @@ Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 
 - Validate and translate HTTP/gRPC requests into domain `*InputDTO`.
 - Call the appropriate logic class; return domain `*OutputDTO`.
-- Map domain errors → HTTP/gRPC status codes.
+- Let AppUtils exception handlers/interceptors map ArchiPy `BaseError` status metadata. Add transport-specific mapping
+  only when the domain error has no suitable mapping; never expose internal exception text.
 - Version in path: `services/{domain}/v{n}/` — not in business logic.
 
 ## Bootstrap via AppUtils + FastAPIConfig
@@ -63,3 +64,4 @@ CLI flags may override for local runs; defaults always come from `FASTAPI`.
 - Put business rules or `@postgres_sqlalchemy_atomic_decorator` in services.
 - Hand-roll bare `FastAPI()` / `grpc.server()` when AppUtils extras are installed.
 - Hardcode uvicorn host/port — use `FastAPIConfig`.
+- Catch every domain error in each route/servicer when AppUtils already provides centralized mapping.

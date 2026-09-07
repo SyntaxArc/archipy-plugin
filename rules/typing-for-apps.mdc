@@ -1,0 +1,42 @@
+---
+description: Strict typing for ArchiPy app Python — complete annotations, Any discipline, runtime-evaluated types
+globs: **/*.py
+alwaysApply: false
+---
+
+# Strict Typing for ArchiPy Apps
+
+Follow the app's configured type checker. For new code:
+
+- Annotate every public function/method parameter and return type.
+- Use Python 3.14 syntax (`X | None`, builtin generics) instead of legacy `Optional` / `List`.
+- Avoid `Any`. Use precise protocols, DTOs, generics, or driver types.
+- Add a narrow `# noqa: ANN401` / type-checker suppression only when unavoidable and include the reason.
+- Never blanket-disable typing rules for a package.
+- Keep shared per-file exemptions in the app's `pyproject.toml`; treat that configuration as source of truth.
+
+## Runtime-Evaluated Types
+
+`TYPE_CHECKING` guards are valid only for imports used purely by static annotations. Keep types imported at runtime
+when Pydantic, SQLAlchemy, dependency-injector, FastAPI, or another framework evaluates them.
+
+```python
+from __future__ import annotations
+
+from archipy.models.dtos.base_dtos import BaseDTO
+
+from my_app.models.entities import UserEntity
+
+
+class UserOutputDTO(BaseDTO):
+    """User payload."""
+
+    user: UserEntity
+```
+
+## Behave Exception
+
+Step functions under `features/steps/` follow Behave signatures and may remain unannotated when the app excludes them
+from Ruff/type checking. Production helpers used by steps remain fully typed.
+
+Run the app's configured type checker after changes (`uv run ty check` when the project uses `ty`).

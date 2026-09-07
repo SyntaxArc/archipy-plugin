@@ -1,0 +1,36 @@
+---
+description: ArchiPy app rule ownership and precedence
+alwaysApply: true
+---
+
+# ArchiPy App Rules Index
+
+## Canonical Owners
+
+| Topic | Rule |
+|-------|------|
+| Layers, call flow, import direction | `architecture-for-apps.mdc` |
+| Python formatting, imports, errors, complexity | `python-code-style-for-apps.mdc` |
+| Strict typing | `typing-for-apps.mdc` |
+| Security, secrets, query safety, suppressions | `security-for-apps.mdc` |
+| Dependencies and local checks | `tooling-for-apps.mdc` |
+| Commits, branches, PRs/MRs | `contributing-for-apps.mdc` |
+| Config and dependency injection | `config-and-di.mdc` |
+| Models and domain errors | `using-archipy-models.mdc` |
+| Domain adapters and infrastructure boundaries | `using-archipy-adapters.mdc` |
+| Repositories | `using-archipy-repositories.mdc` |
+| Logics and unit of work | `using-archipy-logics.mdc` |
+| Services and AppUtils | `using-archipy-services.mdc` |
+| Utils, decorators, interceptors | matching `using-archipy-*.mdc` |
+| Behave BDD | `testing-bdd-for-apps.mdc` |
+
+## Precedence
+
+1. App `pyproject.toml`, formatter, linter, and type-checker configuration wins when stricter or project-specific.
+2. A scoped rule wins over the always-on architecture summary for its layer.
+3. `python-code-style-for-apps.mdc` owns general error handling; `using-archipy-adapters.mdc` owns the narrow
+   outer-boundary `except Exception` exception.
+4. `config-and-di.mdc` owns secret/settings resolution; `security-for-apps.mdc` owns whether values are safe to store,
+   log, trace, or expose.
+5. Consumer-app rules never import ArchiPy maintainer workflows such as graphify, library release/changelog policy, or
+   core monorepo Make targets.

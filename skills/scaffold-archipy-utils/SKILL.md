@@ -13,11 +13,10 @@ description: >-
 
 ## Before writing files
 
-Ask:
-
-1. Util name / purpose
-2. Prefer existing ArchiPy util vs custom (`TracingUtils`, `RateLimitUtils`, `DatetimeUtils`, `StringUtils`, `JWTUtils`,
-   `PasswordUtils`, `FileUtils`, `ErrorUtils`, `AppUtils`, …)
+1. Inspect existing helpers and installed ArchiPy version for a matching utility.
+2. Infer project naming and function/class style.
+3. Ask only for an unresolved purpose or behavior. Prefer an ArchiPy utility whenever it fits.
+4. Preserve existing helper modules; do not overwrite.
 
 ## Prefer ArchiPy
 
@@ -55,6 +54,11 @@ class SlugUtils:
 - Google-style docstrings + full type hints
 - Lazy-import optional deps inside functions when needed
 - Brief usage snippet in the reply
+
+## Verify
+
+Run the repository's formatter, linter, and focused unit tests. Report the reused ArchiPy API or files created, plus
+commands run.
 
 ## Docs
 

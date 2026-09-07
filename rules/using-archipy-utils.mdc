@@ -12,9 +12,9 @@ Helpers stay **pure**: no database calls, no network I/O, no constructing adapte
 
 Before writing a custom util, check whether ArchiPy already provides it under `archipy.helpers.utils`:
 
-- `TracingUtils`, `RateLimitUtils`
+- `OtelUtils`, `RateLimitUtils`
 - `DatetimeUtils`, `StringUtils`, `JWTUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`
-- Also: `BaseUtils`, `TOTPUtils`, `KeycloakUtils`, `PrometheusUtils`
+- Also: `BaseUtils`, `TOTPUtils`, `KeycloakUtils`
 - Import from concrete submodules (e.g. `archipy.helpers.utils.jwt_utils`) — package `__init__` does not re-export
 - `AppUtils` — FastAPI / gRPC app factories (see below)
 
@@ -29,16 +29,17 @@ Prefer ArchiPy factories — do **not** hand-roll bare `FastAPI()` / `grpc.serve
 
 | Method | Use |
 |--------|-----|
-| `AppUtils.create_fastapi_app(config?)` | HTTP app; wires CORS/GZip/TrustedHost/HTTPS redirect, metrics, APM, exception handlers from `BaseConfig.FASTAPI` |
-| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception + optional trace/metric/rate-limit interceptors |
-| `AppUtils.create_async_grpc_app(config)` | Async gRPC (`grpc.aio`); same interceptor auto-registration |
+| `AppUtils.create_fastapi_app(config?)` | HTTP app; middleware/exception handlers plus OTel instrumentation through `archipy[otel-fastapi]` |
+| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception, optional OTel, and gRPC rate-limit interceptors |
+| `AppUtils.create_async_grpc_app(config)` | Async gRPC (`grpc.aio`); equivalent async interceptor setup |
 
 Rules:
 
 - Pass `BaseConfig.global_config()` (or injected config); do not duplicate middleware/interceptor setup AppUtils already does.
 - **FastAPI + uvicorn always driven by `config.FASTAPI` (`FastAPIConfig`)** — never hardcode host/port/reload/proxy settings.
 - Sync servicers → `create_grpc_app`; async servicers → `create_async_grpc_app` — do not mix.
-- Enable features via config flags (e.g. `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock ArchiPy middleware/interceptors.
+- Enable features through config (for example `OTEL.IS_ENABLED`, `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, and
+  `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock ArchiPy middleware/interceptors.
 - Custom gRPC interceptors: pass `customized_interceptors=`; do not bypass the exception interceptor.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
@@ -47,6 +48,8 @@ Live: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
 
 - Live under `helpers/utils/`.
 - Pure functions or small classes with clear Google-style docstrings and full type hints.
+- Raise `archipy.models.errors` types such as `ConfigurationError` or `InvalidArgumentError` for helper-level
+  configuration/validation failures; do not invent ad-hoc exception classes.
 - Lazy-import optional third-party deps **inside** functions, never at module level, when the dep is optional:
 
 ```python

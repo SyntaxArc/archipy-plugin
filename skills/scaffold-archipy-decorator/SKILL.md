@@ -3,7 +3,7 @@ name: scaffold-archipy-decorator
 description: >-
   Scaffold or wire a helpers/decorators module for an ArchiPy app. Prefer ArchiPy
   decorators (ttl_cache_decorator, postgres_sqlalchemy_atomic_decorator,
-  capture_span / capture_transaction, …) before custom ones.
+  trace_span / trace_root, measure_duration / count_calls, …) before custom ones.
 ---
 
 # Scaffold ArchiPy Decorator
@@ -14,11 +14,10 @@ description: >-
 
 ## Before writing files
 
-Ask:
-
-1. Decorator purpose (cache, atomic, retry, timing, …)
-2. Prefer ArchiPy built-in vs custom
-3. Sync, async, or both
+1. Inspect existing decorators, call sites, and the installed ArchiPy version for a matching decorator.
+2. Infer sync/async style and project naming from the target call site.
+3. Ask only for unresolved behavior. Prefer an ArchiPy decorator whenever it fits.
+4. Preserve existing decorator modules; do not overwrite.
 
 ## Prefer ArchiPy
 
@@ -27,8 +26,10 @@ Examples:
 - `from archipy.helpers.decorators.cache import ttl_cache_decorator`
 - `from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator`
 - `from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator`
-- `capture_span` / `capture_transaction`, `timeout_decorator`, `retry_decorator`, `singleton_decorator`,
-  `timing_decorator`, `grpc_rate_limit_decorator` under `archipy.helpers.decorators`
+- `trace_span` / `trace_root` (+ async twins) from `archipy.helpers.decorators.tracing`
+- `measure_duration` / `count_calls` (+ async twins) from `archipy.helpers.decorators.metrics`
+- `timeout_decorator`, `retry_decorator`, `singleton_decorator`, `timing_decorator`, and
+  `grpc_rate_limit_decorator` under `archipy.helpers.decorators`
 
 Show correct usage on a sample function; do not reimplement. UoW decorators belong on **logics**, not
 services/repositories.
@@ -84,6 +85,11 @@ def timed(func: Callable[P, R]) -> Callable[P, R]:
 - Google-style docstring with Args/Returns and a usage example
 - **No** concrete adapter imports at module level
 - Separate sync/async wrappers if both needed
+
+## Verify
+
+Run formatter/linter and focused tests for return values, exceptions, and metadata/signature preservation. Report the
+reused ArchiPy API or files created, plus commands run.
 
 ## Docs
 

@@ -1,0 +1,41 @@
+---
+description: ArchiPy app tooling — uv dependencies, project checks, Behave, Ruff, ty, and pre-commit
+alwaysApply: true
+---
+
+# Tooling for ArchiPy Apps
+
+## Package Management
+
+Use `uv`; never install project packages with bare `pip`.
+
+```bash
+uv sync
+uv add "archipy[redis,fastapi]"
+uv add --group dev ruff ty pre-commit
+```
+
+- Inspect `pyproject.toml` before adding dependencies; do not duplicate an existing direct/transitive requirement.
+- Install only ArchiPy extras required by the app.
+- Commit `uv.lock` changes when dependency changes are intentional.
+
+## Project Commands
+
+Prefer commands already defined by the app's `Makefile`, `pyproject.toml`, task runner, or CI. Do not assume ArchiPy
+library Make targets exist. When no wrapper exists, typical direct checks are:
+
+```bash
+uv run ruff format .
+uv run ruff check .
+uv run ty check
+uv run behave features/example.feature
+uv run pre-commit run --all-files
+```
+
+Run the narrowest relevant test during iteration, then the app's complete required gate before handoff. Use Behave as
+the primary ArchiPy acceptance-test style; follow project-specific unit-test tooling when present.
+
+## Hooks
+
+If the app configures pre-commit, install/run it through `uv`. Do not add or rewrite hook configuration unless the task
+requires tooling changes. Fix generated formatting/lint changes before reporting completion.

@@ -13,12 +13,11 @@ description: >-
 
 ## Before writing files
 
-Ask:
-
-1. Framework: FastAPI, gRPC, or other
-2. Sync or async
-3. Prefer ArchiPy built-in vs custom
-4. Cross-cutting concern (metrics, auth context, logging) — not a use-case
+1. Inspect app bootstrap, existing interceptors/middleware, DI wiring, and the installed ArchiPy version.
+2. Infer framework and sync/async style from the repository.
+3. Ask only for an unresolved cross-cutting concern or framework choice. Prefer an ArchiPy interceptor whenever it
+   fits.
+4. Preserve existing registration order and modules; do not overwrite.
 
 ## Prefer ArchiPy
 
@@ -71,6 +70,11 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 - No adapter construction inside the interceptor module
 - Wire through `configs/containers.py`, `AppUtils`, or framework middleware registration
 - Map errors at the boundary; do not leak raw exceptions
+
+## Verify
+
+Run formatter/linter and focused transport tests for ordering, success, and mapped failure behavior. Confirm registration
+occurs once. Report the reused ArchiPy API or files created, plus commands run.
 
 ## Docs
 

@@ -1,18 +1,20 @@
 ---
 name: archipy-docs
 description: >-
-  Look up ArchiPy patterns for app teams. Use bundled reference.md first, then
-  live docs URLs. Trigger when the user asks how to use ArchiPy (config, adapters,
-  helpers, errors, DI, project layout).
+  Look up ArchiPy patterns for app teams using the bundled 5.x reference and live
+  docs. Trigger when the user asks how to use ArchiPy (config, adapters, helpers,
+  errors, DI, project layout, observability).
 ---
 
 # ArchiPy Docs Lookup
 
 ## Procedure
 
-1. Read `reference.md` in this skill directory.
-2. Answer from the reference when possible (cite section names).
-3. If the topic is missing or version-sensitive, point to the matching live doc:
+1. Determine the app's installed ArchiPy major version from `pyproject.toml` or `uv.lock` when available.
+2. For version-sensitive topics (extras, observability, decorators, interceptors), consult the matching live doc first.
+3. Read `reference.md` in this skill directory; it targets ArchiPy 5.x. For older apps, explain migration differences
+   instead of recommending removed APIs.
+4. Answer concisely and link the matching live doc:
 
 | Topic             | URL                                                                                                   |
 |-------------------|-------------------------------------------------------------------------------------------------------|
@@ -30,7 +32,7 @@ description: >-
 | Redis search      | Bundled `reference.md` + `/redis-search`                                                              |
 | API reference     | https://syntaxarc.github.io/ArchiPy/api_reference/                                                    |
 
-4. Prefer PyPI `archipy` APIs — do not assume the ArchiPy monorepo is on disk.
+5. Prefer PyPI `archipy` APIs — do not assume the ArchiPy monorepo is on disk.
 
 ## Output
 

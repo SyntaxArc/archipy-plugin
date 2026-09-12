@@ -18,6 +18,7 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 |---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
 | New app tree                    | `/scaffold-app`                                                                                                                                      |
 | Full domain slice               | `/scaffold-domain`                                                                                                                                   |
+| Models (DTOs / errors)          | `/scaffold-models`                                                                                                                                   |
 | Adapter / logic / service / BDD | `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`, `/scaffold-bdd`                                                                         |
 | Helpers                         | `/scaffold-utils`, `/scaffold-decorator`, `/scaffold-interceptor`                                                                                    |
 | Redis search                    | `/redis-search` (full-text, vector, caching)                                                                                                         |

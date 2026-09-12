@@ -5,7 +5,8 @@ description: Open ArchiPy quickstart guidance for app teams
 
 # /docs-quickstart
 
-Use the **archipy-docs** skill and the Quickstart section of `skills/archipy-docs/reference.md`.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — and the Quickstart section of `../skills/archipy-docs/reference.md`.
 
 Summarize for the user:
 
@@ -16,4 +17,4 @@ Summarize for the user:
 
 Live docs: https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/
 
-Offer `/scaffold-app` if they want files generated.
+Offer `/scaffold-app` if they want files generated, or `/scaffold-models` for DTOs and errors.

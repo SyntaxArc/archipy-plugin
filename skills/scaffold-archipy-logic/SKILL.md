@@ -12,15 +12,20 @@ description: >-
 1. Inspect the target domain's DTOs, repository contract, neighboring logics, DI wiring, and tests.
 2. Infer naming and sync/async style from existing code and installed extras.
 3. Ask only for an unresolved domain/use-case name or transaction choice. Default to sync for
-   `postgres` + `sqlalchemy` and async for `postgres` + `sqlalchemy-async`.
+   `postgres` + `sqlalchemy` and async for `postgres` + `sqlalchemy-async`. Skip a UoW decorator when the
+   use-case does not own a SQLAlchemy session.
 4. Preserve existing use cases; do not overwrite logic or DTO files.
 
 ## Prefer ArchiPy
+
+Install a SQLAlchemy extra only when this use-case owns a Postgres UoW:
 
 ```bash
 uv add "archipy[postgres,sqlalchemy]"
 # or: uv add "archipy[postgres,sqlalchemy-async]"
 ```
+
+Skip this for Redis/Kafka/other logics that do not wrap a SQLAlchemy session.
 
 ## Generate
 
@@ -34,7 +39,8 @@ Stub shape:
 - Google-style class/method docstrings; double quotes; `X | Y` typing.
 - Constructor injects the domain repository (or port) — do not construct adapters.
 - Public method: domain `*InputDTO` in → domain `*OutputDTO` out.
-- Decorate with `postgres_sqlalchemy_atomic_decorator` or `async_postgres_sqlalchemy_atomic_decorator`.
+- Decorate with `postgres_sqlalchemy_atomic_decorator` or `async_postgres_sqlalchemy_atomic_decorator`
+  **when Postgres SQLAlchemy is in play**. Otherwise omit the UoW decorator.
 
 ```python
 from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator
@@ -59,7 +65,7 @@ class UserRegistrationLogic:
         ...
 ```
 
-Create missing domain DTO stubs under `models/dtos/<domain>/domain/v1/` if they do not exist.
+If domain DTOs or errors are missing, follow `../scaffold-archipy-models/SKILL.md` — do not invent naming.
 
 ## Constraints
 

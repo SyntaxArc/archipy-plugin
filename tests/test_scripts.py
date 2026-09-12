@@ -74,6 +74,141 @@ class CatalogTests(unittest.TestCase):
             errors,
         )
 
+    def test_scaffold_command_requires_explicit_skill_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            skill_dir = root / "skills" / "scaffold-archipy-example"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Example\n", encoding="utf-8")
+            commands_dir = root / "commands"
+            commands_dir.mkdir()
+            (commands_dir / "scaffold-example.md").write_text(
+                "Read and follow the **scaffold-archipy-example** skill in full. "
+                "Inspect the workspace as directed there.\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(check_catalog, "ROOT", root):
+                errors = check_catalog.check_command_skill_refs()
+
+        self.assertIn(
+            "commands/scaffold-example.md must reference its skill by explicit "
+            "`skills/scaffold-archipy-example/SKILL.md` path (bold names alone do not resolve in Cursor)",
+            errors,
+        )
+
+    def test_self_contained_scaffold_command_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            skill_dir = root / "skills" / "scaffold-archipy-example"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Example\n", encoding="utf-8")
+            commands_dir = root / "commands"
+            commands_dir.mkdir()
+            (commands_dir / "scaffold-example.md").write_text(
+                "Read `../skills/scaffold-archipy-example/SKILL.md` in full. "
+                "Inspect the workspace as directed there.\n"
+                "## Do not\nDo not overwrite existing files.\n"
+                "## Verify and report\nRun checks. Report files.\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(check_catalog, "ROOT", root):
+                errors = check_catalog.check_command_skill_refs()
+
+        self.assertEqual(errors, [])
+
+    def test_scaffold_command_do_not_heading_rejects_preamble(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            skill_dir = root / "skills" / "scaffold-archipy-example"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Example\n", encoding="utf-8")
+            commands_dir = root / "commands"
+            commands_dir.mkdir()
+            (commands_dir / "scaffold-example.md").write_text(
+                "Read `../skills/scaffold-archipy-example/SKILL.md` in full. "
+                "Inspect the workspace as directed there.\n"
+                "Do not rely on the summaries below alone.\n"
+                "## Verify and report\nRun checks. Report files.\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(check_catalog, "ROOT", root):
+                errors = check_catalog.check_command_skill_refs()
+
+        self.assertIn(
+            "commands/scaffold-example.md must inline its key constraints (`## Do not` heading)",
+            errors,
+        )
+
+    def test_scaffold_command_rejects_mismatched_skill_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "skills" / "scaffold-archipy-example").mkdir(parents=True)
+            (root / "skills" / "scaffold-archipy-example" / "SKILL.md").write_text(
+                "# Example\n",
+                encoding="utf-8",
+            )
+            (root / "skills" / "archipy-docs").mkdir(parents=True)
+            (root / "skills" / "archipy-docs" / "SKILL.md").write_text("# Docs\n", encoding="utf-8")
+            commands_dir = root / "commands"
+            commands_dir.mkdir()
+            (commands_dir / "scaffold-example.md").write_text(
+                "Read `../skills/archipy-docs/SKILL.md` in full. "
+                "Inspect the workspace as directed there.\n"
+                "## Do not\nDo not overwrite existing files.\n"
+                "## Verify and report\nRun checks. Report files.\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(check_catalog, "ROOT", root):
+                errors = check_catalog.check_command_skill_refs()
+
+        self.assertIn(
+            "commands/scaffold-example.md must reference its skill by explicit "
+            "`skills/scaffold-archipy-example/SKILL.md` path (bold names alone do not resolve in Cursor)",
+            errors,
+        )
+
+    def test_docs_command_requires_archipy_docs_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "skills" / "archipy-docs").mkdir(parents=True)
+            (root / "skills" / "archipy-docs" / "SKILL.md").write_text("# Docs\n", encoding="utf-8")
+            commands_dir = root / "commands"
+            commands_dir.mkdir()
+            (commands_dir / "docs-example.md").write_text(
+                "Use the **archipy-docs** skill.\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(check_catalog, "ROOT", root):
+                errors = check_catalog.check_command_skill_refs()
+
+        self.assertIn(
+            "commands/docs-example.md must reference its skill by explicit "
+            "`skills/archipy-docs/SKILL.md` path (bold names alone do not resolve in Cursor)",
+            errors,
+        )
+
+    def test_docs_command_with_archipy_docs_path_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "skills" / "archipy-docs").mkdir(parents=True)
+            (root / "skills" / "archipy-docs" / "SKILL.md").write_text("# Docs\n", encoding="utf-8")
+            commands_dir = root / "commands"
+            commands_dir.mkdir()
+            (commands_dir / "docs-example.md").write_text(
+                "Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill.\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(check_catalog, "ROOT", root):
+                errors = check_catalog.check_command_skill_refs()
+
+        self.assertEqual(errors, [])
+
     def test_skill_reference_must_exist(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

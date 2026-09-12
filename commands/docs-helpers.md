@@ -5,7 +5,9 @@ description: Open ArchiPy helpers docs (utils, decorators, interceptors)
 
 # /docs-helpers
 
-Use the **archipy-docs** skill and the Utils / Decorators / Interceptors sections of `skills/archipy-docs/reference.md`.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — and the Utils / Decorators / Interceptors sections of
+`../skills/archipy-docs/reference.md`.
 
 Explain the three packages separately:
 

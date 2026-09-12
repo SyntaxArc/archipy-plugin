@@ -92,7 +92,8 @@ Standard tag/container keys:
 | `@needs-vault` | vault |
 
 ```bash
-uv run behave --tags=~@needs-redis
+# Skip every @needs-* tag present — a Redis-only skip still runs @needs-postgres.
+uv run behave --tags=~@needs-redis --tags=~@needs-postgres
 ```
 
 Do not invent a `@needs-*` tag without adding its container mapping.

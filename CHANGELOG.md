@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-09-12
+
+### Added
+
+- `/scaffold-models` command and `scaffold-archipy-models` skill for domain/repository DTOs, errors, and optional
+  entities — `/scaffold-domain` and `/scaffold-logic` compose it instead of inlining model stubs
+
+### Fixed
+
+- Slash commands are now self-contained for Cursor: every `scaffold-*` command and `/redis-search` carries an explicit
+  `skills/<skill>/SKILL.md` path (bold skill names alone did not resolve), a mandatory read list, inspect/ask steps,
+  inlined key constraints, and a Verify + report section — Cursor no longer skips the skill and hallucinates layouts
+- Plugin-relative paths (`../skills/...` in commands, `../...` across skills) now state they resolve from the plugin
+  installation (`$CURSOR_PLUGIN_ROOT` / `$CLAUDE_PLUGIN_ROOT`), not the app workspace, so symlinked and marketplace
+  installs resolve skill and template files
+- Docs commands reference `../skills/archipy-docs/SKILL.md` by explicit path
+- BDD mocks-mode verify skips every `@needs-*` tag present, not only `@needs-redis`
+- `/scaffold-logic` installs a Postgres SQLAlchemy extra and UoW decorator only when that stack is in play
+- Service bootstrap exports `create_<domain>_v{n}_router` instead of a hardcoded `create_user_v1_router`
+- Custom `timed()` decorator example rejects coroutine functions to match the sync-wrapper constraint
+
+### Changed
+
+- Catalog guard `check_command_skill_refs` now binds each command to its canonical skill path, requires `archipy-docs`
+  for `docs-*`, and matches a `## Do not` heading (not the preamble `Do not rely`)
+
+### Tests
+
+- Added regression coverage for the explicit skill-path requirement, mismatched skill paths, preamble-only `Do not`,
+  docs-command path binding, and the passing self-contained command shape
+
 ## [0.9.1] - 2026-09-07
 
 ### Changed

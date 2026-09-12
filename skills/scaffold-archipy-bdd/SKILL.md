@@ -74,7 +74,8 @@ Do **not** paste ArchiPy’s entire container catalogue or gRPC test servers.
 - Gherkin source of truth; tag infra `@needs-redis` / `@needs-postgres` / …
 - Steps: `get_current_scenario_context(context)` or `context.scenario_context_pool.get_context(context.scenario.id)`
 - Mocks mode: inject `RedisMock` into scenario context — no Docker
-- Skip infra: `uv run behave --tags=~@needs-redis`
+- Skip infra: every `@needs-*` tag present
+  (`uv run behave --tags=~@needs-redis --tags=~@needs-postgres` — a Redis-only skip still runs other infra)
 
 ## Constraints
 

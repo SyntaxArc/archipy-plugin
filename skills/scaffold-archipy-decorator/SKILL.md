@@ -42,6 +42,7 @@ Create `helpers/decorators/<name>.py`:
 from __future__ import annotations
 
 import functools
+import inspect
 import logging
 import time
 from collections.abc import Callable
@@ -62,11 +63,16 @@ def timed(func: Callable[P, R]) -> Callable[P, R]:
     Returns:
         Wrapped callable that logs elapsed milliseconds.
 
+    Raises:
+        TypeError: If `func` is a coroutine function — use an async twin instead.
+
     Example:
         @timed
         def build_report(order_id: str) -> str:
             ...
     """
+    if inspect.iscoroutinefunction(func):
+        raise TypeError(f"{func.__qualname__} is async; use an async twin instead of timed()")
 
     @functools.wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
@@ -85,6 +91,7 @@ def timed(func: Callable[P, R]) -> Callable[P, R]:
 - Google-style docstring with Args/Returns and a usage example
 - **No** concrete adapter imports at module level
 - Separate sync/async wrappers if both needed
+- Sync wrappers must reject coroutine functions (`inspect.iscoroutinefunction`) — use async twins instead
 
 ## Verify
 
@@ -94,4 +101,5 @@ reused ArchiPy API or files created, plus commands run.
 ## Docs
 
 - https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
-- Bundled skill reference: `../archipy-docs/reference.md` (Decorators section)
+- Bundled skill reference: `../archipy-docs/reference.md` (Decorators section), resolved relative to this `SKILL.md`'s
+  directory in the plugin installation — not the app workspace.

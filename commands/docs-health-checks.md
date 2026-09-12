@@ -5,7 +5,9 @@ description: Open ArchiPy app health-check guidance for HTTP and gRPC liveness, 
 
 # /docs-health-checks
 
-Use the **archipy-docs** skill (`skills/archipy-docs/reference.md`) plus bundled health-check guidance.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — via `../skills/archipy-docs/reference.md`, plus bundled health-check
+guidance.
 
 Cover:
 

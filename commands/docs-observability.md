@@ -5,7 +5,9 @@ description: Open ArchiPy OpenTelemetry guidance (traces, metrics, logs)
 
 # /docs-observability
 
-Use the **archipy-docs** skill and the Observability section of `skills/archipy-docs/reference.md`.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — and the Observability section of
+`../skills/archipy-docs/reference.md`.
 
 Cover:
 

@@ -10,6 +10,8 @@ Data structures only — no I/O, no business rules.
 
 Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 
+Scaffold: `/scaffold-models` (composed by `/scaffold-domain`).
+
 ## Layout
 
 ```text

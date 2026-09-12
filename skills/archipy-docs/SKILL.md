@@ -26,7 +26,8 @@ description: >-
 | Config            | https://syntaxarc.github.io/ArchiPy/tutorials/config_management/                                      |
 | DI                | https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/                                   |
 | Health checks     | Bundled `reference.md` (HTTP + gRPC) + `/scaffold-health-checks`                                      |
-| Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/                                         |
+| Models / DTOs     | Bundled `reference.md` § DTO naming + `/scaffold-models`                                              |
+| Errors            | https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/ + `/scaffold-models`                     |
 | Testing           | https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/ + `/scaffold-bdd`                     |
 | Observability     | Bundled `reference.md` § Observability + https://syntaxarc.github.io/ArchiPy/tutorials/observability/ |
 | Redis search      | Bundled `reference.md` + `/redis-search`                                                              |

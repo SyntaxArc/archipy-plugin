@@ -21,7 +21,7 @@ description: >-
 ## Prefer ArchiPy
 
 If an ArchiPy util fits, show import + usage example and stop — do not duplicate. See `../archipy-docs/reference.md`
-(Utils section).
+(Utils section), resolved relative to this `SKILL.md`'s directory in the plugin installation — not the app workspace.
 
 ## Custom util
 

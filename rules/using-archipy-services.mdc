@@ -30,7 +30,7 @@ from archipy.configs.base_config import BaseConfig
 
 # FastAPI — reads BaseConfig.FASTAPI for title, docs, middleware
 app = AppUtils.create_fastapi_app()
-app.include_router(create_user_v1_router(container))
+app.include_router(create_<domain>_v1_router(container))
 
 # gRPC sync / async — do not mix servicer styles
 config = BaseConfig.global_config()

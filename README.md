@@ -94,12 +94,13 @@ Then restart Claude Code or run `/reload-plugins`.
 | `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py`            |
 | `testing-bdd-for-apps.mdc`       | `**/features/**/*`                               |
 
-### Skills (13)
+### Skills (14)
 
 | Skill                            | When to use                                                               |
 |----------------------------------|---------------------------------------------------------------------------|
 | `scaffold-archipy-app`           | Bootstrap a new ArchiPy-based service layout                              |
 | `scaffold-archipy-domain`        | Full domain slice (models, repo, logic, service)                          |
+| `scaffold-archipy-models`        | Domain/repository DTOs, errors, optional entities under `models/`         |
 | `scaffold-archipy-adapter`       | Add domain adapter under `repositories/{domain}/adapters/`                |
 | `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator`    |
 | `scaffold-archipy-service`       | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
@@ -112,12 +113,13 @@ Then restart Claude Code or run `/reload-plugins`.
 | `redis-search`                   | RediSearch full-text, vector search, and search-cache adapters            |
 | `archipy-docs`                   | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
 
-### Commands (20)
+### Commands (21)
 
 | Command                   | Action                                               |
 |---------------------------|------------------------------------------------------|
 | `/scaffold-app`           | Run scaffold-archipy-app                             |
 | `/scaffold-domain`        | Run scaffold-archipy-domain                          |
+| `/scaffold-models`        | Run scaffold-archipy-models                          |
 | `/scaffold-adapter`       | Run scaffold-archipy-adapter                         |
 | `/scaffold-logic`         | Run scaffold-archipy-logic                           |
 | `/scaffold-service`       | Run scaffold-archipy-service                         |
@@ -162,6 +164,12 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 - **Purpose:** Full domain slice composing models + adapter + logic + service.
 - **Asks:** Domain, extras, transport.
 - **Outcome:** DTOs/errors, repository adapters, one logic, one service v1, DI notes.
+
+### `/scaffold-models`
+
+- **Purpose:** Data-only models — domain/repository DTOs, errors, optional entities/types.
+- **Asks:** Domain / operation names; entities or types only when needed.
+- **Outcome:** `models/dtos/<domain>/…`, `models/errors/`, optional `entities/` / `types/`.
 
 ### `/scaffold-adapter`
 
@@ -354,6 +362,7 @@ always-on rule text, and the post-tool hook injects glob-matched rules.
 | Plugin entry                                 | Live documentation                                                                                                                                                         |
 |----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `/docs-quickstart`, `scaffold-archipy-app`   | [Quickstart](https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/), [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/) |
+| `/scaffold-models`, `scaffold-archipy-models` | [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/), [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/) |
 | `/docs-adapters`, `scaffold-archipy-adapter` | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/), [API adapters](https://syntaxarc.github.io/ArchiPy/api_reference/adapters/)                           |
 | `/redis-search`                              | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/) + bundled Redis search skill stubs                                                                     |
 | `/docs-helpers`, helper scaffolds            | [Helpers](https://syntaxarc.github.io/ArchiPy/tutorials/helpers/), [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                           |

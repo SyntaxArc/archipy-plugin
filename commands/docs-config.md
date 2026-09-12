@@ -5,7 +5,9 @@ description: Open ArchiPy configuration and dependency-injection guidance
 
 # /docs-config
 
-Use the **archipy-docs** skill and the BaseConfig / Dependency injection sections of `skills/archipy-docs/reference.md`.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — and the BaseConfig / Dependency injection sections of
+`../skills/archipy-docs/reference.md`.
 
 Cover:
 

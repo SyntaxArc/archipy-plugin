@@ -33,6 +33,11 @@ REFERENCE_FILE_RE = re.compile(r"`(reference/[A-Za-z0-9_.\-/]+)`")
 ARCHIPY_REFERENCE_VERSION_RE = re.compile(r"Verified against `archipy` (\d+)\.(\d+)\.x")
 COMMAND_SKILL_RE = re.compile(r"Follow the \*\*([a-z0-9-]+)\*\* skill", re.IGNORECASE)
 DOCS_SKILL_RE = re.compile(r"Use the \*\*([a-z0-9-]+)\*\* skill", re.IGNORECASE)
+SKILL_PATH_RE = re.compile(r"skills/([a-z0-9-]+)/SKILL\.md")
+COMMAND_DO_NOT_HEADING_RE = re.compile(
+    r"^##\s+(?:\d+\.\s+)?Do(?:\s+\*\*)?\s*not\b",
+    re.MULTILINE | re.IGNORECASE,
+)
 CHANGELOG_VERSION_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.MULTILINE)
 
 ARCHIPY_5_REMOVED_GUIDANCE = (
@@ -251,6 +256,17 @@ def check_rules() -> list[str]:
     return errors
 
 
+def _canonical_skill_for_command(stem: str) -> str | None:
+    """Return the skill folder a command must cite by explicit path."""
+    if stem.startswith("docs-"):
+        return "archipy-docs"
+    if stem == "redis-search":
+        return "redis-search"
+    if stem.startswith("scaffold-"):
+        return f"scaffold-archipy-{stem.removeprefix('scaffold-')}"
+    return None
+
+
 def check_command_skill_refs() -> list[str]:
     errors: list[str] = []
     skills_on_disk = {
@@ -259,16 +275,33 @@ def check_command_skill_refs() -> list[str]:
     for command in sorted((ROOT / "commands").glob("*.md")):
         text = command.read_text(encoding="utf-8")
         refs = COMMAND_SKILL_RE.findall(text) + DOCS_SKILL_RE.findall(text)
-        if not refs:
+        path_refs = SKILL_PATH_RE.findall(text)
+        canonical = _canonical_skill_for_command(command.stem)
+        if not refs and not path_refs:
             errors.append(f"commands/{command.name} has no Follow/Use **skill** reference")
             continue
-        for skill in refs:
+        for skill in list(refs) + path_refs:
             if skill not in skills_on_disk:
                 errors.append(f"commands/{command.name} references missing skill `{skill}`")
+        if canonical and canonical not in path_refs:
+            errors.append(
+                f"commands/{command.name} must reference its skill by explicit "
+                f"`skills/{canonical}/SKILL.md` path (bold names alone do not resolve in Cursor)"
+            )
+        if command.stem.startswith("docs-"):
+            continue
         if command.stem.startswith("scaffold-") or command.stem == "redis-search":
             if "in full" not in text or "Inspect the workspace" not in text:
                 errors.append(
                     f"commands/{command.name} must read its skill in full and inspect the workspace"
+                )
+            if not COMMAND_DO_NOT_HEADING_RE.search(text):
+                errors.append(
+                    f"commands/{command.name} must inline its key constraints (`## Do not` heading)"
+                )
+            if "Verify" not in text or "Report" not in text:
+                errors.append(
+                    f"commands/{command.name} must include a Verify + report section"
                 )
     return errors
 

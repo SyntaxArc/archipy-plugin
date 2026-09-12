@@ -32,7 +32,7 @@ services/<domain>/v{n}/
 ### FastAPI
 
 - Thin router: request → domain `*InputDTO` → logic → `*OutputDTO`.
-- Export `create_router(container)` (or equivalent) for `manage.py` / app factory.
+- Export `create_<domain>_v{n}_router(container)` for `manage.py` / app factory.
 - Map domain errors to HTTP status; no business rules / atomic UoW decorators here.
 
 ### gRPC
@@ -49,7 +49,7 @@ from archipy.helpers.utils.app_utils import AppUtils
 from archipy.configs.base_config import BaseConfig
 
 app = AppUtils.create_fastapi_app()
-app.include_router(create_user_v1_router(container))
+app.include_router(create_<domain>_v1_router(container))
 ```
 
 uvicorn in `manage.py` from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`,

@@ -62,9 +62,9 @@ uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
 | `parsian-ipg` / `parsian-ipg-async` | Parsian payment gateway                                                         |
 | `saman-ipg`                         | Saman payment gateway                                                           |
 
-Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-adapter`, `/scaffold-logic`, `/scaffold-service`,
-`/scaffold-bdd`, `/scaffold-health-checks`, `/redis-search`, plus helper scaffolds (`utils` / `decorator` /
-`interceptor`).
+Plugin scaffolds: `/scaffold-app`, `/scaffold-domain`, `/scaffold-models`, `/scaffold-adapter`, `/scaffold-logic`,
+`/scaffold-service`, `/scaffold-bdd`, `/scaffold-health-checks`, `/redis-search`, plus helper scaffolds (`utils` /
+`decorator` / `interceptor`).
 
 ## Project layout (apps)
 
@@ -520,7 +520,8 @@ features/
 
 - Behave (not pytest); `uv add "archipy[behave]"`; infra also `archipy[testcontainers]`.
 - Isolate with `ScenarioContext` + pool; hooks in `environment.py` (see `/scaffold-bdd`).
-- Tag infra `@needs-*`; skip with `behave --tags=~@needs-redis`.
+- Tag infra `@needs-*`; skip every `@needs-*` tag present
+  (`behave --tags=~@needs-redis --tags=~@needs-postgres`).
 - Reset `SessionManagerRegistry` after scenarios.
 - Do not copy ArchiPy-core gRPC/Temporal environment blocks unless the app needs them.
 

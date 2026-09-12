@@ -22,7 +22,8 @@ description: >-
 ## Prefer ArchiPy
 
 Check `archipy.helpers.interceptors` (FastAPI / gRPC). Prefer AppUtils auto-registration for stock interceptors. Show
-registration via DI or framework APIs from docs / `../archipy-docs/reference.md` (Interceptors).
+registration via DI or framework APIs from docs / `../archipy-docs/reference.md` (Interceptors), resolved relative to
+this `SKILL.md`'s directory in the plugin installation — not the app workspace.
 
 ## Custom interceptor
 

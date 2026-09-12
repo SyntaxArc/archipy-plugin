@@ -5,7 +5,8 @@ description: Open ArchiPy adapter patterns and API docs for app teams
 
 # /docs-adapters
 
-Use the **archipy-docs** skill and the Adapters section of `skills/archipy-docs/reference.md`.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — and the Adapters section of `../skills/archipy-docs/reference.md`.
 
 Cover:
 

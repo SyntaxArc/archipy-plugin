@@ -16,7 +16,8 @@ Redis search via ArchiPy (`archipy[redis]`):
 - **Vector search**: KNN / range via `SearchQueryDTO.from_knn` / `from_range`
 - **Search caching**: cache-aside around expensive search results
 
-Canonical layout and ArchiPy constraints: `../archipy-docs/reference.md` (Adapters + Redis Search). Templates:
+Canonical layout and ArchiPy constraints: `../archipy-docs/reference.md` (Adapters + Redis Search), resolved relative
+to this `SKILL.md`'s directory in the plugin installation — not the app workspace. Templates:
 `reference/fulltext_adapter.py`, `reference/vector_adapter.py`, `reference/search_cache_adapter.py`.
 
 Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation

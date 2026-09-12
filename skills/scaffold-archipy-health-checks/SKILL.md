@@ -22,7 +22,8 @@ Health checks are app code. ArchiPy does not ship stock HTTP routes or a stock g
 
 **Probe semantics** (liveness vs readiness vs startup, K8s notes, common mistakes, FastAPI sketches): keep
 `../archipy-docs/reference.md` § Health checks as the source of truth — do not invent alternate probe meanings or
-duplicate endpoint sketches here.
+duplicate endpoint sketches here. Resolve `../...` paths relative to this `SKILL.md`'s directory in the plugin
+installation — not the app workspace.
 
 ```bash
 uv add "archipy[fastapi]"   # HTTP probes

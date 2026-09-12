@@ -5,7 +5,8 @@ description: Open ArchiPy error-handling guidance
 
 # /docs-errors
 
-Use the **archipy-docs** skill and the Errors section of `skills/archipy-docs/reference.md`.
+Read `../skills/archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this
+command file inside the plugin installation) — and the Errors section of `../skills/archipy-docs/reference.md`.
 
 Cover:
 
@@ -17,3 +18,5 @@ Cover:
 Live docs:
 
 - https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/
+
+Offer `/scaffold-models` if they want DTO or error modules generated.

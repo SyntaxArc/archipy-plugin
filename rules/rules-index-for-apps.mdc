@@ -32,5 +32,5 @@ alwaysApply: true
    outer-boundary `except Exception` exception.
 4. `config-and-di.mdc` owns secret/settings resolution; `security-for-apps.mdc` owns whether values are safe to store,
    log, trace, or expose.
-5. Consumer-app rules never import ArchiPy maintainer workflows such as graphify, library release/changelog policy, or
+5. Consumer-app rules never import ArchiPy maintainer workflows such as library release/changelog policy, or
    core monorepo Make targets.

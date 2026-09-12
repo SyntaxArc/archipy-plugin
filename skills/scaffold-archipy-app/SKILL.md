@@ -70,7 +70,7 @@ features/                  # optional — /scaffold-bdd
 
 - Double quotes, Google-style docstrings, `X | Y` typing.
 - No secrets in code; list env keys in `.env.example`.
-- Do not copy ArchiPy library maintainer tooling (graphify, library BDD internals).
+- Do not copy ArchiPy library maintainer tooling (library BDD internals).
 
 ## Verify
 

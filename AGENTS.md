@@ -4,7 +4,7 @@ Works in **Cursor** and **Claude Code**.
 
 Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/project/archipy/).
 
-**Not** for maintaining the ArchiPy library (no graphify, library changelog, or core monorepo tooling).
+**Not** for maintaining the ArchiPy library (no library changelog or core monorepo tooling).
 
 ## Essentials
 

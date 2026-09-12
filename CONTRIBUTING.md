@@ -72,4 +72,4 @@ rule bodies. Do not point both manifests at the same hooks file — schemas diff
 
 - Apps: models data-only; logics UoW + rules; services thin transport.
 - Domain adapters under `repositories/{domain}/adapters/` only.
-- No graphify / library changelog / ArchiPy monorepo maintainer tooling in this plugin.
+- No library changelog / ArchiPy monorepo maintainer tooling in this plugin.

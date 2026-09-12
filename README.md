@@ -18,7 +18,7 @@ It ships:
 - **Skills** — agent workflows for scaffolding and docs lookup
 - **Commands** — slash entry points (`/scaffold-app`, `/docs-helpers`, …)
 
-It is **not** for maintaining the ArchiPy library itself (no graphify, library changelog, or core BDD internals).
+It is **not** for maintaining the ArchiPy library itself (no library changelog or core BDD internals).
 
 ## Requirements
 

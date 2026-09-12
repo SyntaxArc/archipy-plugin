@@ -50,7 +50,7 @@ If files already exist, merge compatible additions and preserve project conventi
 - Never hardcode host/port; never hand-roll bare `FastAPI()` when AppUtils is in use.
 - Do not invent a top-level app `adapters/` package — domain adapters live under `repositories/<domain>/adapters/`.
 - There is no decorator named `atomic` — UoW means a real `*_sqlalchemy_atomic_decorator` on logics.
-- Do not copy ArchiPy library maintainer tooling (graphify, library BDD internals).
+- Do not copy ArchiPy library maintainer tooling (library BDD internals).
 
 ## 5. Verify and report
 

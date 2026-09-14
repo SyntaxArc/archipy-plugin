@@ -23,7 +23,8 @@ transports, adapters, and `.env.example`. Infer required instrumentation extras 
 ## 2. Ask only for unresolved choices
 
 - Enabled signals (traces / metrics / logs)
-- OTLP endpoint/protocol, service name, sampling ratio, log level
+- Metrics exporter (`otlp` / `pull` / `pushgateway`)
+- OTLP endpoint/protocol or Pushgateway URL, service name, sampling ratio, log level
 
 Preserve existing config/bootstrap. Never write collector credentials or OTLP headers with secret values.
 

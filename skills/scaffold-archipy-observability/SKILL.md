@@ -12,7 +12,9 @@ description: >-
 
 1. Inspect `pyproject.toml`/`uv.lock`, `AppConfig`, bootstrap order, app transports, adapters, and `.env.example`.
 2. Infer required instrumentation extras from the installed stack.
-3. Ask only for unresolved choices: enabled signals, OTLP endpoint/protocol, service name, sampling ratio, and log level.
+3. Ask only for unresolved choices: enabled signals, metrics exporter (`otlp` / `pull` /
+   `pushgateway`), OTLP endpoint/protocol or Pushgateway URL, service name, sampling ratio,
+   and log level.
 4. Preserve existing config/bootstrap. Never write collector credentials or OTLP headers with secret values.
 
 ## Install only matching extras
@@ -49,6 +51,9 @@ OTEL__PROTOCOL=grpc
 OTEL__TRACES_ENABLED=true
 OTEL__METRICS_ENABLED=true
 OTEL__METRICS_EXPORTER=otlp
+# Pull scrape: OTEL__METRICS_EXPORTER=pull
+# Pushgateway: OTEL__METRICS_EXPORTER=pushgateway
+# OTEL__METRICS_PUSHGATEWAY_URL=http://pushgateway.monitoring:9091
 OTEL__METRICS_PULL_HOST=0.0.0.0
 OTEL__METRICS_PULL_PORT=8200
 OTEL__SYSTEM_METRICS_ENABLED=true
@@ -61,8 +66,12 @@ OTEL__FASTAPI_EXCLUDED_URLS=health,docs,redoc,openapi.json
 
 Use `BaseConfig.OTEL`; ArchiPy builds providers programmatically. Do not rely on OpenTelemetry SDK `OTEL_*`
 autoconfiguration. For `http/protobuf`, use port 4318; ArchiPy appends `/v1/{signal}` when the base endpoint has no path.
-Set `OTEL__METRICS_EXPORTER=pull` for scrape-only metrics. Set `OTEL__LOGS_EXPORTER=otlp` to push logs to a collector
-(default `console` writes INFO/DEBUG to stdout and WARNING+ to stderr).
+Set `OTEL__METRICS_EXPORTER=pull` for scrape-only metrics. Set `OTEL__METRICS_EXPORTER=pushgateway`
+and `OTEL__METRICS_PUSHGATEWAY_URL` (job defaults to `SERVICE_NAME`) for Prometheus Pushgateway —
+no local `/metrics` server. `otlp` pushes OTLP to a collector; do not confuse it with Pushgateway.
+If pull scrape cannot bind, ArchiPy logs a warning and keeps traces/logs/metrics providers.
+Set `OTEL__LOGS_EXPORTER=otlp` to push logs to a collector (default `console` writes INFO/DEBUG to
+stdout and WARNING+ to stderr).
 
 ## Initialize before adapters
 

@@ -4,7 +4,7 @@ Condensed patterns for **apps that depend on** PyPI `archipy`. Prefer live docs 
 
 https://syntaxarc.github.io/ArchiPy/
 
-Verified against `archipy` 5.2.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
+Verified against `archipy` 5.4.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
 and `archipy.configs` package `__init__` files do not re-export symbols.
 
 > **ArchiPy 5.x:** OpenTelemetry replaces the removed Sentry, Elastic APM, and Prometheus integrations. Use
@@ -450,7 +450,7 @@ Combine library pieces rather than inventing a parallel stack:
 | Concern         | ArchiPy pieces                                                                                          | Extra                          |
 |-----------------|---------------------------------------------------------------------------------------------------------|--------------------------------|
 | Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation               | `otel` + `otel-fastapi`/`otel-grpc` |
-| Metrics         | `measure_duration` / `count_calls` (+ async twins), AppUtils gRPC `rpc.server.duration`, `METRICS_EXPORTER` (`otlp`\|`pull`) | `otel` (+ `otel-grpc` for RPC) |
+| Metrics         | `measure_duration` / `count_calls` (+ async twins), AppUtils gRPC `rpc.server.duration`, `METRICS_EXPORTER` (`otlp`\|`pull`\|`pushgateway`) | `otel` (+ `otel-grpc` for RPC) |
 | Logs            | `LOGS_EXPORTER` (`console`\|`otlp`); default console splits INFO/DEBUG → stdout, WARNING+ → stderr     | `otel`                         |
 | Errors          | `BaseUtils.capture_exception` records on the current span                                               | `otel`                         |
 | Timing only     | `timing_decorator`                                                                                      | —                              |
@@ -465,6 +465,9 @@ OTEL__PROTOCOL=grpc
 OTEL__TRACES_ENABLED=true
 OTEL__METRICS_ENABLED=true
 OTEL__METRICS_EXPORTER=otlp
+# Pull scrape (no collector): OTEL__METRICS_EXPORTER=pull
+# Pushgateway: OTEL__METRICS_EXPORTER=pushgateway
+# OTEL__METRICS_PUSHGATEWAY_URL=http://pushgateway.monitoring:9091
 OTEL__METRICS_PULL_HOST=0.0.0.0
 OTEL__METRICS_PULL_PORT=8200
 OTEL__SYSTEM_METRICS_ENABLED=true
@@ -475,7 +478,12 @@ OTEL__LOGS_LEVEL=WARNING
 ```
 
 - Unique exporters: set `OTEL__METRICS_EXPORTER=pull` for scrape-only metrics on
-  `METRICS_PULL_HOST:METRICS_PULL_PORT/metrics` (do not dual-export). Set `OTEL__LOGS_EXPORTER=otlp` to push logs.
+  `METRICS_PULL_HOST:METRICS_PULL_PORT/metrics` (do not dual-export). Set
+  `OTEL__METRICS_EXPORTER=pushgateway` plus `OTEL__METRICS_PUSHGATEWAY_URL` to push
+  Prometheus text to a Pushgateway (no local scrape). `otlp` is OTLP to a collector,
+  not Pushgateway. Set `OTEL__LOGS_EXPORTER=otlp` to push logs.
+- If pull scrape cannot bind, ArchiPy logs a warning and keeps traces/logs/metrics.
+- `OtelUtils.metrics_registry()` returns the Prometheus registry for `pull` / `pushgateway`.
 - `SYSTEM_METRICS_ENABLED=false` disables process/system metrics when metrics are otherwise on.
 - Prefer `WARNING` or higher for exported production logs when using OTLP.
 

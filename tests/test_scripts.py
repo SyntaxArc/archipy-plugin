@@ -155,19 +155,52 @@ class CatalogTests(unittest.TestCase):
 
 
 class HygieneTests(unittest.TestCase):
-    def test_session_start(self) -> None:
+    def _run_cursor(self, event: str, payload: dict[str, object]) -> dict[str, object]:
         result = subprocess.run(
-            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), "sessionStart"],
+            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), event],
             cwd=ROOT,
-            input="{}",
+            input=json.dumps(payload),
             capture_output=True,
             text=True,
             check=False,
         )
-        self.assertEqual(result.returncode, 0)
-        payload = json.loads(result.stdout)
-        self.assertIn("additional_context", payload)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout) if result.stdout.strip() else {}
+
+    def test_session_start(self) -> None:
+        payload = self._run_cursor("sessionStart", {"workspace_roots": [self._archipy_app()]})
         self.assertIn("repositories/{domain}/adapters", payload["additional_context"])
+        # Cursor loads .mdc rules itself; only the reminder is injected.
+        self.assertNotIn("# Architecture for ArchiPy Apps", payload["additional_context"])
+
+    def test_cursor_session_start_skips_non_archipy_project(self) -> None:
+        with tempfile.TemporaryDirectory() as other:
+            self.assertEqual(self._run_cursor("sessionStart", {"workspace_roots": [other]}), {})
+
+    def test_session_start_reports_locked_archipy_version(self) -> None:
+        app = self._archipy_app()
+        Path(app, "uv.lock").write_text(
+            'version = 1\n\n[[package]]\nname = "archipy"\nversion = "5.4.0"\nsource = { registry = "x" }\n',
+            encoding="utf-8",
+        )
+        cursor = self._run_cursor("sessionStart", {"workspace_roots": [app]})
+        self.assertIn("This app uses archipy 5.4.0 with extras [postgres]", cursor["additional_context"])
+        claude = self._claude_context(self._run_claude("SessionStart", {"cwd": app}), "SessionStart")
+        self.assertIn("This app uses archipy 5.4.0 with extras [postgres]", claude)
+
+    def test_cursor_pre_tool_use_denies_new_top_level_adapter(self) -> None:
+        app = self._archipy_app()
+        payload = self._run_cursor(
+            "preToolUse",
+            {"cwd": app, "tool_name": "Write", "tool_input": {"file_path": f"{app}/adapters/redis_adapter.py"}},
+        )
+        self.assertEqual(payload["permission"], "deny")
+        self.assertIn("repositories/<domain>/adapters/", str(payload["agent_message"]))
+        allowed = self._run_cursor(
+            "preToolUse",
+            {"cwd": app, "tool_name": "Write", "tool_input": {"file_path": f"{app}/repositories/u/adapters/a.py"}},
+        )
+        self.assertEqual(allowed, {})
 
     def test_allows_repo_adapters(self) -> None:
         result = subprocess.run(
@@ -298,6 +331,34 @@ class HygieneTests(unittest.TestCase):
             "PostToolUse", {"cwd": app, "tool_input": {"file_path": f"{app}/repositories/user/adapters/user_db_adapter.py"}}
         )
         self.assertNotIn("is under adapters/ but not", self._claude_context(nested, "PostToolUse"))
+
+    def _pre_write(self, app: str, file_path: str) -> dict[str, object]:
+        return self._run_claude("PreToolUse", {"cwd": app, "tool_name": "Write", "tool_input": {"file_path": file_path}})
+
+    def test_claude_pre_tool_use_denies_new_top_level_adapter(self) -> None:
+        app = self._archipy_app()
+        payload = self._pre_write(app, f"{app}/adapters/redis_adapter.py")
+        output = payload["hookSpecificOutput"]
+        assert isinstance(output, dict)
+        self.assertEqual(output["hookEventName"], "PreToolUse")
+        self.assertEqual(output["permissionDecision"], "deny")
+        self.assertIn("repositories/<domain>/adapters/", str(output["permissionDecisionReason"]))
+
+    def test_claude_pre_tool_use_allows_existing_or_repo_adapters(self) -> None:
+        app = self._archipy_app()
+        Path(app, "adapters").mkdir()
+        Path(app, "adapters", "legacy_adapter.py").write_text("", encoding="utf-8")
+        self.assertEqual(self._pre_write(app, f"{app}/adapters/legacy_adapter.py"), {})
+        self.assertEqual(self._pre_write(app, f"{app}/repositories/user/adapters/user_db_adapter.py"), {})
+        self.assertEqual(self._pre_write(app, "/elsewhere/adapters/x.py"), {})
+        edit = self._run_claude(
+            "PreToolUse", {"cwd": app, "tool_name": "Edit", "tool_input": {"file_path": f"{app}/adapters/new.py"}}
+        )
+        self.assertEqual(edit, {})
+
+    def test_claude_pre_tool_use_skips_non_archipy_project(self) -> None:
+        with tempfile.TemporaryDirectory() as other:
+            self.assertEqual(self._pre_write(other, f"{other}/adapters/x.py"), {})
 
 if __name__ == "__main__":
     unittest.main()

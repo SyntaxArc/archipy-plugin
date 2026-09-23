@@ -27,9 +27,13 @@ CURSOR_SESSION = "sessionStart"
 CURSOR_POST = "postToolUse"
 CLAUDE_SESSION = "SessionStart"
 CLAUDE_POST = "PostToolUse"
+CLAUDE_PRE = "PreToolUse"
+CURSOR_PRE = "preToolUse"
 
 # Markers that identify an ArchiPy consumer app; rules stay out of unrelated projects.
 ARCHIPY_MARKERS = ("pyproject.toml", "uv.lock", "requirements.txt")
+UV_LOCK_ARCHIPY_RE = re.compile(r'^\[\[package\]\]\nname = "archipy"\nversion = "([^"]+)"', re.MULTILINE)
+PYPROJECT_ARCHIPY_RE = re.compile(r"""["']archipy(?:\[([^\]]*)\])?\s*([<>=~!][^"']*)?["']""")
 ARCHIPY_DEP_RE = re.compile(r"""(^|[\s"'\[,])archipy([\s"'\[\]=<>~!,]|$)""", re.MULTILINE)
 
 
@@ -60,9 +64,16 @@ def _emit_claude(event: str, context: str) -> dict[str, Any]:
     return {"hookSpecificOutput": {"hookEventName": event, "additionalContext": context}}
 
 
-def _is_archipy_app(payload: dict[str, Any]) -> bool:
-    """Return True when the project at the payload cwd (or a parent) depends on ArchiPy."""
-    start = Path(str(payload.get("cwd") or os.environ.get("CLAUDE_PROJECT_DIR") or Path.cwd()))
+def _project_dir(payload: dict[str, Any]) -> Path:
+    """Claude sends `cwd`; Cursor sends `cwd` on tool events and `workspace_roots` on every event."""
+    roots = payload.get("workspace_roots")
+    root = roots[0] if isinstance(roots, list) and roots else None
+    return Path(str(payload.get("cwd") or root or os.environ.get("CLAUDE_PROJECT_DIR") or Path.cwd()))
+
+
+def _archipy_app_root(payload: dict[str, Any]) -> Path | None:
+    """Return the project directory when it (or a parent up to the repo root) depends on ArchiPy."""
+    start = _project_dir(payload)
     for directory in (start, *start.parents):
         found_marker = False
         for marker in ARCHIPY_MARKERS:
@@ -72,12 +83,37 @@ def _is_archipy_app(payload: dict[str, Any]) -> bool:
             found_marker = True
             try:
                 if ARCHIPY_DEP_RE.search(path.read_text(encoding="utf-8", errors="ignore")):
-                    return True
+                    return directory
             except OSError:
                 continue
         if found_marker or (directory / ".git").exists():
-            return False
-    return False
+            return None
+    return None
+
+
+def _is_archipy_app(payload: dict[str, Any]) -> bool:
+    return _archipy_app_root(payload) is not None
+
+
+def _read(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return ""
+
+
+def _archipy_version_line(app_root: Path) -> str:
+    """Describe the app's pinned ArchiPy version and extras; empty when unknown."""
+    locked = UV_LOCK_ARCHIPY_RE.search(_read(app_root / "uv.lock"))
+    declared = PYPROJECT_ARCHIPY_RE.search(_read(app_root / "pyproject.toml"))
+    version = locked.group(1) if locked else (declared.group(2) or "").strip() if declared else ""
+    extras = (declared.group(1) or "").replace(" ", "") if declared else ""
+    if not version:
+        return ""
+    line = f"This app uses archipy {version}"
+    if extras:
+        line += f" with extras [{extras}]"
+    return line + ". Only suggest APIs and extras available in that version; check live docs when unsure."
 
 
 def _dedupe_key(payload: dict[str, Any]) -> str:
@@ -202,8 +238,21 @@ def _matching_rules(file_paths: list[str]) -> list[tuple[str, str]]:
     return chunks
 
 
-def handle_cursor_session_start(_payload: dict[str, Any]) -> dict[str, Any]:
-    return {"additional_context": HARD_RULES}
+def _session_context(app_root: Path, *, include_rules: bool) -> str:
+    parts = [HARD_RULES]
+    if version_line := _archipy_version_line(app_root):
+        parts.append(version_line)
+    if include_rules:
+        parts.extend(_always_apply_rules())
+    return "\n\n".join(parts)
+
+
+def handle_cursor_session_start(payload: dict[str, Any]) -> dict[str, Any]:
+    # Cursor loads `.mdc` rules natively; only add the reminder and version line in ArchiPy apps.
+    app_root = _archipy_app_root(payload)
+    if app_root is None:
+        return {}
+    return {"additional_context": _session_context(app_root, include_rules=False)}
 
 
 def handle_claude_session_start(payload: dict[str, Any]) -> dict[str, Any]:
@@ -212,10 +261,10 @@ def handle_claude_session_start(payload: dict[str, Any]) -> dict[str, Any]:
     if state is not None:
         state.unlink(missing_ok=True)
     # Claude Code plugins do not load Cursor `.mdc` rules; inject always-on rule bodies in ArchiPy apps only.
-    if not _is_archipy_app(payload):
+    app_root = _archipy_app_root(payload)
+    if app_root is None:
         return {}
-    parts = [HARD_RULES, *_always_apply_rules()]
-    return _emit_claude(CLAUDE_SESSION, "\n\n".join(parts))
+    return _emit_claude(CLAUDE_SESSION, _session_context(app_root, include_rules=True))
 
 
 def _hygiene_warnings(paths: list[str]) -> list[str]:
@@ -227,6 +276,58 @@ def _hygiene_warnings(paths: list[str]) -> list[str]:
                 "repositories/{domain}/adapters/. Move domain adapters there."
             )
     return parts
+
+
+def _relative_to_cwd(file_path: str, cwd: str) -> str | None:
+    """Return file_path relative to cwd, or None when it lies outside the project."""
+    path = Path(file_path)
+    if not path.is_absolute():
+        return path.as_posix()
+    try:
+        return path.relative_to(Path(cwd)).as_posix()
+    except ValueError:
+        return None
+
+
+def _new_adapter_violation(payload: dict[str, Any]) -> str | None:
+    """Reason to block a Write that creates a domain adapter outside repositories/{domain}/adapters/.
+
+    Only new files are blocked: legacy apps must still be able to edit an existing top-level adapters/ package.
+    """
+    if payload.get("tool_name") != "Write" or not _is_archipy_app(payload):
+        return None
+    cwd = str(_project_dir(payload))
+    for file_path in _paths_from_payload(payload):
+        relative = _relative_to_cwd(file_path, cwd)
+        if relative is None or not _is_forbidden_adapters_path(relative):
+            continue
+        if (Path(cwd) / relative).exists():
+            continue
+        return (
+            f"ArchiPy apps keep domain adapters under repositories/{{domain}}/adapters/, not `{relative}`. "
+            "Write it as repositories/<domain>/adapters/<name>_adapter.py instead."
+        )
+    return None
+
+
+def handle_claude_pre_tool_use(payload: dict[str, Any]) -> dict[str, Any]:
+    reason = _new_adapter_violation(payload)
+    if reason is None:
+        return {}
+    return {
+        "hookSpecificOutput": {
+            "hookEventName": CLAUDE_PRE,
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        }
+    }
+
+
+def handle_cursor_pre_tool_use(payload: dict[str, Any]) -> dict[str, Any]:
+    reason = _new_adapter_violation(payload)
+    if reason is None:
+        return {}
+    return {"permission": "deny", "user_message": reason, "agent_message": reason}
 
 
 def handle_cursor_post_tool_use(payload: dict[str, Any]) -> dict[str, Any]:
@@ -261,6 +362,10 @@ def main() -> int:
         _emit(handle_claude_session_start(payload))
     elif event in {CURSOR_SESSION, "session_start"}:
         _emit(handle_cursor_session_start(payload))
+    elif event == CLAUDE_PRE:
+        _emit(handle_claude_pre_tool_use(payload))
+    elif event in {CURSOR_PRE, "pre_tool_use"}:
+        _emit(handle_cursor_pre_tool_use(payload))
     elif event == CLAUDE_POST:
         _emit(handle_claude_post_tool_use(payload))
     elif event in {CURSOR_POST, "post_tool_use"}:

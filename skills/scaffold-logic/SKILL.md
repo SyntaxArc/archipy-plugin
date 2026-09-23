@@ -1,8 +1,9 @@
 ---
 name: scaffold-logic
 description: >-
-  Scaffold an ArchiPy logic class with unit-of-work decorator and domain DTO
-  I/O. Use when adding a use-case under logics/{domain}/.
+  Scaffold an ArchiPy logic (use case) under logics/{domain}/ with a unit-of-work
+  decorator and DTO I/O. Use for "add business logic", "new use case", "transactional
+  operation", or "service layer method".
 ---
 
 # Scaffold ArchiPy Logic

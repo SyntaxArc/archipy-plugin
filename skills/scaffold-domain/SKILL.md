@@ -1,8 +1,9 @@
 ---
 name: scaffold-domain
 description: >-
-  Scaffold a full ArchiPy domain slice (DTOs, errors, repository adapters,
-  logic, service). Use when adding a new domain to an existing ArchiPy app.
+  Scaffold a full ArchiPy domain slice (DTOs, errors, repository + adapter, logic,
+  service). Use for "add a <name> domain/module/feature", "new resource with CRUD", or
+  "end-to-end endpoint".
 ---
 
 # Scaffold ArchiPy Domain

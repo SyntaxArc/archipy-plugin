@@ -1,9 +1,9 @@
 ---
 name: archipy-docs
 description: >-
-  Look up ArchiPy patterns for app teams using the bundled 5.x reference and live
-  docs. Trigger when the user asks how to use ArchiPy (config, adapters, helpers,
-  errors, DI, project layout, observability).
+  Answer how-to questions about ArchiPy 5.x in an app (config, DI, adapters, helpers,
+  errors, layout, observability) from the bundled reference and live docs. Use for "how
+  do I … with archipy", "which extra/adapter/decorator", or API questions.
 ---
 
 # ArchiPy Docs Lookup

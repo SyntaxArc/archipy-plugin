@@ -1,9 +1,9 @@
 ---
 name: scaffold-service
 description: >-
-  Scaffold a thin ArchiPy service (FastAPI router or gRPC servicer) and note
-  AppUtils / FastAPIConfig bootstrap. Use when adding HTTP/gRPC transport under
-  services/{domain}/v{n}/.
+  Scaffold a thin FastAPI router or gRPC servicer under services/{domain}/v{n}/ with
+  AppUtils bootstrap. Use for "add an endpoint/route/API", "expose via REST/gRPC", or
+  "new API version".
 ---
 
 # Scaffold ArchiPy Service

@@ -1,8 +1,9 @@
 ---
 name: scaffold-interceptor
 description: >-
-  Scaffold or wire a helpers/interceptors module for an ArchiPy app. Prefer
-  ArchiPy FastAPI/gRPC interceptors before custom ones. Cross-cutting only.
+  Add or wire cross-cutting FastAPI/gRPC interceptors or middleware, preferring
+  ArchiPy's. Use for "add middleware", "request ID/logging/auth interceptor", or "gRPC
+  interceptor".
 ---
 
 # Scaffold ArchiPy Interceptor

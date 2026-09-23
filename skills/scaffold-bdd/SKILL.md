@@ -1,9 +1,9 @@
 ---
 name: scaffold-bdd
 description: >-
-  Scaffold Behave BDD layout for an ArchiPy app (feature, steps, ScenarioContext,
-  pool manager, environment, optional testcontainers). Use when adding acceptance
-  tests under features/.
+  Scaffold Behave BDD tests (features, steps, ScenarioContext, environment, optional
+  testcontainers) for an ArchiPy app. Use for "add tests", "acceptance/BDD tests",
+  "behave", or "feature file".
 ---
 
 # Scaffold ArchiPy BDD

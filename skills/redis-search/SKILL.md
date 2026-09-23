@@ -1,9 +1,9 @@
 ---
 name: redis-search
 description: >-
-  Scaffold Redis search adapters for full-text search (RediSearch), vector search,
-  and search caching patterns. Use when adding search infrastructure to ArchiPy apps.
-  Prefer RedisAdapter.search_index() over raw client.ft().
+  Scaffold RediSearch full-text, vector, or search-cache adapters in an ArchiPy app. Use
+  for "add search", "full-text/semantic/vector search", "embeddings index", or "cache
+  search results".
 ---
 
 # Redis Search Skills

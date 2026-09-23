@@ -1,9 +1,9 @@
 ---
 name: scaffold-models
 description: >-
-  Scaffold ArchiPy models (domain/repository DTOs, errors, optional entities and
-  types). Use when adding data structures under models/ — no I/O, no business
-  rules.
+  Scaffold ArchiPy models under models/: domain/repository DTOs, errors, optional
+  entities and types. Use for "add DTO/schema/request/response model", "new error type",
+  or "SQLAlchemy entity".
 ---
 
 # Scaffold ArchiPy Models

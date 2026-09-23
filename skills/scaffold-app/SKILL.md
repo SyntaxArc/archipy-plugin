@@ -1,9 +1,9 @@
 ---
 name: scaffold-app
 description: >-
-  Scaffold a minimal ArchiPy application package (config, containers stub, domain
-  slice, helpers tree, optional manage.py). Use when starting a new ArchiPy-based
-  service or asking to bootstrap project layout.
+  Bootstrap a new ArchiPy service layout (configs, models, repositories, logics,
+  services, helpers, manage.py). Use for "new service/project", "start an archipy app",
+  or "set up the project structure".
 ---
 
 # Scaffold ArchiPy App

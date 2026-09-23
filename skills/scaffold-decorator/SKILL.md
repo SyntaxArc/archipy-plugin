@@ -1,9 +1,9 @@
 ---
 name: scaffold-decorator
 description: >-
-  Scaffold or wire a helpers/decorators module for an ArchiPy app. Prefer ArchiPy
-  decorators (ttl_cache_decorator, postgres_sqlalchemy_atomic_decorator,
-  trace_span / trace_root, measure_duration / count_calls, …) before custom ones.
+  Add or wire helpers/decorators, preferring ArchiPy's (ttl_cache, atomic UoW,
+  trace_span, measure_duration, retry). Use for "cache this function", "add
+  timing/tracing/retry", or "write a decorator".
 ---
 
 # Scaffold ArchiPy Decorator

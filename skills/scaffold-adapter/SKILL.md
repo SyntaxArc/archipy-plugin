@@ -1,9 +1,9 @@
 ---
 name: scaffold-adapter
 description: >-
-  Scaffold a domain adapter under repositories/{domain}/adapters/ for an ArchiPy
-  app. Use when adding infrastructure integrations or thin wrappers around
-  ArchiPy adapters.
+  Scaffold a domain adapter under repositories/{domain}/adapters/ wrapping an ArchiPy
+  adapter or external client. Use for "add Postgres/Redis/Kafka/S3/HTTP client",
+  "integrate <service>", or "new adapter".
 ---
 
 # Scaffold ArchiPy Adapter

@@ -1,9 +1,9 @@
 ---
 name: scaffold-health-checks
 description: >-
-  Scaffold ArchiPy FastAPI and/or gRPC health checks for liveness, readiness,
-  and optional Kubernetes probe YAML. Use when adding app-level health checks,
-  startup safety, and graceful shutdown behavior.
+  Scaffold FastAPI/gRPC liveness, readiness, and startup health checks, graceful
+  shutdown, and optional Kubernetes probes. Use for "health endpoint",
+  "readiness/liveness probe", or "k8s probes".
 ---
 
 # Scaffold ArchiPy Health Checks

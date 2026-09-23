@@ -1,8 +1,9 @@
 ---
 name: scaffold-utils
 description: >-
-  Scaffold or wire a helpers/utils module for an ArchiPy app. Prefer ArchiPy
-  utils before inventing custom ones. Use when adding pure utility helpers.
+  Add or wire pure helpers/utils, preferring ArchiPy utils (datetime, JWT, password,
+  file, string). Use for "add a helper/util function", "format dates", "hash passwords",
+  or "generate tokens".
 ---
 
 # Scaffold ArchiPy Utils

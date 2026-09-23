@@ -1,9 +1,9 @@
 ---
 name: scaffold-observability
 description: >-
-  Configure ArchiPy 5.x OpenTelemetry traces, metrics, logs, AppUtils
-  instrumentation, and decorators. Use when adding OTLP observability or
-  migrating removed Sentry, Elastic APM, or Prometheus integrations.
+  Configure ArchiPy 5.x OpenTelemetry traces, metrics, logs, and instrumentation. Use
+  for "add tracing/metrics/OTel", "Prometheus/Pushgateway", or migrating off Sentry,
+  Elastic APM, or old Prometheus.
 ---
 
 # Scaffold ArchiPy OpenTelemetry

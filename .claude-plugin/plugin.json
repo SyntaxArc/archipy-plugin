@@ -17,6 +17,5 @@
   ],
   "logo": "assets/logo.jpg",
   "skills": "./skills",
-  "commands": "./commands",
   "hooks": "./hooks/claude-hooks.json"
 }

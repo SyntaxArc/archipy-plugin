@@ -22,12 +22,12 @@ Reload the editor after edits.
 
 ## Catalog sync checklist
 
-Before every PR that touches skills/commands/AGENTS/README:
+Before every PR that touches skills/agents/AGENTS/README:
 
-1. Every `/command` listed in `AGENTS.md` has a matching `commands/<name>.md`.
+1. Every `/name` listed in `AGENTS.md` has a matching `skills/<name>/SKILL.md` (skills are slash commands).
 2. Every `skills/<name>/SKILL.md` frontmatter `name:` matches the folder name.
-3. Every `commands/<name>.md` sets `disable-model-invocation: true` — commands wrap skills, so Claude's
-   model-invocable list should show each workflow once (the skill). Users still type `/<name>`.
+3. `docs-*` skills set `disable-model-invocation: true` (user shortcuts into `archipy-docs`); all other skills stay
+   model-invocable. Scaffold skills need `## Before writing files`, `## Do not`, and `## Verify` ending in a report.
 4. README `### Rules (N)` / `### Skills (N)` / `### Commands (N)` counts match disk; tables list every entry.
 5. Atomic UoW decorator name stays `postgres_sqlalchemy_atomic_decorator` (not a fictional `@atomic` API).
 

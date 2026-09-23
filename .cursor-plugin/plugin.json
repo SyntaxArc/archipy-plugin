@@ -18,6 +18,5 @@
   "logo": "assets/logo.jpg",
   "rules": "./rules",
   "skills": "./skills",
-  "commands": "./commands",
   "hooks": "./hooks/hooks.json"
 }

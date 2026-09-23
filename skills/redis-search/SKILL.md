@@ -84,13 +84,14 @@ Use `reference/vector_adapter.py`: `VectorFieldConfig` + `SearchQueryDTO.from_kn
 Use `reference/search_cache_adapter.py`: cache-aside with Redis get/setex. Repository orchestrates search + cache;
 logics own invalidation rules.
 
-## Constraints
+## Do not
 
 - Sync and async must be separate classes.
 - No business logic in adapters — map data and talk to infrastructure only.
 - Do **not** create a top-level `adapters/<name>/` package — domain adapters live under repositories.
 - Prefer ArchiPy search handle API; only drop to raw Redis for operations the handle does not cover.
 - Use specific exceptions; always `raise ... from e`.
+- Prefer the ArchiPy search-handle API — never raw `client.ft()` for operations the handle covers.
 
 ## Verify
 

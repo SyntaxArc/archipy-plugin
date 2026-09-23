@@ -18,7 +18,8 @@ FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n?", re.DOTALL)
 
 HARD_RULES = (
     "ArchiPy apps: follow architecture-for-apps rule + skills/archipy-docs/reference.md. "
-    "Domain adapters under repositories/{domain}/adapters/ only. Prefer /scaffold-* commands."
+    "Domain adapters under repositories/{domain}/adapters/ only. "
+    "Prefer the plugin skills (/scaffold-*, /redis-search, archipy-docs)."
 )
 
 # Cursor event names (camelCase). Claude Code uses PascalCase and a different hooks.json schema.

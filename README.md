@@ -15,8 +15,7 @@ boundaries, adapters, helpers (utils / decorators / interceptors), configuration
 It ships:
 
 - **Rules** — persistent guidance while editing matching files
-- **Skills** — agent workflows for scaffolding and docs lookup
-- **Commands** — slash entry points (`/scaffold-app`, `/docs-helpers`, …)
+- **Skills** — scaffolding and docs workflows, also invocable as slash commands (`/scaffold-app`, `/docs-helpers`, …)
 
 It is **not** for maintaining the ArchiPy library itself (no library changelog or core BDD internals).
 
@@ -39,7 +38,7 @@ ln -sfn "$(pwd)" ~/.cursor/plugins/local/archipy
 
 Then run **Developer: Reload Window** in Cursor (or restart Cursor).
 
-Verify under **Customize** that the `archipy` plugin loaded (rules, skills, commands).
+Verify under **Customize** that the `archipy` plugin loaded (rules, skills).
 
 ### Cursor — Team marketplace (Teams / Enterprise)
 
@@ -94,52 +93,38 @@ Then restart Claude Code or run `/reload-plugins`.
 | `using-archipy-services.mdc`     | `**/services/**/*.py`, `**/manage.py`            |
 | `testing-bdd-for-apps.mdc`       | `**/features/**/*`                               |
 
-### Skills (14)
+### Skills (22)
 
-| Skill                            | When to use                                                               |
-|----------------------------------|---------------------------------------------------------------------------|
-| `scaffold-archipy-app`           | Bootstrap a new ArchiPy-based service layout                              |
-| `scaffold-archipy-domain`        | Full domain slice (models, repo, logic, service)                          |
-| `scaffold-archipy-models`        | Domain/repository DTOs, errors, optional entities under `models/`         |
-| `scaffold-archipy-adapter`       | Add domain adapter under `repositories/{domain}/adapters/`                |
-| `scaffold-archipy-logic`         | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator`    |
-| `scaffold-archipy-service`       | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`                 |
-| `scaffold-archipy-bdd`           | Behave `features/` stub                                                   |
-| `scaffold-archipy-utils`         | Wire or create `helpers/utils`                                            |
-| `scaffold-archipy-decorator`     | Wire or create `helpers/decorators`                                       |
-| `scaffold-archipy-interceptor`   | Wire or create `helpers/interceptors`                                     |
-| `scaffold-archipy-health-checks` | Scaffold FastAPI/gRPC health checks and optional K8s probe YAML           |
-| `scaffold-archipy-observability` | Configure ArchiPy 5.x OpenTelemetry and stack instrumentation             |
-| `redis-search`                   | RediSearch full-text, vector search, and search-cache adapters            |
-| `archipy-docs`                   | Answer “how do I… with ArchiPy?” using bundled `reference.md` + live docs |
+Every skill is a slash command in both Cursor and Claude Code (Claude Code namespaces them as `/archipy:<name>`).
+`docs-*` skills set `disable-model-invocation: true`: they are user shortcuts into `archipy-docs`, so the model sees
+each workflow once.
 
-### Commands (21)
+| Skill                    | Slash                     | Invoked by  | When to use                                                             |
+|--------------------------|---------------------------|-------------|-------------------------------------------------------------------------|
+| `scaffold-app`           | `/scaffold-app`           | Model + you | Bootstrap a new ArchiPy-based service layout                            |
+| `scaffold-domain`        | `/scaffold-domain`        | Model + you | Full domain slice (models, repo, logic, service)                        |
+| `scaffold-models`        | `/scaffold-models`        | Model + you | Domain/repository DTOs, errors, optional entities under `models/`       |
+| `scaffold-adapter`       | `/scaffold-adapter`       | Model + you | Domain adapter under `repositories/{domain}/adapters/`                  |
+| `scaffold-logic`         | `/scaffold-logic`         | Model + you | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator`  |
+| `scaffold-service`       | `/scaffold-service`       | Model + you | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`               |
+| `scaffold-bdd`           | `/scaffold-bdd`           | Model + you | Behave `features/` layout                                               |
+| `scaffold-utils`         | `/scaffold-utils`         | Model + you | Wire or create `helpers/utils`                                          |
+| `scaffold-decorator`     | `/scaffold-decorator`     | Model + you | Wire or create `helpers/decorators`                                     |
+| `scaffold-interceptor`   | `/scaffold-interceptor`   | Model + you | Wire or create `helpers/interceptors`                                   |
+| `scaffold-health-checks` | `/scaffold-health-checks` | Model + you | FastAPI/gRPC health checks and optional K8s probe YAML                  |
+| `scaffold-observability` | `/scaffold-observability` | Model + you | ArchiPy 5.x OpenTelemetry traces, metrics, logs                         |
+| `redis-search`           | `/redis-search`           | Model + you | RediSearch full-text, vector search, and search-cache adapters          |
+| `archipy-docs`           | —                         | Model       | Answer “how do I… with ArchiPy?” from the bundled reference + live docs |
+| `docs-quickstart`        | `/docs-quickstart`        | You         | Quickstart + bundled reference                                          |
+| `docs-adapters`          | `/docs-adapters`          | You         | Adapter patterns + docs links                                           |
+| `docs-helpers`           | `/docs-helpers`           | You         | Utils / decorators / interceptors                                       |
+| `docs-config`            | `/docs-config`            | You         | BaseConfig + DI docs                                                    |
+| `docs-errors`            | `/docs-errors`            | You         | Error handling docs                                                     |
+| `docs-testing`           | `/docs-testing`           | You         | BDD testing docs                                                        |
+| `docs-observability`     | `/docs-observability`     | You         | Observability docs                                                      |
+| `docs-health-checks`     | `/docs-health-checks`     | You         | HTTP/gRPC health checks (liveness/readiness/startup)                    |
 
-| Command                   | Action                                               |
-|---------------------------|------------------------------------------------------|
-| `/scaffold-app`           | Run scaffold-archipy-app                             |
-| `/scaffold-domain`        | Run scaffold-archipy-domain                          |
-| `/scaffold-models`        | Run scaffold-archipy-models                          |
-| `/scaffold-adapter`       | Run scaffold-archipy-adapter                         |
-| `/scaffold-logic`         | Run scaffold-archipy-logic                           |
-| `/scaffold-service`       | Run scaffold-archipy-service                         |
-| `/scaffold-bdd`           | Run scaffold-archipy-bdd                             |
-| `/scaffold-utils`         | Run scaffold-archipy-utils                           |
-| `/scaffold-decorator`     | Run scaffold-archipy-decorator                       |
-| `/scaffold-interceptor`   | Run scaffold-archipy-interceptor                     |
-| `/scaffold-health-checks` | Scaffold FastAPI/gRPC health + K8s probe YAML        |
-| `/scaffold-observability` | Configure OpenTelemetry traces, metrics, and logs    |
-| `/redis-search`           | Scaffold Redis full-text / vector / search-cache     |
-| `/docs-quickstart`        | Quickstart + bundled reference                       |
-| `/docs-adapters`          | Adapter patterns + docs links                        |
-| `/docs-helpers`           | Utils / decorators / interceptors                    |
-| `/docs-config`            | BaseConfig + DI docs                                 |
-| `/docs-errors`            | Error handling docs                                  |
-| `/docs-testing`           | BDD testing docs                                     |
-| `/docs-observability`     | Observability docs                                   |
-| `/docs-health-checks`     | HTTP/gRPC health checks (liveness/readiness/startup) |
-
-There is **no** `/scaffold-helper` — use the three helper-specific commands.
+There is **no** `/scaffold-helper` — use the three helper-specific skills.
 
 ## Quick start
 
@@ -150,7 +135,7 @@ There is **no** `/scaffold-helper` — use the three helper-specific commands.
 5. Expect: `AppConfig`, models stub, `repositories/<domain>/`, optional `manage.py` (if `fastapi`), helpers tree,
    `.env.example`.
 
-## Commands deep dive
+## Skills deep dive
 
 ### `/scaffold-app`
 
@@ -344,7 +329,6 @@ archipy-plugin/
 ├── scripts/                 # Catalog checks + hook scripts
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
-├── commands/                # Slash commands
 ├── assets/logo.jpg
 ├── AGENTS.md
 ├── CONTRIBUTING.md
@@ -353,24 +337,23 @@ archipy-plugin/
 └── CHANGELOG.md
 ```
 
-Cursor loads `rules/` (`.mdc`), `skills/`, `commands/`, and `hooks/hooks.json`. Claude Code loads `skills/`, `commands/`,
-and `hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules; in projects that depend on `archipy`, the Claude
+Cursor loads `rules/` (`.mdc`), `skills/`, and `hooks/hooks.json`. Claude Code loads `skills/` and
+`hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules; in projects that depend on `archipy`, the Claude
 session hook injects always-on rule text and the post-tool hook injects glob-matched rules (once per session).
-Commands set `disable-model-invocation: true`, so Claude auto-selects the matching skill while `/scaffold-*` and
-`/docs-*` stay available to users.
+Skills double as slash commands; only the `docs-*` shortcuts set `disable-model-invocation: true`.
 
 ## ArchiPy docs map
 
 | Plugin entry                                 | Live documentation                                                                                                                                                         |
 |----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/docs-quickstart`, `scaffold-archipy-app`   | [Quickstart](https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/), [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/) |
-| `/scaffold-models`, `scaffold-archipy-models` | [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/), [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/) |
-| `/docs-adapters`, `scaffold-archipy-adapter` | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/), [API adapters](https://syntaxarc.github.io/ArchiPy/api_reference/adapters/)                           |
+| `/docs-quickstart`, `scaffold-app`   | [Quickstart](https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/), [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/) |
+| `/scaffold-models`, `scaffold-models` | [Project structure](https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/), [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/) |
+| `/docs-adapters`, `scaffold-adapter` | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/), [API adapters](https://syntaxarc.github.io/ArchiPy/api_reference/adapters/)                           |
 | `/redis-search`                              | [Adapters](https://syntaxarc.github.io/ArchiPy/tutorials/adapters/) + bundled Redis search skill stubs                                                                     |
 | `/docs-helpers`, helper scaffolds            | [Helpers](https://syntaxarc.github.io/ArchiPy/tutorials/helpers/), [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/)                           |
 | `/docs-config`                               | [Config](https://syntaxarc.github.io/ArchiPy/tutorials/config_management/), [DI](https://syntaxarc.github.io/ArchiPy/tutorials/dependency_injection/)                      |
 | `/docs-errors`                               | [Error handling](https://syntaxarc.github.io/ArchiPy/tutorials/error_handling/)                                                                                            |
-| `/docs-testing`, `scaffold-archipy-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                        |
+| `/docs-testing`, `scaffold-bdd`      | [Testing strategy](https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/)                                                                                        |
 | `/docs-observability`, OTel scaffold         | [Observability](https://syntaxarc.github.io/ArchiPy/tutorials/observability/) + `/scaffold-observability`                                                                  |
 | `/docs-health-checks`, health scaffold       | Bundled `reference.md` Health checks + `/scaffold-health-checks`                                                                                                           |
 | `archipy-docs` / `reference.md`              | [Docs home](https://syntaxarc.github.io/ArchiPy/), [API reference](https://syntaxarc.github.io/ArchiPy/api_reference/)                                                     |
@@ -382,8 +365,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist (version bump acro
 1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy`
    (Claude Code).
 2. Edit rules (`.mdc` frontmatter: `description`, `alwaysApply` / `globs`), skills (`name` + `description` matching
-   folder name), or commands (`name` + `description` +
-   `disable-model-invocation: true`).
+   folder name), `docs-*` skills also set
+   `disable-model-invocation: true`.
 3. Reload the editor window after changes.
 4. Keep consumer focus: apps using PyPI `archipy`, not ArchiPy monorepo maintainers.
 5. Run `python scripts/check_catalog.py` before opening a PR.

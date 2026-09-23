@@ -44,7 +44,7 @@ jobs:
             AGENTS.md
             CONTRIBUTING.md
             CHANGELOG.md
-            commands
             skills
+            agents
             rules
           fail: true

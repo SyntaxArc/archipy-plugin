@@ -1,9 +1,9 @@
 ---
 name: redis-search
 description: >-
-  Scaffold Redis search adapters for full-text search (RediSearch), vector search,
-  and search caching patterns. Use when adding search infrastructure to ArchiPy apps.
-  Prefer RedisAdapter.search_index() over raw client.ft().
+  Scaffold RediSearch full-text, vector, or search-cache adapters in an ArchiPy app. Use
+  for "add search", "full-text/semantic/vector search", "embeddings index", or "cache
+  search results".
 ---
 
 # Redis Search Skills
@@ -16,7 +16,7 @@ Redis search via ArchiPy (`archipy[redis]`):
 - **Vector search**: KNN / range via `SearchQueryDTO.from_knn` / `from_range`
 - **Search caching**: cache-aside around expensive search results
 
-Canonical layout and ArchiPy constraints: `../archipy-docs/reference.md` (Adapters + Redis Search), resolved relative
+Canonical layout and ArchiPy constraints: `../archipy-docs/reference/adapters.md` (Adapters + Redis Search), resolved relative
 to this `SKILL.md`'s directory in the plugin installation — not the app workspace. Templates:
 `reference/fulltext_adapter.py`, `reference/vector_adapter.py`, `reference/search_cache_adapter.py`.
 
@@ -84,13 +84,14 @@ Use `reference/vector_adapter.py`: `VectorFieldConfig` + `SearchQueryDTO.from_kn
 Use `reference/search_cache_adapter.py`: cache-aside with Redis get/setex. Repository orchestrates search + cache;
 logics own invalidation rules.
 
-## Constraints
+## Do not
 
 - Sync and async must be separate classes.
 - No business logic in adapters — map data and talk to infrastructure only.
 - Do **not** create a top-level `adapters/<name>/` package — domain adapters live under repositories.
 - Prefer ArchiPy search handle API; only drop to raw Redis for operations the handle does not cover.
 - Use specific exceptions; always `raise ... from e`.
+- Prefer the ArchiPy search-handle API — never raw `client.ft()` for operations the handle covers.
 
 ## Verify
 

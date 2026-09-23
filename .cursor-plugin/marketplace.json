@@ -7,8 +7,8 @@
     {
       "name": "archipy",
       "source": ".",
-      "description": "Cursor and Claude Code plugin: rules, skills, and commands for building apps with ArchiPy",
-      "version": "0.11.0"
+      "description": "Cursor and Claude Code plugin: rules, skills, agents, and hooks for building apps with ArchiPy",
+      "version": "0.12.0"
     }
   ]
 }

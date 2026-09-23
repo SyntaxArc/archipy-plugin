@@ -6,6 +6,12 @@
         "command": "python3 \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/scripts/scaffold_hygiene.py\" sessionStart"
       }
     ],
+    "preToolUse": [
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/scripts/scaffold_hygiene.py\" preToolUse",
+        "matcher": "Write"
+      }
+    ],
     "postToolUse": [
       {
         "command": "python3 \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/scripts/scaffold_hygiene.py\" postToolUse",

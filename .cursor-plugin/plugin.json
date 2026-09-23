@@ -1,7 +1,7 @@
 {
   "name": "archipy",
-  "version": "0.11.0",
-  "description": "Cursor and Claude Code plugin: rules, skills, and commands for building apps with ArchiPy",
+  "version": "0.12.0",
+  "description": "Cursor and Claude Code plugin: rules, skills, agents, and hooks for building apps with ArchiPy",
   "author": {
     "name": "SyntaxArc"
   },
@@ -18,6 +18,5 @@
   "logo": "assets/logo.jpg",
   "rules": "./rules",
   "skills": "./skills",
-  "commands": "./commands",
   "hooks": "./hooks/hooks.json"
 }

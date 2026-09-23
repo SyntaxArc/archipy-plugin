@@ -19,7 +19,6 @@ MANIFESTS = (
 
 AGENTS_COMMAND_RE = re.compile(r"`(/[a-z0-9-]+)`")
 README_SKILLS_HEADER_RE = re.compile(r"### Skills \((\d+)\)")
-README_COMMANDS_HEADER_RE = re.compile(r"### Commands \((\d+)\)")
 README_RULES_HEADER_RE = re.compile(r"### Rules \((\d+)\)")
 README_SKILL_ROW_RE = re.compile(r"^\| `([a-z0-9-]+)`\s+\|", re.MULTILINE)
 README_RULE_ROW_RE = re.compile(r"^\| `([a-z0-9-]+\.mdc)`\s+\|", re.MULTILINE)
@@ -31,13 +30,9 @@ FRONTMATTER_DESC_RE = re.compile(
 SKILL_NAME_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 REFERENCE_FILE_RE = re.compile(r"`(reference/[A-Za-z0-9_.\-/]+)`")
 ARCHIPY_REFERENCE_VERSION_RE = re.compile(r"Verified against `archipy` (\d+)\.(\d+)\.x")
-COMMAND_SKILL_RE = re.compile(r"Follow the \*\*([a-z0-9-]+)\*\* skill", re.IGNORECASE)
-DOCS_SKILL_RE = re.compile(r"Use the \*\*([a-z0-9-]+)\*\* skill", re.IGNORECASE)
-SKILL_PATH_RE = re.compile(r"skills/([a-z0-9-]+)/SKILL\.md")
-COMMAND_DO_NOT_HEADING_RE = re.compile(
-    r"^##\s+(?:\d+\.\s+)?Do(?:\s+\*\*)?\s*not\b",
-    re.MULTILINE | re.IGNORECASE,
-)
+RELATIVE_PATH_RE = re.compile(r"`(?:\$\{CLAUDE_SKILL_DIR\}/)?(\.\./[A-Za-z0-9_.\-/]+)`")
+DO_NOT_HEADING_RE = re.compile(r"^## Do not\s*$", re.MULTILINE)
+DISABLE_MODEL_INVOCATION_RE = re.compile(r"^disable-model-invocation:\s*true\s*$", re.MULTILINE)
 CHANGELOG_VERSION_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.MULTILINE)
 
 ARCHIPY_5_REMOVED_GUIDANCE = (
@@ -174,42 +169,39 @@ def _check_archipy_reference_text(text: str) -> list[str]:
 
 
 def check_archipy_reference() -> list[str]:
-    reference = ROOT / "skills" / "archipy-docs" / "reference.md"
+    docs = ROOT / "skills" / "archipy-docs"
+    reference = docs / "reference.md"
     if not reference.is_file():
         return ["missing skills/archipy-docs/reference.md"]
-    return _check_archipy_reference_text(reference.read_text(encoding="utf-8"))
+    # reference.md is the index (with the verified version); topic files hold the rest.
+    parts = [reference, *sorted((docs / "reference").glob("*.md"))]
+    return _check_archipy_reference_text("\n".join(path.read_text(encoding="utf-8") for path in parts))
+
+
+def _skill_dirs() -> list[Path]:
+    skills_root = ROOT / "skills"
+    return sorted(p for p in skills_root.iterdir() if p.is_dir() and (p / "SKILL.md").is_file())
+
+
+def _is_scaffold_skill(name: str) -> bool:
+    return name.startswith("scaffold-") or name == "redis-search"
 
 
 def check_agents_commands() -> list[str]:
+    """Every `/name` advertised in AGENTS.md must be a skill (skills are slash-invocable)."""
     errors: list[str] = []
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-    commands_dir = ROOT / "commands"
     mentioned = sorted({m.group(1) for m in AGENTS_COMMAND_RE.finditer(agents) if m.group(1).startswith("/")})
     for command in mentioned:
         stem = command.lstrip("/")
-        path = commands_dir / f"{stem}.md"
-        if not path.is_file():
-            errors.append(f"AGENTS.md advertises `{command}` but missing commands/{stem}.md")
-    return errors
-
-
-def check_command_model_invocation() -> list[str]:
-    """Commands duplicate skills; hide them from Claude's model-invocable listing."""
-    errors: list[str] = []
-    for path in sorted((ROOT / "commands").glob("*.md")):
-        frontmatter = path.read_text(encoding="utf-8").split("---", 2)
-        if len(frontmatter) < 3 or not re.search(
-            r"^disable-model-invocation:\s*true\s*$", frontmatter[1], re.MULTILINE
-        ):
-            errors.append(f"commands/{path.name} missing `disable-model-invocation: true`")
+        if not (ROOT / "skills" / stem / "SKILL.md").is_file():
+            errors.append(f"AGENTS.md advertises `{command}` but missing skills/{stem}/SKILL.md")
     return errors
 
 
 def check_skills() -> list[str]:
     errors: list[str] = []
-    skills_root = ROOT / "skills"
-    skill_dirs = sorted(p for p in skills_root.iterdir() if p.is_dir() and (p / "SKILL.md").is_file())
-    for skill_dir in skill_dirs:
+    for skill_dir in _skill_dirs():
         skill_md = skill_dir / "SKILL.md"
         text = skill_md.read_text(encoding="utf-8")
         match = FRONTMATTER_NAME_RE.search(text)
@@ -232,11 +224,44 @@ def check_skills() -> list[str]:
         for reference in REFERENCE_FILE_RE.findall(text):
             if not (skill_dir / reference).is_file():
                 errors.append(f"{skill_dir.name}/SKILL.md references missing `{reference}`")
-        if name.startswith("scaffold-") or name == "redis-search":
+        for relative in RELATIVE_PATH_RE.findall(text):
+            if relative.endswith("..."):
+                continue
+            if not (skill_dir / relative).resolve().exists():
+                errors.append(f"{skill_dir.name}/SKILL.md references missing `{relative}`")
+        # docs-* are user-only shortcuts to archipy-docs; everything else stays model-invocable.
+        frontmatter = text.split("---", 2)[1] if text.startswith("---") else ""
+        user_only = bool(DISABLE_MODEL_INVOCATION_RE.search(frontmatter))
+        if name.startswith("docs-") and not user_only:
+            errors.append(f"{skill_dir.name}/SKILL.md must set `disable-model-invocation: true`")
+        if not name.startswith("docs-") and user_only:
+            errors.append(f"{skill_dir.name}/SKILL.md must stay model-invocable")
+        if _is_scaffold_skill(name):
             if "## Before writing files" not in text:
                 errors.append(f"{skill_dir.name}/SKILL.md missing `## Before writing files` workflow")
+            if not DO_NOT_HEADING_RE.search(text):
+                errors.append(f"{skill_dir.name}/SKILL.md missing `## Do not` constraints")
             if "## Verify" not in text:
                 errors.append(f"{skill_dir.name}/SKILL.md missing `## Verify` feedback loop")
+            elif "Report" not in text[text.index("## Verify"):]:
+                errors.append(f"{skill_dir.name}/SKILL.md `## Verify` must end with a report step")
+    return errors
+
+
+def check_agents() -> list[str]:
+    """Subagents load from `agents/` in both Cursor and Claude Code; each needs name + description."""
+    errors: list[str] = []
+    for path in sorted((ROOT / "agents").glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        match = FRONTMATTER_NAME_RE.search(text)
+        if not text.startswith("---\n") or not match:
+            errors.append(f"agents/{path.name} missing frontmatter name")
+            continue
+        if match.group(1).strip() != path.stem:
+            errors.append(f"agents/{path.name} name `{match.group(1).strip()}` != file name")
+        desc = FRONTMATTER_DESC_RE.search(text)
+        if not desc or len(desc.group(1).strip()) < 20:
+            errors.append(f"agents/{path.name} missing or trivial description")
     return errors
 
 
@@ -268,67 +293,13 @@ def check_rules() -> list[str]:
     return errors
 
 
-def _canonical_skill_for_command(stem: str) -> str | None:
-    """Return the skill folder a command must cite by explicit path."""
-    if stem.startswith("docs-"):
-        return "archipy-docs"
-    if stem == "redis-search":
-        return "redis-search"
-    if stem.startswith("scaffold-"):
-        return f"scaffold-archipy-{stem.removeprefix('scaffold-')}"
-    return None
-
-
-def check_command_skill_refs() -> list[str]:
-    errors: list[str] = []
-    skills_on_disk = {
-        p.name for p in (ROOT / "skills").iterdir() if p.is_dir() and (p / "SKILL.md").is_file()
-    }
-    for command in sorted((ROOT / "commands").glob("*.md")):
-        text = command.read_text(encoding="utf-8")
-        refs = COMMAND_SKILL_RE.findall(text) + DOCS_SKILL_RE.findall(text)
-        path_refs = SKILL_PATH_RE.findall(text)
-        canonical = _canonical_skill_for_command(command.stem)
-        if not refs and not path_refs:
-            errors.append(f"commands/{command.name} has no Follow/Use **skill** reference")
-            continue
-        for skill in list(refs) + path_refs:
-            if skill not in skills_on_disk:
-                errors.append(f"commands/{command.name} references missing skill `{skill}`")
-        if canonical and canonical not in path_refs:
-            errors.append(
-                f"commands/{command.name} must reference its skill by explicit "
-                f"`skills/{canonical}/SKILL.md` path (bold names alone do not resolve in Cursor)"
-            )
-        if command.stem.startswith("docs-"):
-            continue
-        if command.stem.startswith("scaffold-") or command.stem == "redis-search":
-            if "in full" not in text or "Inspect the workspace" not in text:
-                errors.append(
-                    f"commands/{command.name} must read its skill in full and inspect the workspace"
-                )
-            if not COMMAND_DO_NOT_HEADING_RE.search(text):
-                errors.append(
-                    f"commands/{command.name} must inline its key constraints (`## Do not` heading)"
-                )
-            if "Verify" not in text or "Report" not in text:
-                errors.append(
-                    f"commands/{command.name} must include a Verify + report section"
-                )
-    return errors
-
-
 def check_readme_catalog() -> list[str]:
     errors: list[str] = []
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    skills_on_disk = sorted(
-        p.name for p in (ROOT / "skills").iterdir() if p.is_dir() and (p / "SKILL.md").is_file()
-    )
-    commands_on_disk = sorted(p.stem for p in (ROOT / "commands").glob("*.md"))
+    skills_on_disk = [p.name for p in _skill_dirs()]
     rules_on_disk = sorted(p.name for p in (ROOT / "rules").glob("*.mdc"))
 
     skills_header = README_SKILLS_HEADER_RE.search(readme)
-    commands_header = README_COMMANDS_HEADER_RE.search(readme)
     rules_header = README_RULES_HEADER_RE.search(readme)
     if not skills_header:
         errors.append("README.md missing `### Skills (N)` header")
@@ -336,20 +307,19 @@ def check_readme_catalog() -> list[str]:
         errors.append(
             f"README Skills count {skills_header.group(1)} != disk {len(skills_on_disk)}"
         )
-    if not commands_header:
-        errors.append("README.md missing `### Commands (N)` header")
-    elif int(commands_header.group(1)) != len(commands_on_disk):
-        errors.append(
-            f"README Commands count {commands_header.group(1)} != disk {len(commands_on_disk)}"
-        )
     if not rules_header:
         errors.append("README.md missing `### Rules (N)` header")
     elif int(rules_header.group(1)) != len(rules_on_disk):
         errors.append(f"README Rules count {rules_header.group(1)} != disk {len(rules_on_disk)}")
 
     skills_section = ""
-    if skills_header and commands_header:
-        skills_section = readme[skills_header.end(): commands_header.start()]
+    if skills_header:
+        next_header = re.search(r"^#{1,3} ", readme[skills_header.end():], re.MULTILINE)
+        end = skills_header.end() + next_header.start() if next_header else len(readme)
+        skills_section = readme[skills_header.end(): end]
+    for agent in sorted((ROOT / "agents").glob("*.md")):
+        if f"`{agent.stem}`" not in readme:
+            errors.append(f"README.md missing agent `{agent.stem}`")
     readme_skills = README_SKILL_ROW_RE.findall(skills_section)
     missing = sorted(set(skills_on_disk) - set(readme_skills))
     extra = sorted(set(readme_skills) - set(skills_on_disk))
@@ -369,9 +339,9 @@ def check_readme_catalog() -> list[str]:
     if extra_rules:
         errors.append(f"README rules table unknown: {', '.join(extra_rules)}")
 
-    for stem in commands_on_disk:
-        if f"`/{stem}`" not in readme:
-            errors.append(f"README.md missing command `/{stem}`")
+    for stem in skills_on_disk:
+        if stem != "archipy-docs" and f"`/{stem}`" not in readme:
+            errors.append(f"README.md missing slash command `/{stem}`")
     return errors
 
 
@@ -382,22 +352,18 @@ def main() -> int:
     errors.extend(check_changelog_version())
     errors.extend(check_archipy_reference())
     errors.extend(check_agents_commands())
-    errors.extend(check_command_model_invocation())
     errors.extend(check_skills())
     errors.extend(check_rules())
-    errors.extend(check_command_skill_refs())
+    errors.extend(check_agents())
     errors.extend(check_readme_catalog())
     if errors:
         for error in errors:
             _fail(error)
         return 1
     version = _manifest_version(MANIFESTS[0])
-    skill_count = len(
-        [p for p in (ROOT / "skills").iterdir() if p.is_dir() and (p / "SKILL.md").is_file()]
-    )
-    command_count = len(list((ROOT / "commands").glob("*.md")))
+    skill_count = len(_skill_dirs())
     rule_count = len(list((ROOT / "rules").glob("*.mdc")))
-    print(f"OK: version={version} skills={skill_count} commands={command_count} rules={rule_count}")
+    print(f"OK: version={version} skills={skill_count} rules={rule_count}")
     return 0
 
 

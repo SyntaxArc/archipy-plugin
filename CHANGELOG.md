@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-09-23
+
+### Added
+
+- `archipy-reviewer` subagent (`agents/`) that reviews ArchiPy app diffs against layer, import-direction, unit of
+  work, adapter placement, error-chaining, config, and security rules; loaded by both Cursor and Claude Code
+- `PreToolUse` (Claude Code) / `preToolUse` (Cursor) hook that blocks creating a new domain adapter outside
+  `repositories/{domain}/adapters/`; existing top-level `adapters/` files stay editable
+- Session start tells the agent which `archipy` version and extras the app pins (from `uv.lock` or `pyproject.toml`)
+- `claude plugin eval` suite under `evals/` (four fire cases graded on outcomes, one should-not-fire case)
+- Release workflow: pushing a `vX.Y.Z` tag re-runs checks, verifies the manifest version, and publishes the GitHub
+  release from this changelog
+- Catalog checks for skill `## Do not` / `## Verify` + report sections, resolvable relative paths, `docs-*` invocation
+  mode, and agent frontmatter
+
+### Changed
+
+- Skills are the single entry point in both tools: each is also a slash command (`/scaffold-adapter`,
+  `/docs-helpers`, …). Claude Code now lists 22 skills (14 model-invocable) instead of 35 entries
+- Skill descriptions lead with the phrases users type ("add an endpoint", "new adapter", …) for better auto-selection
+- `archipy-docs/reference.md` is now an index plus topic files under `reference/`; `docs-*` and scaffold skills load
+  only their topic
+- Cursor session start only runs in ArchiPy apps, matching Claude Code
+
+### Removed
+
+- `commands/` directory. Every former command is now a skill with the same name, so `/scaffold-*`, `/redis-search`,
+  and `/docs-*` keep working. The `scaffold-archipy-*` skill names are renamed to `scaffold-*`
+
+### Fixed
+
+- `redis-search` was registered twice (command and skill with the same name)
+
 ## [0.11.0] - 2026-09-23
 
 ### Fixed

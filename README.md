@@ -339,6 +339,7 @@ archipy-plugin/
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
 ├── agents/                  # Subagents (archipy-reviewer)
+├── evals/                   # claude plugin eval suite
 ├── assets/logo.jpg
 ├── AGENTS.md
 ├── CONTRIBUTING.md
@@ -348,8 +349,10 @@ archipy-plugin/
 ```
 
 Cursor loads `rules/` (`.mdc`), `skills/`, and `hooks/hooks.json`. Claude Code loads `skills/` and
-`hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules; in projects that depend on `archipy`, the Claude
-session hook injects always-on rule text and the post-tool hook injects glob-matched rules (once per session).
+`hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules. In projects that depend on `archipy`, hooks in both tools add a
+reminder and the app's ArchiPy version at session start and block creating new domain adapters outside
+`repositories/{domain}/adapters/`; in Claude Code they also inject always-on and glob-matched rule text (once per
+session). See `CONTRIBUTING.md` § Hooks.
 Skills double as slash commands; only the `docs-*` shortcuts set `disable-model-invocation: true`.
 
 ## ArchiPy docs map

@@ -8,6 +8,14 @@ description: >-
 
 # Scaffold ArchiPy Service
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-services.mdc`
+- `../../rules/config-and-di.mdc`
+
 ## Before writing files
 
 1. Inspect existing transports, domain DTOs/logics, app bootstrap, DI wiring, and service tests.

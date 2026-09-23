@@ -8,6 +8,13 @@ description: >-
 
 # Scaffold ArchiPy App
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/architecture-for-apps.mdc`
+- `../../rules/config-and-di.mdc`
+
 ## Before writing files
 
 1. Inspect the workspace for `pyproject.toml`, existing packages, config, and source layout.

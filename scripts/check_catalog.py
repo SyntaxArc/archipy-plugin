@@ -25,7 +25,7 @@ README_SKILL_ROW_RE = re.compile(r"^\| `([a-z0-9-]+)`\s+\|", re.MULTILINE)
 README_RULE_ROW_RE = re.compile(r"^\| `([a-z0-9-]+\.mdc)`\s+\|", re.MULTILINE)
 FRONTMATTER_NAME_RE = re.compile(r"^name:\s*([^\s#]+)", re.MULTILINE)
 FRONTMATTER_DESC_RE = re.compile(
-    r"^description:\s*(?:>-\s*)?(.*?)(?=\n[a-zA-Z_]+\s*:|\n---)",
+    r"^description:\s*(?:>-\s*)?(.*?)(?=\n[a-zA-Z_-]+\s*:|\n---)",
     re.MULTILINE | re.DOTALL,
 )
 SKILL_NAME_RE = re.compile(r"^[a-z0-9-]{1,64}$")
@@ -190,6 +190,18 @@ def check_agents_commands() -> list[str]:
         path = commands_dir / f"{stem}.md"
         if not path.is_file():
             errors.append(f"AGENTS.md advertises `{command}` but missing commands/{stem}.md")
+    return errors
+
+
+def check_command_model_invocation() -> list[str]:
+    """Commands duplicate skills; hide them from Claude's model-invocable listing."""
+    errors: list[str] = []
+    for path in sorted((ROOT / "commands").glob("*.md")):
+        frontmatter = path.read_text(encoding="utf-8").split("---", 2)
+        if len(frontmatter) < 3 or not re.search(
+            r"^disable-model-invocation:\s*true\s*$", frontmatter[1], re.MULTILINE
+        ):
+            errors.append(f"commands/{path.name} missing `disable-model-invocation: true`")
     return errors
 
 
@@ -370,6 +382,7 @@ def main() -> int:
     errors.extend(check_changelog_version())
     errors.extend(check_archipy_reference())
     errors.extend(check_agents_commands())
+    errors.extend(check_command_model_invocation())
     errors.extend(check_skills())
     errors.extend(check_rules())
     errors.extend(check_command_skill_refs())

@@ -1,6 +1,7 @@
 ---
 name: docs-health-checks
 description: Open ArchiPy app health-check guidance for HTTP and gRPC liveness, readiness, startup probes, and shutdown
+disable-model-invocation: true
 ---
 
 # /docs-health-checks

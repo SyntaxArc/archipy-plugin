@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-09-23
+
+### Fixed
+
+- Claude Code hooks now emit `hookSpecificOutput.additionalContext`; the previous top-level `additional_context`
+  (Cursor shape) was ignored by Claude Code, so always-on and path-scoped rules never reached the model
+
+### Changed
+
+- Claude Code SessionStart/PostToolUse rule injection only runs in projects that depend on `archipy`
+  (`pyproject.toml`, `uv.lock`, or `requirements.txt`)
+- PostToolUse injects each path-scoped rule once per session (tracked per subagent) instead of on every edit;
+  SessionStart (including after `/compact` or `/clear`) resets the tracking
+- Commands set `disable-model-invocation: true` so Claude's model-invocable list shows each workflow once (the
+  skill); users still run `/scaffold-*` and `/docs-*`
+- Scaffold skills list the plugin rules to read first, matching their commands' mandatory reads
+- Template/rule paths use Claude Code-substituted `${CLAUDE_SKILL_DIR}` (skills) and `${CLAUDE_PLUGIN_ROOT}`
+  (commands); unbraced `$CLAUDE_PLUGIN_ROOT` was never substituted
+
 ## [0.10.1] - 2026-09-14
 
 ### Changed

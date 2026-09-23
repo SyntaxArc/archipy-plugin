@@ -290,21 +290,40 @@ class HygieneTests(unittest.TestCase):
         self.assertIn("repositories/{domain}/adapters", payload["additional_context"])
         self.assertNotIn("# Architecture for ArchiPy Apps", payload["additional_context"])
 
-    def test_claude_session_start_injects_architecture_rule(self) -> None:
+    def _run_claude(self, event: str, payload: dict[str, object]) -> dict[str, object]:
         env = os.environ.copy()
         env["CLAUDE_PLUGIN_ROOT"] = str(ROOT)
         result = subprocess.run(
-            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), "SessionStart"],
+            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), event],
             cwd=ROOT,
-            input="{}",
+            input=json.dumps(payload),
             capture_output=True,
             text=True,
             check=False,
             env=env,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        payload = json.loads(result.stdout)
-        context = payload["additional_context"]
+        return json.loads(result.stdout)
+
+    def _archipy_app(self) -> str:
+        app = tempfile.TemporaryDirectory()
+        self.addCleanup(app.cleanup)
+        Path(app.name, "pyproject.toml").write_text(
+            '[project]\nname = "demo"\ndependencies = ["archipy[postgres]>=5.4"]\n',
+            encoding="utf-8",
+        )
+        return app.name
+
+    def _claude_context(self, payload: dict[str, object], event: str) -> str:
+        output = payload["hookSpecificOutput"]
+        assert isinstance(output, dict)
+        self.assertEqual(output["hookEventName"], event)
+        self.assertNotIn("additional_context", payload)
+        return str(output["additionalContext"])
+
+    def test_claude_session_start_injects_architecture_rule(self) -> None:
+        payload = self._run_claude("SessionStart", {"cwd": self._archipy_app()})
+        context = self._claude_context(payload, "SessionStart")
         self.assertIn("# ArchiPy App Rules Index", context)
         self.assertIn("# Architecture for ArchiPy Apps", context)
         self.assertIn("# Contributing to ArchiPy Apps", context)
@@ -313,23 +332,66 @@ class HygieneTests(unittest.TestCase):
         self.assertIn("# Tooling for ArchiPy Apps", context)
         self.assertIn("services → logics", context)
 
-    def test_claude_post_tool_use_injects_glob_rule(self) -> None:
-        env = os.environ.copy()
-        env["CLAUDE_PLUGIN_ROOT"] = str(ROOT)
-        result = subprocess.run(
-            [sys.executable, str(SCRIPTS / "scaffold_hygiene.py"), "PostToolUse"],
-            cwd=ROOT,
-            input=json.dumps({"tool_input": {"path": "logics/user/user_logic.py"}}),
-            capture_output=True,
-            text=True,
-            check=False,
-            env=env,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        payload = json.loads(result.stdout)
-        self.assertIn("Unit of Work", payload["additional_context"])
-        self.assertIn("# Strict Typing for ArchiPy Apps", payload["additional_context"])
+    def test_claude_session_start_skips_non_archipy_project(self) -> None:
+        with tempfile.TemporaryDirectory() as other:
+            Path(other, "pyproject.toml").write_text('[project]\nname = "archipy-plugin"\n', encoding="utf-8")
+            self.assertEqual(self._run_claude("SessionStart", {"cwd": other}), {})
 
+    def test_claude_post_tool_use_injects_glob_rule(self) -> None:
+        payload = self._run_claude(
+            "PostToolUse",
+            {"cwd": self._archipy_app(), "tool_input": {"file_path": "logics/user/user_logic.py"}},
+        )
+        context = self._claude_context(payload, "PostToolUse")
+        self.assertIn("Unit of Work", context)
+        self.assertIn("# Strict Typing for ArchiPy Apps", context)
+
+    def test_claude_post_tool_use_injects_rule_once_per_session(self) -> None:
+        session_id = f"test-{os.getpid()}-{id(self)}"
+        state = Path(tempfile.gettempdir()) / f"archipy-plugin-rules-{session_id}.json"
+        self.addCleanup(state.unlink, missing_ok=True)
+        app = self._archipy_app()
+        edit = {"cwd": app, "session_id": session_id, "tool_input": {"file_path": "logics/user/user_logic.py"}}
+        first = self._run_claude("PostToolUse", edit)
+        self.assertIn("Unit of Work", self._claude_context(first, "PostToolUse"))
+        self.assertEqual(self._run_claude("PostToolUse", edit), {})
+        warning = self._run_claude(
+            "PostToolUse",
+            {"cwd": app, "session_id": session_id, "tool_input": {"file_path": "adapters/redis_adapter.py"}},
+        )
+        self.assertIn("repositories/{domain}/adapters", self._claude_context(warning, "PostToolUse"))
+
+    def test_claude_session_start_resets_rule_dedupe(self) -> None:
+        session_id = f"test-reset-{os.getpid()}-{id(self)}"
+        state = Path(tempfile.gettempdir()) / f"archipy-plugin-rules-{session_id}.json"
+        self.addCleanup(state.unlink, missing_ok=True)
+        app = self._archipy_app()
+        edit = {"cwd": app, "session_id": session_id, "tool_input": {"file_path": "logics/user/user_logic.py"}}
+        self._run_claude("PostToolUse", edit)
+        self.assertEqual(self._run_claude("PostToolUse", edit), {})
+        self._run_claude("SessionStart", {"cwd": app, "session_id": session_id, "source": "compact"})
+        self.assertIn("Unit of Work", self._claude_context(self._run_claude("PostToolUse", edit), "PostToolUse"))
+
+    def test_claude_post_tool_use_dedupes_subagents_separately(self) -> None:
+        session_id = f"test-agent-{os.getpid()}-{id(self)}"
+        tmp = Path(tempfile.gettempdir())
+        for suffix in ("", "-sub1"):
+            self.addCleanup((tmp / f"archipy-plugin-rules-{session_id}{suffix}.json").unlink, missing_ok=True)
+        app = self._archipy_app()
+        edit = {"cwd": app, "session_id": session_id, "tool_input": {"file_path": "logics/user/user_logic.py"}}
+        self._run_claude("PostToolUse", {**edit, "agent_id": "sub1"})
+        self.assertIn("Unit of Work", self._claude_context(self._run_claude("PostToolUse", edit), "PostToolUse"))
+
+    def test_claude_post_tool_use_absolute_paths(self) -> None:
+        app = self._archipy_app()
+        logic = self._run_claude("PostToolUse", {"cwd": app, "tool_input": {"file_path": f"{app}/logics/user/user_logic.py"}})
+        self.assertIn("Unit of Work", self._claude_context(logic, "PostToolUse"))
+        adapter = self._run_claude("PostToolUse", {"cwd": app, "tool_input": {"file_path": f"{app}/adapters/redis_adapter.py"}})
+        self.assertIn("repositories/{domain}/adapters", self._claude_context(adapter, "PostToolUse"))
+        nested = self._run_claude(
+            "PostToolUse", {"cwd": app, "tool_input": {"file_path": f"{app}/repositories/user/adapters/user_db_adapter.py"}}
+        )
+        self.assertNotIn("is under adapters/ but not", self._claude_context(nested, "PostToolUse"))
 
 if __name__ == "__main__":
     unittest.main()

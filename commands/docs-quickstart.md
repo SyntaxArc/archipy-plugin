@@ -1,6 +1,7 @@
 ---
 name: docs-quickstart
 description: Open ArchiPy quickstart guidance for app teams
+disable-model-invocation: true
 ---
 
 # /docs-quickstart

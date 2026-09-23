@@ -8,6 +8,12 @@ description: >-
 
 # Scaffold ArchiPy Health Checks
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/using-archipy-services.mdc`
+
 ## Before writing files
 
 1. Inspect package/config, current transports, app lifecycle, dependency adapters, DI wiring, deployment manifests, and
@@ -56,7 +62,7 @@ styles on one server.
 
 Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
 (`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-health-checks/` or
-`$CLAUDE_PLUGIN_ROOT/skills/scaffold-archipy-health-checks/`). These are plugin templates, not app-relative paths. Copy
+`${CLAUDE_SKILL_DIR}/`). These are plugin templates, not app-relative paths. Copy
 and adapt them into the app; never edit the plugin copies.
 
 ```text

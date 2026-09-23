@@ -8,6 +8,12 @@ description: >-
 
 # Scaffold ArchiPy OpenTelemetry
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/config-and-di.mdc`
+
 ## Before writing files
 
 1. Inspect `pyproject.toml`/`uv.lock`, `AppConfig`, bootstrap order, app transports, adapters, and `.env.example`.

@@ -11,6 +11,12 @@ description: >-
 
 **Only** `helpers/interceptors/`. Do not create utils or decorators here.
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/using-archipy-interceptors.mdc`
+
 ## Before writing files
 
 1. Inspect app bootstrap, existing interceptors/middleware, DI wiring, and the installed ArchiPy version.

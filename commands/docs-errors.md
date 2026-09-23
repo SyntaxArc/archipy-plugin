@@ -1,6 +1,7 @@
 ---
 name: docs-errors
 description: Open ArchiPy error-handling guidance
+disable-model-invocation: true
 ---
 
 # /docs-errors

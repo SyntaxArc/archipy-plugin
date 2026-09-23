@@ -1,6 +1,7 @@
 ---
 name: docs-helpers
 description: Open ArchiPy helpers docs (utils, decorators, interceptors)
+disable-model-invocation: true
 ---
 
 # /docs-helpers

@@ -1,6 +1,7 @@
 ---
 name: docs-testing
 description: Open ArchiPy BDD testing guidance
+disable-model-invocation: true
 ---
 
 # /docs-testing

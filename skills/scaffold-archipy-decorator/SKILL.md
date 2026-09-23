@@ -12,6 +12,12 @@ description: >-
 
 **Only** `helpers/decorators/`. Do not create utils or interceptors here.
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/using-archipy-decorators.mdc`
+
 ## Before writing files
 
 1. Inspect existing decorators, call sites, and the installed ArchiPy version for a matching decorator.

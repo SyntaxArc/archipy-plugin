@@ -1,6 +1,7 @@
 ---
 name: docs-config
 description: Open ArchiPy configuration and dependency-injection guidance
+disable-model-invocation: true
 ---
 
 # /docs-config

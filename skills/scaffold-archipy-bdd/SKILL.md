@@ -8,6 +8,12 @@ description: >-
 
 # Scaffold ArchiPy BDD
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/testing-bdd-for-apps.mdc`
+
 ## Before writing files
 
 1. Inspect existing `features/`, Behave config, scenario context, tags, containers, and the behavior being tested.
@@ -44,7 +50,7 @@ Model after ArchiPy `features/` + docs tutorial (consumer-slim — no library gR
 needs them).
 
 Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
-(`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-bdd/` or `$CLAUDE_PLUGIN_ROOT/skills/scaffold-archipy-bdd/`). These are
+(`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-bdd/` or `${CLAUDE_SKILL_DIR}/`). These are
 plugin templates, not app-relative paths. Copy and adapt them into the app; never edit the plugin copies.
 
 **Copy templates from `reference/`, adapt package imports, create only if missing:**

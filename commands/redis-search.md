@@ -1,6 +1,7 @@
 ---
 name: redis-search
 description: Scaffold Redis search adapters (RediSearch full-text, vector, search caching)
+disable-model-invocation: true
 ---
 
 # /redis-search
@@ -8,7 +9,7 @@ description: Scaffold Redis search adapters (RediSearch full-text, vector, searc
 ## 0. Mandatory reads — do this first, before generating anything
 
 Read these files in full. Resolve `../...` paths relative to this command file inside the plugin installation
-(`commands/` and `skills/` are siblings; e.g. `$CURSOR_PLUGIN_ROOT/commands/` or `$CLAUDE_PLUGIN_ROOT/commands/` —
+(`commands/` and `skills/` are siblings; e.g. `$CURSOR_PLUGIN_ROOT/commands/` or `${CLAUDE_PLUGIN_ROOT}/commands/` —
 follow symlinks). Do not rely on the summaries below alone.
 
 - `../skills/redis-search/SKILL.md` (canonical workflow — follow it in full)
@@ -16,7 +17,7 @@ follow symlinks). Do not rely on the summaries below alone.
 - `../rules/using-archipy-adapters.mdc` (ports, sync/async split, boundary errors)
 
 Copy skill templates from `reference/` resolved relative to the skill's `SKILL.md` location in the plugin installation
-(`$CURSOR_PLUGIN_ROOT/skills/redis-search/` or `$CLAUDE_PLUGIN_ROOT/skills/redis-search/`):
+(`$CURSOR_PLUGIN_ROOT/skills/redis-search/` or `${CLAUDE_PLUGIN_ROOT}/skills/redis-search/`):
 `reference/fulltext_adapter.py`, `reference/vector_adapter.py`, `reference/search_cache_adapter.py`. Copy and adapt
 them into the app; never edit the plugin copies.
 

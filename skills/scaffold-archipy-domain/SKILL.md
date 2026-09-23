@@ -7,6 +7,16 @@ description: >-
 
 # Scaffold ArchiPy Domain
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-models.mdc`
+- `../../rules/using-archipy-repositories.mdc`
+- `../../rules/using-archipy-logics.mdc`
+- `../../rules/using-archipy-services.mdc`
+
 ## Before writing files
 
 1. Inspect `pyproject.toml`, the package tree, neighboring domains, DI containers, and existing tests.
@@ -21,7 +31,7 @@ description: >-
 
 Before generating files, read these plugin skills in full. Resolve `../...` paths relative to this `SKILL.md` file's
 directory in the plugin installation (`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-domain/` or
-`$CLAUDE_PLUGIN_ROOT/skills/scaffold-archipy-domain/`) — not relative to the app workspace:
+`${CLAUDE_SKILL_DIR}/`) — not relative to the app workspace:
 
 - `../scaffold-archipy-models/SKILL.md`
 - `../scaffold-archipy-adapter/SKILL.md`

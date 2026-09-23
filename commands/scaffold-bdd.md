@@ -1,6 +1,7 @@
 ---
 name: scaffold-bdd
 description: Scaffold Behave BDD layout with ScenarioContext, pool manager, environment, optional testcontainers
+disable-model-invocation: true
 ---
 
 # /scaffold-bdd
@@ -8,14 +9,14 @@ description: Scaffold Behave BDD layout with ScenarioContext, pool manager, envi
 ## 0. Mandatory reads — do this first, before generating anything
 
 Read these files in full. Resolve `../...` paths relative to this command file inside the plugin installation
-(`commands/` and `skills/` are siblings; e.g. `$CURSOR_PLUGIN_ROOT/commands/` or `$CLAUDE_PLUGIN_ROOT/commands/` —
+(`commands/` and `skills/` are siblings; e.g. `$CURSOR_PLUGIN_ROOT/commands/` or `${CLAUDE_PLUGIN_ROOT}/commands/` —
 follow symlinks). Do not rely on the summaries below alone.
 
 - `../skills/scaffold-archipy-bdd/SKILL.md` (canonical workflow — follow it in full)
 - `../rules/testing-bdd-for-apps.mdc` (Behave, ScenarioContext, `@needs-*` tags)
 
 Copy skill templates from `reference/` resolved relative to the skill's `SKILL.md` location in the plugin installation
-(`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-bdd/` or `$CLAUDE_PLUGIN_ROOT/skills/scaffold-archipy-bdd/`). These are
+(`$CURSOR_PLUGIN_ROOT/skills/scaffold-archipy-bdd/` or `${CLAUDE_PLUGIN_ROOT}/skills/scaffold-archipy-bdd/`). These are
 plugin templates, not app-relative paths. Copy and adapt them into the app; never edit the plugin copies.
 
 ## 1. Inspect the workspace

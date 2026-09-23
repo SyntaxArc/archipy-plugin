@@ -29,7 +29,8 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 Bundled cheat sheet: `skills/archipy-docs/reference.md`.
 
 When a command names a skill, read that skill's `SKILL.md` in full before generating files. Resolve
-`skills/*/reference/` templates from the plugin installation (`$CURSOR_PLUGIN_ROOT` or `$CLAUDE_PLUGIN_ROOT`), copy
+`skills/*/reference/` templates from the plugin installation (Cursor: `$CURSOR_PLUGIN_ROOT`; Claude Code substitutes
+`${CLAUDE_SKILL_DIR}` in skills and `${CLAUDE_PLUGIN_ROOT}` in skills/commands), copy
 them into the app, and never edit plugin templates in place.
 
 Live docs: https://syntaxarc.github.io/ArchiPy/

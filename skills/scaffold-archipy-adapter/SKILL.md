@@ -8,6 +8,14 @@ description: >-
 
 # Scaffold ArchiPy Adapter
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-adapters.mdc`
+- `../../rules/using-archipy-repositories.mdc`
+
 ## Before writing files
 
 1. Inspect `pyproject.toml`, the target domain, neighboring adapters, ports, DI wiring, and tests.

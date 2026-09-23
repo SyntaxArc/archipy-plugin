@@ -1,6 +1,7 @@
 ---
 name: docs-observability
 description: Open ArchiPy OpenTelemetry guidance (traces, metrics, logs)
+disable-model-invocation: true
 ---
 
 # /docs-observability

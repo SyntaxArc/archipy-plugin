@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -25,6 +26,10 @@ CURSOR_SESSION = "sessionStart"
 CURSOR_POST = "postToolUse"
 CLAUDE_SESSION = "SessionStart"
 CLAUDE_POST = "PostToolUse"
+
+# Markers that identify an ArchiPy consumer app; rules stay out of unrelated projects.
+ARCHIPY_MARKERS = ("pyproject.toml", "uv.lock", "requirements.txt")
+ARCHIPY_DEP_RE = re.compile(r"""(^|[\s"'\[,])archipy([\s"'\[\]=<>~!,]|$)""", re.MULTILINE)
 
 
 def _plugin_root() -> Path:
@@ -47,6 +52,61 @@ def _read_stdin() -> dict[str, Any]:
 
 def _emit(payload: dict[str, Any]) -> None:
     sys.stdout.write(json.dumps(payload))
+
+
+def _emit_claude(event: str, context: str) -> dict[str, Any]:
+    """Build Claude Code hook output; Claude ignores Cursor's top-level `additional_context`."""
+    return {"hookSpecificOutput": {"hookEventName": event, "additionalContext": context}}
+
+
+def _is_archipy_app(payload: dict[str, Any]) -> bool:
+    """Return True when the project at the payload cwd (or a parent) depends on ArchiPy."""
+    start = Path(str(payload.get("cwd") or os.environ.get("CLAUDE_PROJECT_DIR") or Path.cwd()))
+    for directory in (start, *start.parents):
+        found_marker = False
+        for marker in ARCHIPY_MARKERS:
+            path = directory / marker
+            if not path.is_file():
+                continue
+            found_marker = True
+            try:
+                if ARCHIPY_DEP_RE.search(path.read_text(encoding="utf-8", errors="ignore")):
+                    return True
+            except OSError:
+                continue
+        if found_marker or (directory / ".git").exists():
+            return False
+    return False
+
+
+def _dedupe_key(payload: dict[str, Any]) -> str:
+    # Subagents share the parent session_id; key them separately so the main thread still gets rules.
+    return "-".join(str(payload.get(key) or "") for key in ("session_id", "agent_id")).rstrip("-")
+
+
+def _seen_rules_file(session_id: str) -> Path | None:
+    safe = re.sub(r"[^A-Za-z0-9_-]", "", session_id)
+    if not safe:
+        return None
+    return Path(tempfile.gettempdir()) / f"archipy-plugin-rules-{safe}.json"
+
+
+def _unseen_rules(session_id: str, rule_names: list[str]) -> list[str]:
+    """Filter rules already injected this session and record the new ones."""
+    state = _seen_rules_file(session_id)
+    if state is None:
+        return rule_names
+    try:
+        seen = set(json.loads(state.read_text(encoding="utf-8")))
+    except (OSError, ValueError, TypeError):
+        seen = set()
+    fresh = [name for name in rule_names if name not in seen]
+    if fresh:
+        try:
+            state.write_text(json.dumps(sorted(seen | set(fresh))), encoding="utf-8")
+        except OSError:
+            pass
+    return fresh
 
 
 def _is_forbidden_adapters_path(file_path: str) -> bool:
@@ -123,11 +183,11 @@ def _always_apply_rules() -> list[str]:
     return chunks
 
 
-def _matching_rules(file_paths: list[str]) -> list[str]:
+def _matching_rules(file_paths: list[str]) -> list[tuple[str, str]]:
     rules_dir = _plugin_root() / "rules"
     if not rules_dir.is_dir():
         return []
-    chunks: list[str] = []
+    chunks: list[tuple[str, str]] = []
     seen: set[str] = set()
     for rule in sorted(rules_dir.glob("*.mdc")):
         meta, body = _parse_rule(rule)
@@ -137,7 +197,7 @@ def _matching_rules(file_paths: list[str]) -> list[str]:
         if any(_path_matches(path, globs) for path in file_paths):
             if rule.name not in seen:
                 seen.add(rule.name)
-                chunks.append(body.strip())
+                chunks.append((rule.name, body.strip()))
     return chunks
 
 
@@ -145,14 +205,19 @@ def handle_cursor_session_start(_payload: dict[str, Any]) -> dict[str, Any]:
     return {"additional_context": HARD_RULES}
 
 
-def handle_claude_session_start(_payload: dict[str, Any]) -> dict[str, Any]:
-    # Claude Code plugins do not load Cursor `.mdc` rules; inject always-on rule bodies.
+def handle_claude_session_start(payload: dict[str, Any]) -> dict[str, Any]:
+    # Startup/resume/clear/compact may drop earlier rule context; let path-scoped rules inject again.
+    state = _seen_rules_file(_dedupe_key(payload))
+    if state is not None:
+        state.unlink(missing_ok=True)
+    # Claude Code plugins do not load Cursor `.mdc` rules; inject always-on rule bodies in ArchiPy apps only.
+    if not _is_archipy_app(payload):
+        return {}
     parts = [HARD_RULES, *_always_apply_rules()]
-    return {"additional_context": "\n\n".join(parts)}
+    return _emit_claude(CLAUDE_SESSION, "\n\n".join(parts))
 
 
-def handle_post_tool_use(payload: dict[str, Any], *, inject_rules: bool) -> dict[str, Any]:
-    paths = _paths_from_payload(payload)
+def _hygiene_warnings(paths: list[str]) -> list[str]:
     parts: list[str] = []
     for path in paths:
         if _is_forbidden_adapters_path(path):
@@ -160,11 +225,28 @@ def handle_post_tool_use(payload: dict[str, Any], *, inject_rules: bool) -> dict
                 f"ArchiPy hygiene: `{Path(path).as_posix()}` is under adapters/ but not "
                 "repositories/{domain}/adapters/. Move domain adapters there."
             )
-    if inject_rules:
-        parts.extend(_matching_rules(paths))
+    return parts
+
+
+def handle_cursor_post_tool_use(payload: dict[str, Any]) -> dict[str, Any]:
+    parts = _hygiene_warnings(_paths_from_payload(payload))
     if not parts:
         return {}
     return {"additional_context": "\n\n".join(parts)}
+
+
+def handle_claude_post_tool_use(payload: dict[str, Any]) -> dict[str, Any]:
+    if not _is_archipy_app(payload):
+        return {}
+    paths = _paths_from_payload(payload)
+    parts = _hygiene_warnings(paths)
+    rules = dict(_matching_rules(paths))
+    # Inject each path-scoped rule once per session instead of on every edit.
+    for name in _unseen_rules(_dedupe_key(payload), list(rules)):
+        parts.append(rules[name])
+    if not parts:
+        return {}
+    return _emit_claude(CLAUDE_POST, "\n\n".join(parts))
 
 
 def main() -> int:
@@ -179,9 +261,9 @@ def main() -> int:
     elif event in {CURSOR_SESSION, "session_start"}:
         _emit(handle_cursor_session_start(payload))
     elif event == CLAUDE_POST:
-        _emit(handle_post_tool_use(payload, inject_rules=True))
+        _emit(handle_claude_post_tool_use(payload))
     elif event in {CURSOR_POST, "post_tool_use"}:
-        _emit(handle_post_tool_use(payload, inject_rules=False))
+        _emit(handle_cursor_post_tool_use(payload))
     else:
         _emit({})
     return 0

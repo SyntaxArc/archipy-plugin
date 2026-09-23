@@ -7,6 +7,14 @@ description: >-
 
 # Scaffold ArchiPy Logic
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-logics.mdc`
+- `../../rules/using-archipy-models.mdc`
+
 ## Before writing files
 
 1. Inspect the target domain's DTOs, repository contract, neighboring logics, DI wiring, and tests.

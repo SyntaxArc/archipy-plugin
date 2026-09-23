@@ -1,6 +1,7 @@
 ---
 name: docs-adapters
 description: Open ArchiPy adapter patterns and API docs for app teams
+disable-model-invocation: true
 ---
 
 # /docs-adapters

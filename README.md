@@ -354,8 +354,10 @@ archipy-plugin/
 ```
 
 Cursor loads `rules/` (`.mdc`), `skills/`, `commands/`, and `hooks/hooks.json`. Claude Code loads `skills/`, `commands/`,
-and `hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules; the Claude session hook injects
-always-on rule text, and the post-tool hook injects glob-matched rules.
+and `hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules; in projects that depend on `archipy`, the Claude
+session hook injects always-on rule text and the post-tool hook injects glob-matched rules (once per session).
+Commands set `disable-model-invocation: true`, so Claude auto-selects the matching skill while `/scaffold-*` and
+`/docs-*` stay available to users.
 
 ## ArchiPy docs map
 
@@ -380,7 +382,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist (version bump acro
 1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy`
    (Claude Code).
 2. Edit rules (`.mdc` frontmatter: `description`, `alwaysApply` / `globs`), skills (`name` + `description` matching
-   folder name), or commands (`name` + `description`).
+   folder name), or commands (`name` + `description` +
+   `disable-model-invocation: true`).
 3. Reload the editor window after changes.
 4. Keep consumer focus: apps using PyPI `archipy`, not ArchiPy monorepo maintainers.
 5. Run `python scripts/check_catalog.py` before opening a PR.

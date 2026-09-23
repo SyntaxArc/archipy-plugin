@@ -11,6 +11,12 @@ description: >-
 
 **Only** `helpers/utils/`. Do not create decorators or interceptors here.
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/using-archipy-utils.mdc`
+
 ## Before writing files
 
 1. Inspect existing helpers and installed ArchiPy version for a matching utility.

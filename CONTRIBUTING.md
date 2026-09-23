@@ -26,8 +26,10 @@ Before every PR that touches skills/commands/AGENTS/README:
 
 1. Every `/command` listed in `AGENTS.md` has a matching `commands/<name>.md`.
 2. Every `skills/<name>/SKILL.md` frontmatter `name:` matches the folder name.
-3. README `### Rules (N)` / `### Skills (N)` / `### Commands (N)` counts match disk; tables list every entry.
-4. Atomic UoW decorator name stays `postgres_sqlalchemy_atomic_decorator` (not a fictional `@atomic` API).
+3. Every `commands/<name>.md` sets `disable-model-invocation: true` — commands wrap skills, so Claude's
+   model-invocable list should show each workflow once (the skill). Users still type `/<name>`.
+4. README `### Rules (N)` / `### Skills (N)` / `### Commands (N)` counts match disk; tables list every entry.
+5. Atomic UoW decorator name stays `postgres_sqlalchemy_atomic_decorator` (not a fictional `@atomic` API).
 
 Run:
 
@@ -66,7 +68,10 @@ Plugin hooks:
 - Claude Code: `hooks/claude-hooks.json` (`SessionStart`, `PostToolUse`) via `${CLAUDE_PLUGIN_ROOT}`
 
 Claude Code does not load `.mdc` rules. `scripts/scaffold_hygiene.py SessionStart` / `PostToolUse` injects matching
-rule bodies. Do not point both manifests at the same hooks file — schemas differ.
+rule bodies via `hookSpecificOutput.additionalContext` (Claude ignores Cursor's top-level `additional_context`).
+Claude injection runs only when the project's `pyproject.toml`, `uv.lock`, or `requirements.txt` depends on `archipy`;
+path-scoped rules inject once per session (and subagent), reset on each SessionStart (startup/resume/clear/compact).
+Do not point both manifests at the same hooks file — schemas differ.
 
 ## Scope reminders
 

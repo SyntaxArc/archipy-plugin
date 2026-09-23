@@ -1,6 +1,7 @@
 ---
 name: scaffold-adapter
 description: Scaffold a domain adapter under repositories/{domain}/adapters/
+disable-model-invocation: true
 ---
 
 # /scaffold-adapter
@@ -8,7 +9,7 @@ description: Scaffold a domain adapter under repositories/{domain}/adapters/
 ## 0. Mandatory reads — do this first, before generating anything
 
 Read these files in full. Resolve `../...` paths relative to this command file inside the plugin installation
-(`commands/` and `skills/` are siblings; e.g. `$CURSOR_PLUGIN_ROOT/commands/` or `$CLAUDE_PLUGIN_ROOT/commands/` —
+(`commands/` and `skills/` are siblings; e.g. `$CURSOR_PLUGIN_ROOT/commands/` or `${CLAUDE_PLUGIN_ROOT}/commands/` —
 follow symlinks). Do not rely on the summaries below alone.
 
 - `../skills/scaffold-archipy-adapter/SKILL.md` (canonical workflow — follow it in full)

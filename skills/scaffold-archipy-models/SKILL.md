@@ -12,6 +12,13 @@ description: >-
 
 **Only** `models/`. Do not create repositories, logics, services, or helpers here.
 
+## Read first
+
+Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
+
+- `../../rules/using-archipy-models.mdc`
+- `../../rules/architecture-for-apps.mdc`
+
 ## Before writing files
 
 1. Inspect existing `models/` (DTOs, errors, entities, types), neighboring domains, and the installed ArchiPy version.

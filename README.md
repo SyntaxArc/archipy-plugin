@@ -15,6 +15,7 @@ boundaries, adapters, helpers (utils / decorators / interceptors), configuration
 It ships:
 
 - **Rules** — persistent guidance while editing matching files
+- **Agents** — `archipy-reviewer` for architecture reviews of app diffs
 - **Skills** — scaffolding and docs workflows, also invocable as slash commands (`/scaffold-app`, `/docs-helpers`, …)
 
 It is **not** for maintaining the ArchiPy library itself (no library changelog or core BDD internals).
@@ -125,6 +126,14 @@ each workflow once.
 | `docs-health-checks`     | `/docs-health-checks`     | You         | HTTP/gRPC health checks (liveness/readiness/startup)                    |
 
 There is **no** `/scaffold-helper` — use the three helper-specific skills.
+
+### Agents (1)
+
+| Agent              | When to use                                                                                     |
+|--------------------|-------------------------------------------------------------------------------------------------|
+| `archipy-reviewer` | Review an ArchiPy app diff against layers, import direction, UoW, adapter placement, and errors |
+
+Both Cursor and Claude Code load subagents from `agents/`. Ask for a review, or let the agent pick it up after scaffolding.
 
 ## Quick start
 
@@ -329,6 +338,7 @@ archipy-plugin/
 ├── scripts/                 # Catalog checks + hook scripts
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
+├── agents/                  # Subagents (archipy-reviewer)
 ├── assets/logo.jpg
 ├── AGENTS.md
 ├── CONTRIBUTING.md

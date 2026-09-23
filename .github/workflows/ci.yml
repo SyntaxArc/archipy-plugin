@@ -45,5 +45,6 @@ jobs:
             CONTRIBUTING.md
             CHANGELOG.md
             skills
+            agents
             rules
           fail: true

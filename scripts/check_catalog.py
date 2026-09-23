@@ -248,6 +248,23 @@ def check_skills() -> list[str]:
     return errors
 
 
+def check_agents() -> list[str]:
+    """Subagents load from `agents/` in both Cursor and Claude Code; each needs name + description."""
+    errors: list[str] = []
+    for path in sorted((ROOT / "agents").glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        match = FRONTMATTER_NAME_RE.search(text)
+        if not text.startswith("---\n") or not match:
+            errors.append(f"agents/{path.name} missing frontmatter name")
+            continue
+        if match.group(1).strip() != path.stem:
+            errors.append(f"agents/{path.name} name `{match.group(1).strip()}` != file name")
+        desc = FRONTMATTER_DESC_RE.search(text)
+        if not desc or len(desc.group(1).strip()) < 20:
+            errors.append(f"agents/{path.name} missing or trivial description")
+    return errors
+
+
 def check_rules() -> list[str]:
     errors: list[str] = []
     rules_root = ROOT / "rules"
@@ -300,6 +317,9 @@ def check_readme_catalog() -> list[str]:
         next_header = re.search(r"^#{1,3} ", readme[skills_header.end():], re.MULTILINE)
         end = skills_header.end() + next_header.start() if next_header else len(readme)
         skills_section = readme[skills_header.end(): end]
+    for agent in sorted((ROOT / "agents").glob("*.md")):
+        if f"`{agent.stem}`" not in readme:
+            errors.append(f"README.md missing agent `{agent.stem}`")
     readme_skills = README_SKILL_ROW_RE.findall(skills_section)
     missing = sorted(set(skills_on_disk) - set(readme_skills))
     extra = sorted(set(readme_skills) - set(skills_on_disk))
@@ -334,6 +354,7 @@ def main() -> int:
     errors.extend(check_agents_commands())
     errors.extend(check_skills())
     errors.extend(check_rules())
+    errors.extend(check_agents())
     errors.extend(check_readme_catalog())
     if errors:
         for error in errors:

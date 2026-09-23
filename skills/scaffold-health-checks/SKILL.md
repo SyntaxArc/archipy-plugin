@@ -27,7 +27,7 @@ Read these plugin rules in full before generating files (paths relative to this 
 Health checks are app code. ArchiPy does not ship stock HTTP routes or a stock gRPC `Health` servicer.
 
 **Probe semantics** (liveness vs readiness vs startup, K8s notes, common mistakes, FastAPI sketches): keep
-`../archipy-docs/reference.md` § Health checks as the source of truth — do not invent alternate probe meanings or
+`../archipy-docs/reference/health-checks.md` § Health checks as the source of truth — do not invent alternate probe meanings or
 duplicate endpoint sketches here. Resolve `../...` paths relative to this `SKILL.md`'s directory in the plugin
 installation — not the app workspace.
 
@@ -83,14 +83,14 @@ Share readiness helpers across transports. Keep business rules out of transport 
 - Wire with `include_router` into `manage.py` / app factory.
 - Liveness: process-only, no deps. Readiness: deps + warm-up + shutdown, timeouts, per-check detail.
 - Optional heartbeat mode for deadlock detection only when user asks.
-- Code sketches and payload shapes: `../archipy-docs/reference.md` § Health checks → FastAPI endpoints.
+- Code sketches and payload shapes: `../archipy-docs/reference/health-checks.md` § Health checks → FastAPI endpoints.
 
 ## gRPC (`health_grpc_service.py`)
 
 Use the standard gRPC Health Checking Protocol (`grpc.health.v1.Health`) via `grpcio-health-checking`.
 
 Register at least `""` (overall), `"readiness"`, and `"liveness"`. Map ready/alive → `SERVING`, not ready →
-`NOT_SERVING`. Full service-name table and update rules: `../archipy-docs/reference.md` § Health checks → gRPC Health
+`NOT_SERVING`. Full service-name table and update rules: `../archipy-docs/reference/health-checks.md` § Health checks → gRPC Health
 protocol.
 
 ### Wire sketch
@@ -146,11 +146,11 @@ timeout, `preStop` sleep for short drain window.
 
 - On `SIGTERM`, fail readiness immediately (HTTP `503` / gRPC `NOT_SERVING`).
 - Give Kubernetes a short window to stop routing, then exit after in-flight requests finish.
-- Details: `../archipy-docs/reference.md` § Health checks → Graceful shutdown.
+- Details: `../archipy-docs/reference/health-checks.md` § Health checks → Graceful shutdown.
 
 ## Common mistakes
 
-See `../archipy-docs/reference.md` § Health checks → Common mistakes. Also avoid:
+See `../archipy-docs/reference/health-checks.md` § Health checks → Common mistakes. Also avoid:
 
 - No warm-up or shutdown awareness in readiness helpers
 - Mixing sync and async gRPC health / domain servicers on one server

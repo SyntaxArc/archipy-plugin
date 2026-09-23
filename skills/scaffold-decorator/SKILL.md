@@ -111,5 +111,5 @@ reused ArchiPy API or files created, plus commands run.
 ## Docs
 
 - https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
-- Bundled skill reference: `../archipy-docs/reference.md` (Decorators section), resolved relative to this `SKILL.md`'s
+- Bundled skill reference: `../archipy-docs/reference/helpers.md` (Decorators section), resolved relative to this `SKILL.md`'s
   directory in the plugin installation — not the app workspace.

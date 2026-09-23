@@ -29,7 +29,7 @@ Read these plugin rules in full before generating files (paths relative to this 
 ## Prefer ArchiPy
 
 Check `archipy.helpers.interceptors` (FastAPI / gRPC). Prefer AppUtils auto-registration for stock interceptors. Show
-registration via DI or framework APIs from docs / `../archipy-docs/reference.md` (Interceptors), resolved relative to
+registration via DI or framework APIs from docs / `../archipy-docs/reference/helpers.md` (Interceptors), resolved relative to
 this `SKILL.md`'s directory in the plugin installation — not the app workspace.
 
 ## Custom interceptor
@@ -93,4 +93,4 @@ occurs once. Report the reused ArchiPy API or files created, plus commands run.
 
 - https://syntaxarc.github.io/ArchiPy/tutorials/helpers/
 - https://syntaxarc.github.io/ArchiPy/tutorials/observability/
-- Bundled skill reference: `../archipy-docs/reference.md` (Interceptors section)
+- Bundled skill reference: `../archipy-docs/reference/helpers.md` (Interceptors section)

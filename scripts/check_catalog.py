@@ -169,10 +169,13 @@ def _check_archipy_reference_text(text: str) -> list[str]:
 
 
 def check_archipy_reference() -> list[str]:
-    reference = ROOT / "skills" / "archipy-docs" / "reference.md"
+    docs = ROOT / "skills" / "archipy-docs"
+    reference = docs / "reference.md"
     if not reference.is_file():
         return ["missing skills/archipy-docs/reference.md"]
-    return _check_archipy_reference_text(reference.read_text(encoding="utf-8"))
+    # reference.md is the index (with the verified version); topic files hold the rest.
+    parts = [reference, *sorted((docs / "reference").glob("*.md"))]
+    return _check_archipy_reference_text("\n".join(path.read_text(encoding="utf-8") for path in parts))
 
 
 def _skill_dirs() -> list[Path]:

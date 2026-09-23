@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # /docs-health-checks
 
-Read `../archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../archipy-docs/`) — via `../archipy-docs/reference.md`, plus bundled health-check
+Read `../archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../archipy-docs/`) — and `../archipy-docs/reference/health-checks.md`, plus bundled health-check
 guidance.
 
 Cover:

@@ -6,8 +6,7 @@ disable-model-invocation: true
 
 # /docs-helpers
 
-Read `../archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../archipy-docs/`) — and the Utils / Decorators / Interceptors sections of
-`../archipy-docs/reference.md`.
+Read `../archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (resolve `../...` relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../archipy-docs/`) — and `../archipy-docs/reference/helpers.md`.
 
 Explain the three packages separately:
 

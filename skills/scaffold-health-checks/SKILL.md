@@ -170,10 +170,12 @@ See `../archipy-docs/reference/health-checks.md` § Health checks → Common mis
 
 ## Verify
 
-1. Run formatter/linter and focused health tests without starting a long-lived server.
-2. Test healthy, dependency failure, timeout, warm-up, and shutdown states.
+1. Run formatter/linter, then Behave scenarios that call the health endpoints/RPCs through the BDD harness with the
+   dependencies' `@needs-*` containers.
+2. Cover healthy, dependency failure (stop or pause the container), timeout, warm-up, and shutdown states.
 3. Validate generated Kubernetes YAML and confirm probe ports/paths/service names match app config.
-4. Report files, dependencies, and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report files, dependencies, and commands run.
 
 ## Beyond Kubernetes
 

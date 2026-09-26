@@ -108,7 +108,7 @@ each workflow once.
 | `scaffold-adapter`       | `/scaffold-adapter`       | Model + you | Domain adapter under `repositories/{domain}/adapters/`                  |
 | `scaffold-logic`         | `/scaffold-logic`         | Model + you | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator`  |
 | `scaffold-service`       | `/scaffold-service`       | Model + you | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`               |
-| `scaffold-bdd`           | `/scaffold-bdd`           | Model + you | Behave `features/` layout                                               |
+| `scaffold-bdd`           | `/scaffold-bdd`           | Model + you | Behave tests via REST/gRPC + testcontainers                             |
 | `scaffold-utils`         | `/scaffold-utils`         | Model + you | Wire or create `helpers/utils`                                          |
 | `scaffold-decorator`     | `/scaffold-decorator`     | Model + you | Wire or create `helpers/decorators`                                     |
 | `scaffold-interceptor`   | `/scaffold-interceptor`   | Model + you | Wire or create `helpers/interceptors`                                   |
@@ -129,11 +129,14 @@ There is **no** `/scaffold-helper` — use the three helper-specific skills.
 
 ### Agents (1)
 
-| Agent              | When to use                                                                                     |
-|--------------------|-------------------------------------------------------------------------------------------------|
-| `archipy-reviewer` | Review an ArchiPy app diff against layers, import direction, UoW, adapter placement, and errors |
+| Agent              | When to use                                                                                                  |
+|--------------------|--------------------------------------------------------------------------------------------------------------|
+| `archipy-reviewer` | Read-only review of an ArchiPy app diff (including untracked files) against layers, UoW, errors, and config |
 
-Both Cursor and Claude Code load subagents from `agents/`. Ask for a review, or let the agent pick it up after scaffolding.
+Both Cursor and Claude Code load subagents from `agents/`. Ask for a review, or let the agent pick it up after scaffolding:
+the layer-producing scaffold skills run it in their `## Verify` step. Claude Code limits it to read-only tools via
+`tools:`; it also sets `readonly: true` for Cursor (unknown keys are ignored), and its prompt forbids edits in both.
+`scripts/check_catalog.py` fails if its checklist drifts from the rules.
 
 ## Quick start
 
@@ -185,10 +188,11 @@ Both Cursor and Claude Code load subagents from `agents/`. Ask for a review, or 
 
 ### `/scaffold-bdd`
 
-- **Purpose:** Behave feature layout with ScenarioContext isolation.
-- **Asks:** Feature name; mocks vs `@needs-*` infra.
-- **Outcome:** `scenario_context.py`, pool manager, `test_helpers.py`, `environment.py`, feature/steps; infra adds slim
-  `test_containers.py` + `.env.test`.
+- **Purpose:** Behave scenarios that drive the `AppUtils`-built app over REST (`TestClient`) and gRPC against
+  testcontainers (databases, queues, Temporal).
+- **Asks:** Feature name (tags and harness hooks are derived from the app).
+- **Outcome:** `environment.py`, `test_containers.py`, `app_harness.py`, scenario context + pool, `test_helpers.py`,
+  `.env.test`, feature/steps.
 
 ### `/scaffold-utils`
 
@@ -319,10 +323,11 @@ Thin transport; AppUtils bootstrap; uvicorn from `FastAPIConfig`.
 
 ### `testing-bdd-for-apps`
 
-Behave + `ScenarioContext`; inject ports/mocks; `@needs-*` infra tags.
+Behave through the services layer (REST `TestClient`, gRPC stubs) on an `AppUtils`-built app; `@needs-*`
+testcontainers for databases, queues, and Temporal.
 
-- **Do:** Isolate scenarios; swap mocks via DI/context.
-- **Don’t:** Share mutable globals across scenarios; use pytest as the primary style.
+- **Do:** Build the app with `AppUtils`; run real containers; reset data per scenario.
+- **Don’t:** Call logics/repositories from steps; mock owned infrastructure; use pytest as the primary style.
 
 ## Project layout
 

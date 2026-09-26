@@ -122,7 +122,8 @@ sort / search DTOs before inventing page or cursor shapes.
 1. Run the repository's formatter and linter on generated Python.
 2. Confirm DTO naming, versioned domain vs unversioned repository layout, and error subclassing.
 3. Import the new modules without constructing infrastructure.
-4. Report files and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report files and commands run.
 
 ## Docs
 

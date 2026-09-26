@@ -40,6 +40,10 @@ server = AppUtils.create_grpc_app(config)           # sync servicers
 
 Do not re-implement CORS, exception handlers, or stock gRPC interceptors that AppUtils already wires.
 
+Each domain exports its transport wiring so the entrypoint and the BDD harness share it:
+`create_<domain>_v{n}_router(container)` for FastAPI and `register_<domain>_v{n}_servicers(server, container)` for
+gRPC (adds servicers to an `AppUtils`-built server; never binds a port).
+
 ## manage.py / uvicorn
 
 Bind from `config.FASTAPI` — never hardcode host/port/reload/proxy:

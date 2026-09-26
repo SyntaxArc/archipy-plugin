@@ -1,5 +1,5 @@
 ---
-description: Using and writing adapters in ArchiPy apps — extras, ports, mocks, boundary errors
+description: Using and writing adapters in ArchiPy apps — extras, ports, test fakes, boundary errors
 globs: **/repositories/**/adapters/**/*.py
 alwaysApply: false
 ---
@@ -38,7 +38,8 @@ repositories/<domain>/
 
 Thin wrappers around ArchiPy adapters (or external clients). Own entity construction and query building.
 Depend on ArchiPy ports when wrapping library adapters; add a local ABC only when the domain needs a custom
-contract. Optional in-memory mock only if BDD needs it (Redis ships `RedisMock`).
+contract. BDD runs adapters against real testcontainers; write a port-conforming fake only for a third-party API
+with no container.
 
 ## Ports
 
@@ -53,7 +54,7 @@ class CachePort(ABC):
     def set(self, key: str, value: str, ttl: int | None = None) -> None: ...
 ```
 
-Implementations and mocks must satisfy the same port.
+Implementations and fakes must satisfy the same port.
 
 ## Boundary Errors
 

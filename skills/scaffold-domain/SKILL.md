@@ -69,9 +69,11 @@ Install extras as needed: `uv add "archipy[<extras>]"`.
 ## Verify
 
 1. Run the repository's formatter and linter on generated Python.
-2. Run targeted domain tests; add a focused test when behavior, mapping, or error handling was added.
+2. Add or run Behave scenarios that exercise the new endpoints over REST/gRPC with their `@needs-*` containers
+   (`/scaffold-bdd`), covering success, validation, and domain errors.
 3. Confirm imports and DI wiring resolve without constructing production infrastructure.
-4. Report created/updated files, dependency changes, and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report created/updated files, dependency changes, and commands run.
 
 ## Docs
 

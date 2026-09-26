@@ -87,7 +87,8 @@ features/                  # optional — /scaffold-bdd
 1. Run the repository's formatter and linter on generated Python.
 2. Import the package and app factory without starting network services.
 3. Run existing targeted tests, if present.
-4. Report created/updated files, installed extras, and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report created/updated files, installed extras, and commands run.
 
 ## Docs
 

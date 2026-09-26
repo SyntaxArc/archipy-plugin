@@ -23,7 +23,6 @@ Read these plugin rules in full before generating files (paths relative to this 
 3. Ask only for unresolved choices:
    - Domain and adapter purpose
    - Sync or async when the repository does not establish one
-   - In-memory mock when testing requirements are unclear
    - New external client when ArchiPy has no matching adapter
 4. Preserve existing adapters and contracts. Extend compatible code; do not overwrite.
 
@@ -48,7 +47,8 @@ repositories/<domain>/
 
 - Thin wrapper: wrap ArchiPy adapter (or external client); own entity construction / query building; map client errors →
   domain errors with `raise ... from e`.
-- Optional mock: same module suffix or sibling file only if BDD needs an in-memory double.
+- No in-memory mocks for BDD: scenarios run this adapter against its testcontainer (`@needs-*`). A port-conforming
+  fake is allowed only for a third-party API that has no container.
 - Ports: depend on ArchiPy ports when wrapping library adapters; add a local ABC only when the domain needs a custom
   contract.
 
@@ -63,9 +63,11 @@ repositories/<domain>/
 ## Verify
 
 1. Run the repository's formatter and linter on generated Python.
-2. Run focused adapter/repository tests with mocks; do not require live infrastructure unless the project already does.
+2. Run the Behave scenarios that reach this adapter through the services layer (its `@needs-*` container, `/scaffold-bdd`);
+   if Docker is unavailable, say so.
 3. Confirm imports, port conformance, exception chaining, and DI wiring.
-4. Report files, dependency changes, and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report files, dependency changes, and commands run.
 
 ## Docs
 

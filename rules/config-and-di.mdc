@@ -63,7 +63,8 @@ uv add "archipy[dependency-injection]"
 ```
 
 - Wire in `configs/containers.py` as providers: **ports → adapters → repositories → logics → services**.
-- Depend on **ports** in business code; override providers in tests with mocks.
+- Depend on **ports** in business code. In BDD, override a provider only for a third-party API with no container;
+  everything else runs against testcontainers.
 - Import `app_config` inside the container module so `set_global` runs before wiring.
 - When OTel is enabled, call `OtelUtils.init_otel_if_needed(config)` after `set_global` and before the container creates
   SQLAlchemy engines, Kafka clients, ScyllaDB sessions, or other instrumented adapters.

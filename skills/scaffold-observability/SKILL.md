@@ -129,7 +129,8 @@ Only capture non-sensitive argument names in trace attributes.
 2. Confirm OTel initializes before adapter construction and AppUtils receives the same global/injected config.
 3. Test with in-memory exporters or `OtelUtils.configure_for_testing`; do not require a production collector.
 4. Confirm disabled signals no-op and no credentials appear in source, logs, or committed env files.
-5. Report extras, config keys, bootstrap changes, and commands run.
+5. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+6. Report extras, config keys, bootstrap changes, and commands run.
 
 ## Docs
 

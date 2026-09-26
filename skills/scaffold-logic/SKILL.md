@@ -87,9 +87,11 @@ If domain DTOs or errors are missing, follow `../scaffold-models/SKILL.md` — d
 ## Verify
 
 1. Run the repository's formatter and linter on generated Python.
-2. Add or run focused tests for success, business-rule failure, and rollback-relevant failure.
+2. Add or run Behave scenarios through the service endpoint that calls this logic (success, business-rule failure,
+   rollback), with its `@needs-*` containers; if no endpoint exists yet, note that the scenario lands with the service.
 3. Confirm DTO boundaries, repository injection, decorator choice, and DI wiring.
-4. Report files and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report files and commands run.
 
 ## Docs
 

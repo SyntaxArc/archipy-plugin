@@ -1,12 +1,13 @@
 ---
-description: BDD testing for ArchiPy apps — Behave, ScenarioContext, testcontainers
+description: BDD testing for ArchiPy apps — Behave through the services layer, REST/gRPC clients, testcontainers
 globs: **/features/**/*
 alwaysApply: false
 ---
 
 # BDD Testing for ArchiPy Apps
 
-ArchiPy-style apps use **Behave** (not pytest) for acceptance tests.
+ArchiPy-style apps use **Behave** (not pytest) for acceptance tests. Every scenario drives the app through its
+**services layer** — the real REST or gRPC transport — against **real infrastructure in testcontainers**.
 
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
 
@@ -16,19 +17,110 @@ Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
 features/
 ├── *.feature
 ├── steps/
+├── environment.py                   # TestConfig + containers → app harness → per-scenario reset
+├── test_containers.py               # ContainerManager + one container per @needs-* tag
+├── app_harness.py                   # TestClient, real gRPC server + channel, Temporal worker, schema/reset hooks
 ├── scenario_context.py              # Per-scenario storage + cleanup
 ├── scenario_context_pool_manager.py # Singleton pool by scenario ID
-├── test_helpers.py                  # get_current_scenario_context
-├── environment.py                   # TestConfig + before/after hooks
-└── test_containers.py               # Infra only — ContainerManager + @needs-* map
+└── test_helpers.py                  # get_current_scenario_context, rest_client, grpc_channel
+.env.test
 ```
 
-Extras: `uv add "archipy[behave]"`; infra also `uv add "archipy[testcontainers]"`.
+Extras: `uv add --group dev "archipy[behave,testcontainers]"`. REST uses FastAPI's built-in `TestClient` (httpx ships
+with `archipy[fastapi]`); gRPC uses the app's generated stubs over a real channel.
+
+## The Seam Is the Transport
+
+Steps call only the app's public API:
+
+The harness always creates the app under test with `AppUtils` and registers the same routers/servicers as the
+production entrypoint — never a bare `FastAPI()` or `grpc.server()` — so exception handlers, interceptors, middleware,
+and lifespan match production:
+
+- **REST:** `AppUtils.create_fastapi_app()` + the app's `create_<domain>_v{n}_router(container)` routers, wrapped in
+  `fastapi.testclient.TestClient` (entered as a context manager so the lifespan runs). Steps use `rest_client(context)`.
+- **gRPC:** `AppUtils.create_grpc_app(config)` (sync) or `create_async_grpc_app(config)` (async) + the app's
+  `register_<domain>_v{n}_servicers(server, container)`, bound to `127.0.0.1:0` and started for real. Steps build
+  generated `*Stub`s from `grpc_channel(context)`. Do not use `grpc_testing` or call servicer methods directly — that
+  skips the ArchiPy exception interceptor.
+- **Async gRPC:** in `async def` steps, `async with context.app.async_grpc_channel() as channel:`.
+
+Steps never import or call logics, repositories, adapters, sessions, or DI providers. Assert on responses (status,
+body, gRPC status/details) and on follow-up API calls, not on database rows or driver calls.
+
+```gherkin
+# Good: observable behavior through the API
+Scenario: Register a new user
+  When I register "user@example.com" over REST
+  Then the response status is 201
+
+# Bad: bypasses the services layer / couples to internals
+Scenario: Repository inserts once
+  When the user logic registers "user@example.com"
+  Then the private database adapter insert method was called once
+```
+
+## Lifecycle (environment.py)
+
+1. Import time — `TestConfig(AppConfig)` reads `.env.test` and `BaseConfig.set_global` replaces the app config.
+2. `before_all` — start every container tagged anywhere in the run, **then** build `AppHarness` (REST client, gRPC
+   server, Temporal worker) and run `prepare_state()` (migrations / `create_all`).
+3. `before_scenario` — allocate a `ScenarioContext`.
+4. `after_scenario` — clean up the context, then `reset_state()` (truncate tables, `FLUSHDB`, drop test topics,
+   buckets, indices) so scenarios stay independent.
+5. `after_all` — stop the harness, `SessionManagerRegistry.reset()`, `ContainerManager.stop_all()`.
+
+Containers are session-scoped: the app's engines, clients, and ArchiPy singleton session managers bind to the endpoint
+they see at construction, so containers must start before the app is built and must not be replaced mid-run.
+`environment.py` imports only the app's config class at module top; every other app module (entrypoints, DI
+container, routers, servicers, workflows) is imported inside harness hooks.
+
+## Infrastructure Tags
+
+Tag each feature (or scenario) with every service it touches. `before_all` starts the containers for the scenarios
+selected by `--tags`, so a subset runs without the rest:
+
+```bash
+uv run behave --tags=~@needs-kafka --tags=~@needs-temporal   # skip scenarios needing Kafka or Temporal
+```
+
+Harness hooks for optional infrastructure check `ContainerManager.running()` and skip themselves when the container
+is absent.
+
+| Tag | Container | Config patched |
+|-----|-----------|----------------|
+| `@needs-postgres` | postgres | `POSTGRES_SQLALCHEMY` host/port/db/user/password |
+| `@needs-mysql` | mysql | `MYSQL_SQLALCHEMY` host/port/db/user/password |
+| `@needs-redis` | redis | `REDIS` |
+| `@needs-kafka` | kafka | `KAFKA.BROKERS_LIST` |
+| `@needs-temporal` | temporal | `TEMPORAL` host/port/namespace |
+| `@needs-minio` | minio | `MINIO` |
+| `@needs-elasticsearch` | elasticsearch | `ELASTIC.HOSTS` |
+| `@needs-keycloak` | keycloak | `KEYCLOAK` URL + admin credentials |
+| `@needs-vault` | vault | `VAULT` |
+| `@needs-scylladb` | scylladb | `SCYLLADB` |
+
+StarRocks and Redis Cluster: copy the container from ArchiPy's `features/test_containers.py` and add its tag. Do not
+invent a `@needs-*` tag without a registered container; unknown `needs-*` tags fail the run.
+
+Workflows: when the app uses Temporal, the harness starts the app's real worker (`TemporalWorkerManager.start_worker`
+with the app's workflows and activities) on a background loop, so workflows started through the API actually execute.
+
+## Third-Party APIs Without a Container
+
+The only allowed substitute is at the adapter port: override that one adapter provider in the DI container with a
+fake that implements the same port (or run a stub HTTP server in a generic `DockerContainer`). Everything the app owns —
+databases, caches, queues, Temporal, object storage, identity — runs in a real container.
+
+## Async Steps
+
+Behave 1.3.3 supports native `async def` steps. Await async APIs directly; never call `asyncio.run()` inside a step.
+Long-lived async pieces (aio gRPC server, Temporal worker) run on the harness background loop.
+
+Step functions may remain unannotated when `features/` is excluded from app lint/type checks. Typical Ruff exemptions
+for Behave steps are `ANN001`, `ANN201`, `ARG001`, `PLR0913`, and `F811`; production helpers remain fully typed.
 
 ## Behavior-First Loop
-
-Name the public seam first (service endpoint, logic API, repository/adapter port, or public helper). Test observable
-behavior, not private methods or driver call counts.
 
 Work in vertical slices:
 
@@ -38,78 +130,15 @@ Work in vertical slices:
 
 Expected values must be independent literals/examples, not values recomputed with the production algorithm.
 
-```gherkin
-# Good: observable app behavior
-Scenario: Register a new user
-  When I register "user@example.com"
-  Then registration succeeds with status "pending"
-
-# Bad: implementation coupling
-Scenario: Repository calls insert once
-  Then the private database adapter insert method was called once
-```
-
-## Lifecycle (environment.py)
-
-1. `before_all` — `TestConfig` / `set_global`, `ScenarioContextPoolManager`, optional `ContainerManager`
-2. `before_feature` — start containers from `@needs-*` tags only
-3. `before_scenario` — allocate `ScenarioContext` from pool
-4. `after_scenario` — `cleanup_context` + `SessionManagerRegistry.reset()`
-5. `after_feature` / `after_all` — `ContainerManager.stop_all()`, `cleanup_all()`
-
-Prefer `/scaffold-bdd` templates over copying ArchiPy-core gRPC/Temporal hooks.
-
-## Ports and Mocks
-
-- Inject mocks (e.g. `RedisMock`) or real adapters via scenario context.
-- Never share mutable globals across scenarios.
-- Mocks and real adapters must satisfy the same port; assert through that public port.
-
-## Infrastructure Tags
-
-```gherkin
-@needs-redis
-Feature: ...
-```
-
-`ContainerManager.extract_containers_from_tags` → `start_containers`. Register only containers the app tests.
-
-Standard tag/container keys:
-
-| Tag | Container |
-|-----|-----------|
-| `@needs-postgres` | postgres |
-| `@needs-mysql` | mysql |
-| `@needs-kafka` | kafka |
-| `@needs-elasticsearch` | elasticsearch |
-| `@needs-minio` | minio |
-| `@needs-keycloak` | keycloak |
-| `@needs-redis` | redis |
-| `@needs-redis-cluster` | redis-cluster |
-| `@needs-scylladb` | scylladb |
-| `@needs-starrocks` | starrocks |
-| `@needs-temporal` | temporal |
-| `@needs-vault` | vault |
-
-```bash
-# Skip every @needs-* tag present — a Redis-only skip still runs @needs-postgres.
-uv run behave --tags=~@needs-redis --tags=~@needs-postgres
-```
-
-Do not invent a `@needs-*` tag without adding its container mapping.
-
-## Async Steps
-
-Behave 1.3.3 supports native `async def` steps. Await async APIs directly; never call `asyncio.run()` inside a step.
-Use `asyncio.run()` only in synchronous lifecycle/cleanup callbacks that cannot be async.
-
-Step functions may remain unannotated when `features/` is excluded from app lint/type checks. Typical Ruff exemptions
-for Behave steps are `ANN001`, `ANN201`, `ARG001`, `PLR0913`, and `F811`; production helpers remain fully typed.
-
 ## Do Not
 
-- Share adapter/DB state across scenarios without cleanup.
+- Call logics, repositories, or adapters from steps.
+- Create the test app without `AppUtils` (bare `FastAPI()` / `grpc.server()` / `grpc.aio.server()`).
+- Use `grpc_testing` or invoke servicer methods directly.
+- Mock infrastructure the app owns (databases, caches, queues, Temporal) instead of running its container.
+- Import app modules other than the config class at the top of `environment.py`, or start containers after the app
+  is built.
+- Share data across scenarios without `reset_state()`.
 - Use pytest as the primary ArchiPy app test style.
-- Paste the full ArchiPy library `test_containers.py` catalogue into an app.
 - Spy on private methods or duplicate production calculations in assertions.
 - Write a complete feature horizontally before making one scenario pass.

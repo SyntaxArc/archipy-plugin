@@ -46,6 +46,8 @@ services/<domain>/v{n}/
 ### gRPC
 
 - Thin servicer calling logic; sync servicers with `AppUtils.create_grpc_app`, async with `create_async_grpc_app`.
+- Export `register_<domain>_v{n}_servicers(server, container)` that adds the servicers to a server built by
+  `AppUtils`; the entrypoint and the BDD harness (`/scaffold-bdd`) both call it, so neither binds a port inside it.
 - Do not mix sync/async servicer styles on one server.
 
 ## Bootstrap (entrypoint)
@@ -73,9 +75,11 @@ uvicorn in `manage.py` from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOA
 ## Verify
 
 1. Run the repository's formatter and linter on generated Python.
-2. Run focused transport tests without starting a long-lived server.
+2. Run the Behave scenarios that exercise the route/servicer through the BDD harness (`/scaffold-bdd`); add one
+   when the endpoint is new.
 3. Confirm route/servicer registration, DTO mapping, domain-error mapping, and DI resolution.
-4. Report files, dependency changes, and commands run.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report files, dependency changes, and commands run.
 
 ## Docs
 

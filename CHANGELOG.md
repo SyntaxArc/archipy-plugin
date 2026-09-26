@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `archipy-reviewer` checks for centralized `AppUtils` error mapping, broad `except Exception` without a reasoned
+  `# noqa: BLE001`, missing atomic decorators on SQLAlchemy logic paths, OTel init order, function-scoped imports,
+  removed ArchiPy 4.x APIs, and missing Behave scenarios; plus a "Not findings" list to cut false positives
+- Catalog check that fails when the reviewer checklist and the rules it mirrors drift apart
+- Evals `06-reviewer-violations` and `07-reviewer-clean-diff` for the reviewer
+- Layer-producing scaffold skills run `archipy-reviewer` in their `## Verify` step
+- `/scaffold-bdd` now drives every scenario through the services layer against real testcontainers: new
+  `app_harness.py` (app created with `AppUtils`, FastAPI `TestClient`, real gRPC server + channel for sync and async
+  servicers, Temporal worker on a background loop, schema/reset hooks), `test_containers.py` (Postgres, MySQL, Redis,
+  Kafka, Temporal, MinIO, Elasticsearch, Keycloak, Vault, ScyllaDB with lazy imports), `.env.test`, and an example
+  REST + gRPC feature. Verified end to end with Postgres, Temporal, Redis, Kafka, and sync/async gRPC
+- `register_<domain>_v{n}_servicers(server, container)` convention for gRPC services, shared by the entrypoint and
+  the BDD harness
+- `archipy-reviewer` flags logic/repository-level steps, test apps not built with `AppUtils`, `grpc_testing`, and
+  mocked owned infrastructure
+
+### Changed
+
+- BDD guidance (`testing-bdd-for-apps.mdc`, `archipy-docs` testing reference, `/docs-testing`, adapter and DI rules)
+  drops mock-first testing: owned infrastructure always runs in testcontainers; only third-party APIs without a
+  container may be faked at the adapter port
+- Containers are session-scoped and start before the app is built (ArchiPy session managers bind once per run);
+  data is reset after each scenario
+
+### Fixed
+
+- `archipy-reviewer` now reviews untracked files (fresh scaffolds never appeared in `git diff`), uses an explicit
+  merge-base fallback chain, and diffs the working tree instead of `<base>...HEAD`
+- `archipy-reviewer` sets `readonly: true` for Cursor alongside Claude Code's `tools:`, restricts Bash to read-only
+  and check-only commands (`uv run --no-sync`), and inherits the parent model
+
 ## [0.12.0] - 2026-09-23
 
 ### Added

@@ -95,10 +95,12 @@ logics own invalidation rules.
 
 ## Verify
 
-1. Run formatter/linter and focused tests for index creation, query mapping, empty results, and mapped failures.
+1. Run formatter/linter, then Behave scenarios (`@needs-redis`, `/scaffold-bdd`) that hit the search endpoint for
+   matches, empty results, and mapped failures.
 2. For vector search, verify encoded vector dimension and distance metric match the schema.
-3. Run live Redis tests only when the project already provides tagged/containerized infrastructure.
-4. Report files, schema assumptions, dependency changes, and commands run.
+3. If Docker is unavailable, say so; do not replace the Redis container with a mock.
+4. Run the `archipy-reviewer` subagent on the changes and fix every **Must fix** finding it reports.
+5. Report files, schema assumptions, dependency changes, and commands run.
 
 ## Docs
 

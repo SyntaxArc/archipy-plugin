@@ -38,6 +38,10 @@ uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
 # Combine extras: uv add "archipy[redis,dependency-injection,fastapi]"
 ```
 
+> ArchiPy 5.4 SQLAlchemy adapters import `sqlalchemy.ext.asyncio` even on the sync path, and SQLAlchemy 2.1 no longer
+> installs `greenlet` by default. With `archipy[postgres,sqlalchemy]`, also add `greenlet` (or use
+> `sqlalchemy-async`), or imports fail with "The SQLAlchemy asyncio module requires … 'greenlet'".
+
 ### Extras matrix (published)
 
 | Extra                               | Use                                                                             |

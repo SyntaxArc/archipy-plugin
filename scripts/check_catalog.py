@@ -46,6 +46,26 @@ ARCHIPY_5_REMOVED_GUIDANCE = (
     "`FastAPIRateLimitConfig`",
 )
 ARCHIPY_5_REQUIRED_GUIDANCE = ("`OtelUtils`", "`trace_span`", "`otel-fastapi`", "`otel-grpc`")
+# Tokens the reviewer agent checks for, paired with the rule that owns them. Both files must mention each token so
+# the agent checklist cannot silently drift from the rules.
+REVIEWER_RULE_TOKENS = {
+    "repositories/{domain}/adapters/": "architecture-for-apps.mdc",
+    "postgres_sqlalchemy_atomic_decorator": "using-archipy-logics.mdc",
+    "async_postgres_sqlalchemy_atomic_decorator": "using-archipy-logics.mdc",
+    "AppUtils.create_fastapi_app": "using-archipy-services.mdc",
+    "create_grpc_app": "using-archipy-services.mdc",
+    "create_async_grpc_app": "using-archipy-services.mdc",
+    "config.FASTAPI": "using-archipy-services.mdc",
+    "raise ... from e": "using-archipy-adapters.mdc",
+    "BLE001": "using-archipy-adapters.mdc",
+    "set_global": "config-and-di.mdc",
+    "init_otel_if_needed": "config-and-di.mdc",
+    "TestClient": "testing-bdd-for-apps.mdc",
+    "grpc_testing": "testing-bdd-for-apps.mdc",
+    "@needs-": "testing-bdd-for-apps.mdc",
+    "register_<domain>_v{n}_servicers": "using-archipy-services.mdc",
+}
+REVIEWER_AGENT = "archipy-reviewer.md"
 REQUIRED_APP_RULES = {
     "architecture-for-apps.mdc",
     "contributing-for-apps.mdc",
@@ -265,6 +285,25 @@ def check_agents() -> list[str]:
     return errors
 
 
+def check_reviewer_rule_sync() -> list[str]:
+    """Every reviewer checklist token must still appear in the rule that owns it, and vice versa."""
+    agent_path = ROOT / "agents" / REVIEWER_AGENT
+    if not agent_path.is_file():
+        return []
+    agent = agent_path.read_text(encoding="utf-8")
+    errors: list[str] = []
+    for token, rule_name in REVIEWER_RULE_TOKENS.items():
+        rule_path = ROOT / "rules" / rule_name
+        if not rule_path.is_file():
+            errors.append(f"reviewer token `{token}` owned by missing rules/{rule_name}")
+            continue
+        if token not in rule_path.read_text(encoding="utf-8"):
+            errors.append(f"rules/{rule_name} no longer mentions reviewer token `{token}`")
+        if token not in agent:
+            errors.append(f"agents/{REVIEWER_AGENT} missing `{token}` from rules/{rule_name}")
+    return errors
+
+
 def check_rules() -> list[str]:
     errors: list[str] = []
     rules_root = ROOT / "rules"
@@ -355,6 +394,7 @@ def main() -> int:
     errors.extend(check_skills())
     errors.extend(check_rules())
     errors.extend(check_agents())
+    errors.extend(check_reviewer_rule_sync())
     errors.extend(check_readme_catalog())
     if errors:
         for error in errors:

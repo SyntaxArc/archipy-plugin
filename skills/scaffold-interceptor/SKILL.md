@@ -86,7 +86,8 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 
 ## Verify
 
-Run formatter/linter and focused transport tests for ordering, success, and mapped failure behavior. Confirm registration
+Run formatter/linter and Behave scenarios through the `AppUtils`-built app (`/scaffold-bdd` harness) for ordering,
+success, and mapped failure behavior. Confirm registration
 occurs once. Report the reused ArchiPy API or files created, plus commands run.
 
 ## Docs

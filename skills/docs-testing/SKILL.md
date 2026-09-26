@@ -10,9 +10,10 @@ Read `../archipy-docs/SKILL.md` in full — use the **archipy-docs** skill (reso
 
 Cover:
 
-- Behave layout (`features/`, steps, ScenarioContext)
-- Ports/mocks vs `@needs-*` integration tags
-- Skipping infra with `behave --tags=~@needs-redis --tags=~@needs-postgres` (every `@needs-*` tag present)
+- Behave layout (`features/`, steps, ScenarioContext, app harness)
+- Scenarios through the services layer: `AppUtils`-built app, FastAPI `TestClient`, gRPC stubs over a real channel
+- Testcontainers per `@needs-*` tag (databases, queues, Temporal, …), session-scoped, with per-scenario data reset
+- Running a subset: `behave --tags=~@needs-kafka` starts only the containers the selected scenarios need
 
 Live docs:
 

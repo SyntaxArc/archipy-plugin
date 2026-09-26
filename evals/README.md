@@ -1,7 +1,7 @@
 # ArchiPy plugin evals
 
 Claude Code eval suite for `claude plugin eval`. Each case runs with and without the plugin; the headline number is
-the uplift (Δ). Cases 01–03 stage a minimal ArchiPy app with their `scaffold.sh` (`scaffold_script`), so they need `--scaffold` and
+the uplift (Δ). Cases 01–03 and 06–07 stage a minimal ArchiPy app with their `scaffold.sh` (`scaffold_script`), so they need `--scaffold` and
 write access. If the runner prints that a case runs against an unstaged workspace, move that case to `case.yaml`
 (`context.scaffold_script: scaffold.sh`):
 
@@ -19,3 +19,5 @@ Pilot one case first (`--case 04-otel-question --runs 1`) to check cost. Results
 | `03-wallet-transfer-logic` | `scaffold-logic` | `*_sqlalchemy_atomic_decorator` on the logic, domain error for insufficient funds |
 | `04-otel-question` | `archipy-docs` | answer uses `OtelUtils` and `otel` extras, no removed 4.x APIs |
 | `05-neg-unrelated-shell` | none | no plugin skill fires on an unrelated shell question |
+| `06-reviewer-violations` | `archipy-reviewer` | catches untracked top-level adapter, hardcoded secret, leaked `httpx` errors, UoW in service; ranks them must-fix |
+| `07-reviewer-clean-diff` | `archipy-reviewer` | no must-fix on a conforming logic; logic→logic call and logic-level UoW not flagged |

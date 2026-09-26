@@ -115,6 +115,22 @@ class CatalogTests(unittest.TestCase):
                 errors = check_catalog.check_agents_commands()
         self.assertEqual(errors, ["AGENTS.md advertises `/scaffold-gone` but missing skills/scaffold-gone/SKILL.md"])
 
+    def test_reviewer_tokens_must_match_rules(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "agents").mkdir()
+            (root / "rules").mkdir()
+            (root / "agents" / "archipy-reviewer.md").write_text("Use set_global and BLE001.\n", encoding="utf-8")
+            (root / "rules" / "config-and-di.mdc").write_text("Call set_global once.\n", encoding="utf-8")
+            (root / "rules" / "using-archipy-adapters.mdc").write_text("Adapters.\n", encoding="utf-8")
+            tokens = {"set_global": "config-and-di.mdc", "BLE001": "using-archipy-adapters.mdc"}
+            with (
+                mock.patch.object(check_catalog, "ROOT", root),
+                mock.patch.object(check_catalog, "REVIEWER_RULE_TOKENS", tokens),
+            ):
+                errors = check_catalog.check_reviewer_rule_sync()
+        self.assertEqual(errors, ["rules/using-archipy-adapters.mdc no longer mentions reviewer token `BLE001`"])
+
     def test_skill_reference_must_exist(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

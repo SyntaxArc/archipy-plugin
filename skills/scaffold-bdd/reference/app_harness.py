@@ -55,6 +55,16 @@ def build_grpc_server() -> grpc.Server | grpc.aio.Server | None:
     return None
 
 
+def build_process_container() -> Any | None:
+    """Process/task projects only: return the app's DI container so steps can reach the logic layer.
+
+    Leave this returning None for any app that exposes REST or gRPC; those scenarios must go through the services layer.
+    """
+    # from configs.containers import ServiceContainer
+    # return ServiceContainer()
+    return None
+
+
 def temporal_worker_spec() -> dict[str, Any] | None:
     """Return `TemporalWorkerManager.start_worker` kwargs for the app's worker; None when Temporal is not in this run."""
     # if "temporal" not in ContainerManager.running():  # e.g. `behave --tags=~@needs-temporal`
@@ -108,6 +118,7 @@ class AppHarness:
 
     def __init__(self) -> None:
         self.rest: TestClient | None = None
+        self.process_container: Any | None = None
         self.grpc_target: str | None = None
         self._grpc_server: grpc.Server | grpc.aio.Server | None = None
         self._grpc_channel: grpc.Channel | None = None
@@ -123,6 +134,7 @@ class AppHarness:
 
     def start(self) -> None:
         prepare_state()
+        self.process_container = build_process_container()
         self._start_rest()
         self._start_grpc()
         self._start_temporal_worker()

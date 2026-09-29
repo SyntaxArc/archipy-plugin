@@ -20,9 +20,12 @@ Read these plugin rules in full before generating files (paths relative to this 
 2. Find the app's entrypoints: the `AppConfig` class, DI container, `create_<domain>_v{n}_router(container)` routers,
    `register_<domain>_v{n}_servicers(server, container)` for gRPC, Temporal workflows/activities, and how the schema is
    created (Alembic or `metadata.create_all`).
-3. Derive the `@needs-*` tags from the infrastructure the endpoints touch (archipy extras in `pyproject.toml`, adapters
+3. Decide the seam. REST/gRPC routers or servicers exist ⇒ **services layer** (default, for every scenario). No
+   REST/gRPC surface (Temporal/queue worker, consumer, scheduled/batch job, CLI) ⇒ process/task project: use the real
+   trigger where possible, else the logic layer via `process_logic(context, "<provider>")`. Say which you chose.
+4. Derive the `@needs-*` tags from the infrastructure the endpoints touch (archipy extras in `pyproject.toml`, adapters
    under `repositories/*/adapters/`).
-4. Ask only for an unresolved feature name. Never overwrite shared support files; merge missing hooks/containers while
+5. Ask only for an unresolved feature name. Never overwrite shared support files; merge missing hooks/containers while
    preserving project-specific behavior.
 
 ## Prefer ArchiPy
@@ -60,6 +63,8 @@ Fill every `ADAPT` hook; import app modules inside the hooks, never at module to
 - `build_rest_app()` — `AppUtils.create_fastapi_app()` + the same routers as `manage.create_app()`.
 - `build_grpc_server()` — `AppUtils.create_grpc_app(config)` or `create_async_grpc_app(config)` +
   `register_<domain>_v{n}_servicers(server, container)`. No port binding; the harness binds `127.0.0.1:0`.
+- `build_process_container()` — process/task projects only: return the DI container for `process_logic`; keep `None`
+  when the app has a services layer.
 - `temporal_worker_spec()` — task queue, workflows, and activities of the app's worker.
 - `prepare_state()` — schema once per run; `reset_state()` — wipe data between scenarios.
 
@@ -84,7 +89,8 @@ Pin images in `.env.test` when the app needs versions other than the defaults in
 ## Do not
 
 - Behave only (not pytest) as primary style.
-- Steps never call logics, repositories, adapters, or DI providers directly.
+- Steps never call repositories, adapters, or DI providers directly. Logics are reachable only in process/task projects
+  (no services layer), through `process_logic`; apps with a services layer go through REST/gRPC for every scenario.
 - Never create the test app without `AppUtils`, and never use `grpc_testing` or direct servicer calls.
 - Do not mock databases, caches, queues, or Temporal — run their containers.
 - No shared mutable globals across scenarios; `reset_state()` after each scenario.

@@ -17,6 +17,9 @@ features/
 - Behave (not pytest); `uv add --group dev "archipy[behave,testcontainers]"`.
 - Scenarios drive the **services layer** only: REST via FastAPI `TestClient`, gRPC via generated stubs over a real
   channel. The app is created with `AppUtils.create_fastapi_app` / `create_grpc_app` / `create_async_grpc_app`.
+- Process/task projects (no REST/gRPC surface: workers, consumers, batch jobs) may drive the **logic layer** through the
+  DI container (`process_logic`), preferring the real trigger (workflow start, message publish) when one exists; any app
+  with a services layer uses it for every scenario.
 - Real infrastructure via testcontainers for everything the app owns (Postgres, MySQL, Redis, Kafka, Temporal, MinIO,
   Elasticsearch, Keycloak, Vault, ScyllaDB); tag features `@needs-*`.
 - Containers start before the app is built and live for the whole run; data is reset after each scenario.

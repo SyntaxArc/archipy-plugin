@@ -18,6 +18,25 @@ Before writing a custom util, check whether ArchiPy already provides it under `a
 - Import from concrete submodules (e.g. `archipy.helpers.utils.jwt_utils`) — package `__init__` does not re-export
 - `AppUtils` — FastAPI / gRPC app factories (see below)
 
+## Hand-rolled code → ArchiPy util
+
+Before writing this logic anywhere in the app (logics, services, repositories too, not only `helpers/`):
+
+| Instead of hand-rolling…                                        | Use (import from concrete submodule)                                                                                              |
+|-----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `datetime.now()` / `utcnow()`, strftime/strptime, tz fixes       | `DatetimeUtils.get_datetime_utc_now`, `get_datetime_now`, `get_epoch_time_now`, `get_string_datetime_from_datetime`, `get_datetime_from_string_datetime`, `ensure_timezone_aware`, `daterange`, `convert_to_jalali` (`datetime_utils`) |
+| bcrypt / passlib / hashlib password hashing, password policy    | `PasswordUtils.hash_password`, `verify_password`, `validate_password`, `generate_password` (`password_utils`)                     |
+| `import jwt` / PyJWT encode-decode (needs `archipy[jwt]`)        | `JWTUtils.create_access_token`, `create_refresh_token`, `verify_access_token`, `verify_refresh_token`, `decode_token` (`jwt_utils`) |
+| `pyotp` / hand-made OTP codes                                   | `TOTPUtils.generate_totp`, `verify_totp`, `generate_secret_key_for_totp` (`totp_utils`)                                           |
+| regex text cleanup, snake/camel, masking, Persian/Arabic digits | `StringUtils.snake_to_camel_case`, `camel_to_snake_case`, `mask_emails`, `mask_phones`, `mask_urls`, `normalize_persian_text`, `convert_numbers_to_english`, `is_string_none_or_empty` (`string_utils`) |
+| upload filename checks, signed download links                   | `FileUtils.validate_file_name`, `create_secure_link` (`file_utils`)                                                               |
+| per-route exception to HTTP/gRPC mapping, validation formatting | `ErrorUtils.*` via `AppUtils` (`error_utils`)                                                                                     |
+| Iranian phone / national-code validation                        | `BaseUtils.validate_iranian_phone_number`, `validate_iranian_national_code_pattern` (`base_utils`)                                |
+| bare `FastAPI()` / `grpc.server()`                              | `AppUtils.create_fastapi_app`, `create_grpc_app`, `create_async_grpc_app` (`app_utils`)                                           |
+
+`datetime.now()` / `utcnow()` are never acceptable, tests and Behave steps included: use `DatetimeUtils`.
+Verified against `archipy` 5.5.1; confirm names against the app's pinned version when unsure.
+
 ## AppUtils (FastAPI + gRPC)
 
 ```bash

@@ -21,6 +21,20 @@ Prefer ArchiPy utils. Import from the **concrete submodule** (package `__init__`
 | `TOTPUtils`       | `archipy.helpers.utils.totp_utils`       | TOTP                            |
 | `KeycloakUtils`   | `archipy.helpers.utils.keycloak_utils`   | Keycloak helpers                |
 
+### Hand-rolled code → ArchiPy util
+
+| Instead of hand-rolling…                                        | Use (import from concrete submodule)                                                                                              |
+|-----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `datetime.now()` / `utcnow()`, strftime/strptime, tz fixes       | `DatetimeUtils.get_datetime_utc_now`, `get_datetime_now`, `get_epoch_time_now`, `get_string_datetime_from_datetime`, `get_datetime_from_string_datetime`, `ensure_timezone_aware`, `daterange`, `convert_to_jalali` (`datetime_utils`) |
+| bcrypt / passlib / hashlib password hashing, password policy    | `PasswordUtils.hash_password`, `verify_password`, `validate_password`, `generate_password` (`password_utils`)                     |
+| `import jwt` / PyJWT encode-decode (needs `archipy[jwt]`)        | `JWTUtils.create_access_token`, `create_refresh_token`, `verify_access_token`, `verify_refresh_token`, `decode_token` (`jwt_utils`) |
+| `pyotp` / hand-made OTP codes                                   | `TOTPUtils.generate_totp`, `verify_totp`, `generate_secret_key_for_totp` (`totp_utils`)                                           |
+| regex text cleanup, snake/camel, masking, Persian/Arabic digits | `StringUtils.snake_to_camel_case`, `camel_to_snake_case`, `mask_emails`, `mask_phones`, `mask_urls`, `normalize_persian_text`, `convert_numbers_to_english`, `is_string_none_or_empty` (`string_utils`) |
+| upload filename checks, signed download links                   | `FileUtils.validate_file_name`, `create_secure_link` (`file_utils`)                                                               |
+| per-route exception to HTTP/gRPC mapping, validation formatting | `ErrorUtils.*` via `AppUtils` (`error_utils`)                                                                                     |
+| Iranian phone / national-code validation                        | `BaseUtils.validate_iranian_phone_number`, `validate_iranian_national_code_pattern` (`base_utils`)                                |
+| bare `FastAPI()` / `grpc.server()`                              | `AppUtils.create_fastapi_app`, `create_grpc_app`, `create_async_grpc_app` (`app_utils`)                                           |
+
 Custom utils: pure only — no DB/network/adapter construction.
 
 ## Decorators

@@ -18,6 +18,7 @@ Read these plugin rules in full before generating files (paths relative to this 
 
 - `../../rules/using-archipy-models.mdc`
 - `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-utils.mdc`
 
 ## Before writing files
 

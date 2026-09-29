@@ -21,3 +21,5 @@ Pilot one case first (`--case 04-otel-question --runs 1`) to check cost. Results
 | `05-neg-unrelated-shell` | none | no plugin skill fires on an unrelated shell question |
 | `06-reviewer-violations` | `archipy-reviewer` | catches untracked top-level adapter, hardcoded secret, leaked `httpx` errors, UoW in service; ranks them must-fix |
 | `07-reviewer-clean-diff` | `archipy-reviewer` | no must-fix on a conforming logic; logic→logic call and logic-level UoW not flagged |
+| `08-prefer-archipy-utils` | `archipy-docs` / `scaffold-utils` | answer uses `PasswordUtils` and `JWTUtils`, no `bcrypt`/`PyJWT`/`passlib` |
+| `09-rest-kebab-nested-path` | `scaffold-service` / `archipy-docs` | nested kebab-case plural path with `UUID` params, no snake/camel segments or verb routes |

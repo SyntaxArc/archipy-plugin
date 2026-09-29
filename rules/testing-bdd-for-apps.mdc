@@ -9,6 +9,10 @@ alwaysApply: false
 ArchiPy-style apps use **Behave** (not pytest) for acceptance tests. Every scenario drives the app through its
 **services layer** — the real REST or gRPC transport — against **real infrastructure in testcontainers**.
 
+One exception: a **process/task project** (no REST or gRPC surface — Temporal/queue workers, Kafka consumers,
+scheduled or batch jobs, CLIs) has no services layer, so its scenarios drive the **logic layer** instead. See
+"Process/Task Projects" below.
+
 Live: https://syntaxarc.github.io/ArchiPy/tutorials/testing_strategy/
 
 ## Layout
@@ -59,6 +63,25 @@ Scenario: Repository inserts once
   When the user logic registers "user@example.com"
   Then the private database adapter insert method was called once
 ```
+
+## Process/Task Projects: the Logic Layer Is the Seam
+
+Use the logic layer as the test seam **only when the app has no REST/gRPC services layer**. Everything else stays on
+the transport, including a mixed app: if a behavior is reachable through an endpoint, test it through that endpoint,
+even when a worker also implements it.
+
+- Decide per app, not per scenario: no `create_<domain>_v{n}_router` / `register_<domain>_v{n}_servicers` in the
+  entrypoints ⇒ process/task project. If the app also serves HTTP/gRPC, use `rest_client` / `grpc_channel` for
+  those scenarios and reserve logic-level steps for the worker-only paths.
+- Prefer the real trigger over calling the logic directly when one exists: start the Temporal workflow through the
+  client, publish the Kafka message to a real topic, invoke the job entrypoint. Call the logic through the DI
+  container only when no trigger can be exercised without heavy wiring.
+- Reach logics through the app's DI container (`process_logic(context, "user_logic")`), never by constructing
+  repositories or adapters in steps. Repositories, adapters, and sessions stay off-limits.
+- Everything else is unchanged: real testcontainers, `AppUtils`-free (there is no app to build), one scenario context per
+  scenario, `reset_state()` between scenarios, and assertions on observable outcomes (workflow result, emitted
+  message, stored state read back through another logic call), not driver calls.
+- Implement `build_process_container()` in `features/app_harness.py`; leave it `None` for apps with a services layer.
 
 ## Lifecycle (environment.py)
 
@@ -132,7 +155,8 @@ Expected values must be independent literals/examples, not values recomputed wit
 
 ## Do Not
 
-- Call logics, repositories, or adapters from steps.
+- Call logics, repositories, or adapters from steps in an app that has a services layer (process/task projects may
+  call logics through `process_logic`; repositories and adapters stay off-limits everywhere).
 - Create the test app without `AppUtils` (bare `FastAPI()` / `grpc.server()` / `grpc.aio.server()`).
 - Use `grpc_testing` or invoke servicer methods directly.
 - Mock infrastructure the app owns (databases, caches, queues, Temporal) instead of running its container.

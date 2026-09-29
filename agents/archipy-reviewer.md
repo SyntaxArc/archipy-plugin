@@ -47,12 +47,21 @@ makes it worse.
   calls another domain's repository and never imports FastAPI or gRPC.
 - `services/{domain}/v{n}/` is thin transport: request → domain `*InputDTO` → logic → `*OutputDTO`. No business rules,
   no unit-of-work decorators.
+- FastAPI paths are `/api/v{n}/<collection>/{<name>_uuid}/<child-collection>/...`: kebab-case literal segments, plural
+  nouns, no verbs, `UUID`-typed path params, version only in the router prefix. Flag `snake_case`/`camelCase` segments,
+  `/get-x` style routes, and flat routes that drop the parent resource (**Should fix**).
+- `import pandas` is a **Should fix**: DataFrame code uses `polars`.
 - Services do not catch every domain error per route/servicer when `AppUtils` already maps errors centrally, and do
   not re-implement CORS, exception handlers, or stock gRPC interceptors that `AppUtils` wires.
 - Each service exports `create_<domain>_v{n}_router(container)` (FastAPI) or
   `register_<domain>_v{n}_servicers(server, container)` (gRPC, no port binding) so the entrypoint and BDD harness share
   the wiring.
 - `helpers/` is pure; prefer `archipy.helpers` utils, decorators, and interceptors over custom ones.
+- Hand-rolled code that ArchiPy utils already cover is a finding, in any layer and in tests too:
+  `datetime.now()`/`utcnow()`/strftime (`DatetimeUtils.get_datetime_now` / `get_datetime_utc_now`), bcrypt/passlib/
+  hashlib passwords (`PasswordUtils`), `import jwt` (`JWTUtils`), `pyotp` (`TOTPUtils`), ad-hoc snake/camel or masking
+  helpers (`StringUtils`), bare `FastAPI()`/`grpc.server()` (`AppUtils`). **Should fix**; hand-rolled password hashing
+  or JWT handling is **Must fix** (security).
 
 **Import direction** (`configs ← models ← helpers ← repositories / logics / services`)
 
@@ -107,7 +116,10 @@ makes it worse.
   `rest_client(context)` (FastAPI `TestClient`), gRPC via generated stubs on `grpc_channel(context)`.
 - The test app is created with `AppUtils.create_fastapi_app` / `create_grpc_app` / `create_async_grpc_app` plus the
   app's routers/servicers — a bare `FastAPI()` / `grpc.server()`, `grpc_testing`, or direct servicer calls are findings.
-- Steps that call logics, repositories, adapters, or DI providers directly are a **Should fix**.
+- Steps that call repositories, adapters, or DI providers directly are a **Should fix**. Steps that call logics are a
+  **Should fix** too, unless the app is a process/task project with no REST/gRPC services layer (worker, consumer,
+  batch job); there logic-level steps via `process_logic` are fine, though a real trigger (workflow start, message
+  publish) is preferred.
 - Infrastructure the app owns (databases, caches, queues, Temporal, object storage) runs in testcontainers via
   `@needs-*` tags; mocking it is a finding. Only third-party APIs with no container may be faked at the adapter port.
 - Containers start before the app is built and are not restarted per feature; `reset_state()` isolates scenarios.
@@ -124,6 +136,8 @@ Do not flag these; they are allowed by the rules:
 - A logic calling another logic, including across domains. Nested atomic-decorator calls reuse the open session.
 - A narrow, reasoned `# noqa: BLE001` on an outermost adapter boundary.
 - Local CLI flags in `manage.py` that override `config.FASTAPI` defaults.
+- `hashlib` digests for cache keys/ETags (not passwords), and process/task projects calling logics from Behave
+  steps via `process_logic`.
 - Style choices the app's own formatter/linter config accepts.
 
 ## Report

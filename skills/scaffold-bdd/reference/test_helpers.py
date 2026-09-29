@@ -15,3 +15,15 @@ def rest_client(context):
 def grpc_channel(context):
     """Sync gRPC channel to the real app server; build generated stubs from it."""
     return context.app.grpc_channel()
+
+
+def process_logic(context, provider_name: str):
+    """Logic instance from the DI container, for process/task projects with no REST/gRPC surface only.
+
+    Prefer `rest_client` / `grpc_channel` whenever the app exposes a services layer.
+    """
+    container = context.app.process_container
+    if container is None:
+        raise RuntimeError("No process container; this app has a services layer, so drive it with rest_client/grpc_channel")
+    return getattr(container, provider_name)()
+

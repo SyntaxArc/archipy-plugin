@@ -19,6 +19,8 @@ FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n?", re.DOTALL)
 HARD_RULES = (
     "ArchiPy apps: follow architecture-for-apps rule + skills/archipy-docs/reference.md. "
     "Domain adapters under repositories/{domain}/adapters/ only. "
+    "Prefer archipy.helpers.utils (DatetimeUtils, PasswordUtils, JWTUtils, TOTPUtils, StringUtils, FileUtils, AppUtils) "
+    "over hand-rolled datetime/password/JWT/string code. "
     "Prefer the plugin skills (/scaffold-*, /redis-search, archipy-docs)."
 )
 

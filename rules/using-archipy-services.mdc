@@ -18,6 +18,25 @@ Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
   only when the domain error has no suitable mapping; never expose internal exception text.
 - Version in path: `services/{domain}/v{n}/` — not in business logic.
 
+## REST resource paths (FastAPI)
+
+Paths are hierarchical resources: `/api/v{n}/<collection>/{<resource>_uuid}/<child-collection>/{<child>_uuid}/...`
+
+```text
+/api/v1/users/{user_uuid}/campaigns/{campaign_uuid}/ad-groups/{ad_group_uuid}/ad-items/{ad_item_uuid}
+```
+
+- **kebab-case** for every literal segment (`ad-groups`, `ad-items`) — never `snake_case`, `camelCase`, or `PascalCase`.
+- Plural nouns for collections; the HTTP method is the verb, so no `/get-user` or `/createCampaign`. Use a sub-resource
+  or a kebab-case action segment only when no CRUD verb fits (`POST .../campaigns/{campaign_uuid}/pause`).
+- Nesting expresses ownership: a child id is only meaningful under its parent, and the logic must verify the parent
+  owns the child instead of trusting the URL.
+- Path parameters are `snake_case` Python names typed `UUID` (`user_uuid: UUID`), so FastAPI validates them; keep the
+  placeholder name identical at every level (`{campaign_uuid}`, not `{id}`).
+- Version prefix `/api/v{n}` comes from the router (`APIRouter(prefix="/api/v1")`), one version per
+  `services/{domain}/v{n}/`. Do not repeat the version in child routes.
+- Collection root has no trailing slash (`/api/v1/users`); do not mix trailing-slash styles.
+
 ## Bootstrap via AppUtils + FastAPIConfig
 
 ```bash
@@ -68,4 +87,5 @@ CLI flags may override for local runs; defaults always come from `FASTAPI`.
 - Put business rules or `@postgres_sqlalchemy_atomic_decorator` in services.
 - Hand-roll bare `FastAPI()` / `grpc.server()` when AppUtils extras are installed.
 - Hardcode uvicorn host/port — use `FastAPIConfig`.
+- Use non-kebab literal path segments, verb paths (`/get-user`), or flat routes that hide the resource hierarchy.
 - Catch every domain error in each route/servicer when AppUtils already provides centralized mapping.

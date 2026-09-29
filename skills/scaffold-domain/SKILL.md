@@ -13,6 +13,7 @@ description: >-
 Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
 
 - `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-utils.mdc`
 - `../../rules/using-archipy-models.mdc`
 - `../../rules/using-archipy-repositories.mdc`
 - `../../rules/using-archipy-logics.mdc`

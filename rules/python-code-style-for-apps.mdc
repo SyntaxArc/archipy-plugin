@@ -39,3 +39,9 @@ evaluate them; Pydantic field types must remain importable at runtime.
 - Prefer at most five function arguments; group cohesive inputs in DTOs/config objects.
 - Run the repository's formatter, linter, and type checker after edits. Use its configured commands; do not assume the
   ArchiPy library's `make` targets exist in consumer apps.
+- Reuse before writing: for dates/times, password hashing, JWT, TOTP, string normalization/masking, file-name checks,
+  and app bootstrap, use `archipy.helpers.utils` (`DatetimeUtils`, `PasswordUtils`, `JWTUtils`, `TOTPUtils`,
+  `StringUtils`, `FileUtils`, `AppUtils`) instead of stdlib/third-party code. See `using-archipy-utils.mdc`.
+- DataFrames: use `polars` (`uv add polars`), never `pandas`. Prefer lazy frames (`pl.scan_*`, `.lazy()` … `.collect()`)
+  for large data. Keep DataFrame work in pure helpers or logics, not in services or DTOs.
+

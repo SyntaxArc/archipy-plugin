@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-09-29
+
+### Added
+
+- "Hand-rolled code → ArchiPy util" table (with real method names, verified on `archipy` 5.5.1) in
+  `using-archipy-utils.mdc` and `archipy-docs/reference/helpers.md`
+- Always-on reuse nudge in `python-code-style-for-apps.mdc` and the session-start hard rules, so it reaches logics,
+  services, and repositories rather than only `helpers/utils/` (Cursor and Claude Code)
+- `scaffold-logic`, `scaffold-domain`, `scaffold-service`, `scaffold-models` now read `using-archipy-utils.mdc`
+- `archipy-reviewer` flags hand-rolled datetime, password, JWT, TOTP, string, and app-bootstrap code
+- REST resource path convention for FastAPI services (`/api/v1/users/{user_uuid}/campaigns/{campaign_uuid}/...`):
+  kebab-case segments, plural collections, `UUID` path params, version in router prefix; in
+  `using-archipy-services.mdc`, `scaffold-service`, the bundled services reference, and `archipy-reviewer`
+- Apps must use `polars` instead of `pandas` for DataFrames (`python-code-style-for-apps.mdc`, `archipy-reviewer`)
+- BDD: process/task projects (no REST/gRPC surface) may use the logic layer as the test seam via `process_logic` and
+  `build_process_container()`; every app with a services layer keeps the services layer for all scenarios
+  (`testing-bdd-for-apps.mdc`, `scaffold-bdd`, reviewer)
+
 ## [0.13.0] - 2026-09-26
 
 ### Added

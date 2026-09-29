@@ -12,6 +12,7 @@ Cover:
 
 - Behave layout (`features/`, steps, ScenarioContext, app harness)
 - Scenarios through the services layer: `AppUtils`-built app, FastAPI `TestClient`, gRPC stubs over a real channel
+- Process/task projects (no REST/gRPC): logic layer is the seam; otherwise services layer for all scenarios
 - Testcontainers per `@needs-*` tag (databases, queues, Temporal, …), session-scoped, with per-scenario data reset
 - Running a subset: `behave --tags=~@needs-kafka` starts only the containers the selected scenarios need
 

@@ -13,6 +13,7 @@ description: >-
 Read these plugin rules in full before generating files (paths relative to this skill directory; Claude Code: `${CLAUDE_SKILL_DIR}/../../rules/`):
 
 - `../../rules/architecture-for-apps.mdc`
+- `../../rules/using-archipy-utils.mdc`
 - `../../rules/using-archipy-services.mdc`
 - `../../rules/config-and-di.mdc`
 
@@ -41,6 +42,8 @@ services/<domain>/v{n}/
 
 - Thin router: request → domain `*InputDTO` → logic → `*OutputDTO`.
 - Export `create_<domain>_v{n}_router(container)` for `manage.py` / app factory.
+- Paths follow the REST resource rule in `using-archipy-services.mdc`: `/api/v1/users/{user_uuid}/campaigns/{campaign_uuid}/...`
+  — kebab-case literal segments, plural collections, `UUID`-typed `snake_case` path params, `APIRouter(prefix="/api/v1")`.
 - Map domain errors to HTTP status; no business rules / atomic UoW decorators here.
 
 ### gRPC

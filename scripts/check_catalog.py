@@ -64,6 +64,12 @@ REVIEWER_RULE_TOKENS = {
     "grpc_testing": "testing-bdd-for-apps.mdc",
     "@needs-": "testing-bdd-for-apps.mdc",
     "register_<domain>_v{n}_servicers": "using-archipy-services.mdc",
+    "kebab-case": "using-archipy-services.mdc",
+    "polars": "python-code-style-for-apps.mdc",
+    "PasswordUtils": "using-archipy-utils.mdc",
+    "DatetimeUtils": "using-archipy-utils.mdc",
+    "JWTUtils": "using-archipy-utils.mdc",
+    "process/task project": "testing-bdd-for-apps.mdc",
 }
 REVIEWER_AGENT = "archipy-reviewer.md"
 REQUIRED_APP_RULES = {

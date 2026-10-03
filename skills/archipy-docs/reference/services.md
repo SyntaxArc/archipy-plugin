@@ -35,6 +35,9 @@ router = APIRouter(prefix="/api/v1")
 def get_ad_item(user_uuid: UUID, campaign_uuid: UUID, ad_group_uuid: UUID, ad_item_uuid: UUID) -> AdItemOutputDTO: ...
 ```
 
+Audit columns: with JWT auth, `created_by*`/`updated_by*` = actor (`current_actor.id` / `act`) first, else token subject (`user_id` / `sub`) — never the
+any path owner uuid (customer, merchant, admin, user… — that is the resource owner).
+
 Literal segments are kebab-case (`ad-groups`); path parameter names stay `snake_case` Python identifiers. No verbs in
 paths; the logic verifies each parent owns its child.
 

@@ -47,7 +47,8 @@ models/
 ```
 
 Naming: `*InputDTO` / `*OutputDTO` for domain (versioned under `domain/v{n}/`); `*CommandDTO` / `*QueryDTO` /
-`*ResponseDTO` for repository (never versioned). Entities/DTOs for JWT-authenticated writes carry an explicit `actor_uuid` that fills `created_by*`/`updated_by*`
+`*ResponseDTO` for repository (never versioned). Any repository method with two or more parameters takes a single
+`*CommandDTO` (write) / `*QueryDTO` (read) instead of positional arguments. Entities/DTOs for JWT-authenticated writes carry an explicit `actor_uuid` that fills `created_by*`/`updated_by*`
 (actor from `current_actor`/`act` first, token `user_id`/`sub` second; never a path owner uuid).
 Prefer ArchiPy `BaseDTO` and the exported `BaseError` hierarchy.
 Verify imports against the app's installed ArchiPy version before writing.

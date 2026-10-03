@@ -37,6 +37,32 @@ Paths are hierarchical resources: `/api/v{n}/<collection>/{<resource>_uuid}/<chi
   `services/{domain}/v{n}/`. Do not repeat the version in child routes.
 - Collection root has no trailing slash (`/api/v1/users`); do not mix trailing-slash styles.
 
+## Actor identity and audit columns (JWT auth)
+
+With any JWT-based auth (`KeycloakUtils` dependencies/decorators, `JWTUtils`, or another issuer) the acting principal comes
+from the verified access token, never from a path parameter. With `KeycloakUtils` it is an `AuthenticatedUserDTO`; for
+other JWTs read the claims the same way: actor = `act.sub` (RFC 8693 delegation/impersonation) when present, else `sub`.
+
+- Fill `created_by*` / `updated_by*` (`created_by_admin*`, `updated_by_admin*` on `AdminEntity` /
+  `UpdatableAdminEntity`) **first** from the actor (`auth.current_actor.id`, or the `act` claim: the impersonating
+  admin/client), and **only if there is no actor** from the access-token subject (`auth.user_id`, or `sub`).
+- Never take it from the URL: a path owner uuid (`{user_uuid}`, `{customer_uuid}`, `{merchant_uuid}`, `{admin_uuid}`, or any
+  other principal type) identifies the resource owner (the target of the request), not the actor. It may differ from the
+  caller (admin acting on a customer, impersonation).
+- Resolve it once in the service layer (`actor_uuid = UUID(auth.current_actor.id if auth.current_actor else auth.user_id)`),
+  pass it as an explicit `actor_uuid` field on the `*InputDTO` / `*CommandDTO`; logics and repositories never read the
+  token or request.
+- Admin entities take the actor uuid in `created_by_admin_uuid`; manager entities in `created_by_uuid`
+  (and `updated_by_*` on every update).
+
+```python
+@router.patch("/merchants/{merchant_uuid}/campaigns/{campaign_uuid}")
+def update_campaign(merchant_uuid: UUID, campaign_uuid: UUID, body: UpdateCampaignBody,
+                    auth: AuthenticatedUserDTO = Depends(<jwt_auth_dependency>)) -> CampaignOutputDTO:
+    actor_uuid = UUID(auth.current_actor.id if auth.current_actor else auth.user_id)  # not merchant_uuid
+    return logic.update(UpdateCampaignInputDTO(owner_uuid=merchant_uuid, campaign_uuid=campaign_uuid, actor_uuid=actor_uuid, ...))
+```
+
 ## Bootstrap via AppUtils + FastAPIConfig
 
 ```bash

@@ -44,6 +44,8 @@ services/<domain>/v{n}/
 - Export `create_<domain>_v{n}_router(container)` for `manage.py` / app factory.
 - Paths follow the REST resource rule in `using-archipy-services.mdc`: `/api/v1/users/{user_uuid}/campaigns/{campaign_uuid}/...`
   — kebab-case literal segments, plural collections, `UUID`-typed `snake_case` path params, `APIRouter(prefix="/api/v1")`.
+- JWT auth (Keycloak or other): compute `actor_uuid` = actor (`current_actor.id` / `act`) first, else token subject (`user_id` / `sub`); pass it in the
+  input DTO for `created_by*`/`updated_by*`. Never use a path owner uuid (customer, merchant, admin, user…) as the actor (see `using-archipy-services.mdc`).
 - Map domain errors to HTTP status; no business rules / atomic UoW decorators here.
 
 ### gRPC

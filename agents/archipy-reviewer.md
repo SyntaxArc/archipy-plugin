@@ -50,6 +50,8 @@ makes it worse.
 - FastAPI paths are `/api/v{n}/<collection>/{<name>_uuid}/<child-collection>/...`: kebab-case literal segments, plural
   nouns, no verbs, `UUID`-typed path params, version only in the router prefix. Flag `snake_case`/`camelCase` segments,
   `/get-x` style routes, and flat routes that drop the parent resource (**Should fix**).
+- With JWT auth (Keycloak or other), `created_by*`/`updated_by*` must come from the actor (`current_actor.id` / `act`) first, then the token subject (`user_id` / `sub`); filling
+  them from a path owner uuid (`user_uuid`, `customer_uuid`, `merchant_uuid`, …), or reading the token below the service layer, is a **Must fix**.
 - `import pandas` is a **Should fix**: DataFrame code uses `polars`.
 - Services do not catch every domain error per route/servicer when `AppUtils` already maps errors centrally, and do
   not re-implement CORS, exception handlers, or stock gRPC interceptors that `AppUtils` wires.

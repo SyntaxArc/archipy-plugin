@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2026-10-03
+
+### Changed
+
+- `scaffold-models` and `using-archipy-models.mdc` now prefer Pydantic constrained/secret types (`PositiveInt`,
+  `NonNegativeInt`, `SecretStr`, `HttpUrl`, `EmailStr`, `UUID4`) and specific date/time types (`NaiveDatetime`,
+  `PastDatetime`, `FutureDatetime`, `PastDate`, `FutureDate`), plus `pydantic-extra-types`, over bare primitives with
+  `Field(...)` bounds or hand-rolled validators
+- `archipy-reviewer` gains a "DTO field types" checklist: flags bare primitives, plain-`str` secrets, and bare `datetime`,
+  and suggests the concrete Pydantic / `pydantic-extra-types` replacement
+
 ## [0.14.0] - 2026-09-29
 
 ### Added

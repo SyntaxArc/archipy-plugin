@@ -54,7 +54,7 @@ Example shapes (`order` → rename):
 
 ```python
 # models/dtos/order/domain/v1/order_create_input_dto.py
-from pydantic import Field
+from pydantic import Field, PositiveInt
 
 from archipy.models.dtos.base_dtos import BaseDTO
 
@@ -64,7 +64,7 @@ class OrderCreateInputDTO(BaseDTO):
 
     customer_id: str = Field(min_length=1)
     sku: str = Field(min_length=1)
-    quantity: int = Field(gt=0)
+    quantity: PositiveInt
 ```
 
 ```python
@@ -81,6 +81,8 @@ class OrderCreateOutputDTO(BaseDTO):
 
 ```python
 # models/dtos/order/repository/order_create_command_dto.py
+from pydantic import PositiveInt
+
 from archipy.models.dtos.base_dtos import BaseDTO
 
 
@@ -89,7 +91,7 @@ class OrderCreateCommandDTO(BaseDTO):
 
     customer_id: str
     sku: str
-    quantity: int
+    quantity: PositiveInt
 ```
 
 ```python
@@ -104,6 +106,14 @@ class OrderNotFoundError(NotFoundError):
 class OrderInvalidArgumentError(InvalidArgumentError):
     """Raised when order input fails domain validation."""
 ```
+
+Prefer Pydantic's constrained types over `int = Field(gt=0)` / bare `str`: `PositiveInt`, `NonNegativeInt`,
+`NonNegativeFloat`, `SecretStr` (tokens, passwords, API keys — never log or serialize the raw value), `HttpUrl`,
+`EmailStr`, `UUID4`, `StringConstraints`, and the specific date/time types: `NaiveDatetime` (default for
+timestamps; no timezone-aware fields), `PastDatetime`, `FutureDatetime`, `PastDate`, `FutureDate` — never bare `datetime` / `date`
+when a stricter type fits. Reach for `pydantic-extra-types` (`PhoneNumber`,
+`Country`, `Currency`, `Coordinate`, …) before hand-rolled validators; add it to the app's dependencies first. Read raw
+secrets only at the boundary with `.get_secret_value()`. Reference: https://docs.pydantic.dev/latest/api/types/
 
 `BaseDTO` is frozen — do not mutate instances after validation. Prefer existing ArchiPy errors over near-duplicates.
 Export public app errors from `models/errors/__init__.py` when other layers consume them. Prefer ArchiPy pagination /

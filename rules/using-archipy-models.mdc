@@ -41,6 +41,23 @@ applicable.
 `BaseDTO` is frozen, strips surrounding string whitespace, validates defaults, and supports `from_attributes`. Do not
 mutate DTO instances after validation.
 
+## Pydantic Types
+
+Use Pydantic's constrained and secret types instead of bare primitives plus `Field(...)` bounds or hand-rolled
+validators:
+
+| Need | Type |
+|------|------|
+| Positive / non-negative numbers | `PositiveInt`, `NonNegativeInt`, `NonNegativeFloat` |
+| Tokens, passwords, API keys | `SecretStr` (call `.get_secret_value()` only at the boundary; never log it) |
+| URLs, emails, IDs | `HttpUrl`, `EmailStr`, `UUID4` |
+| Timestamps | `NaiveDatetime` — no timezone-aware fields; do not use `AwareDatetime` |
+| Past / future constraints | `PastDatetime`, `FutureDatetime`, `PastDate`, `FutureDate` (birth dates, expiries, scheduled times) |
+| String rules | `StringConstraints` / `Annotated[str, ...]` |
+| Phone, country, currency, coordinates | `pydantic-extra-types` (add to the app's dependencies) |
+
+Reference: https://docs.pydantic.dev/latest/api/types/ and https://github.com/pydantic/pydantic-extra-types
+
 ## Errors
 
 - Subclass ArchiPy errors from `archipy.models.errors` (e.g. `AlreadyExistsError`, `NotFoundError`).

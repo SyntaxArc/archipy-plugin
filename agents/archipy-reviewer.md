@@ -124,6 +124,20 @@ makes it worse.
   `@needs-*` tags; mocking it is a finding. Only third-party APIs with no container may be faked at the adapter port.
 - Containers start before the app is built and are not restarted per feature; `reset_state()` isolates scenarios.
 
+**DTO field types** (`models/dtos/`, changed lines only)
+
+- Constraints use Pydantic types, not bare primitives with manual bounds. Suggest the concrete replacement:
+  `int = Field(gt=0)` / `ge=1` → `PositiveInt`; `ge=0` → `NonNegativeInt` / `NonNegativeFloat`; `str` URLs →
+  `HttpUrl`; `str` emails → `EmailStr`; `str` IDs → `UUID4` or `UUID`; regex/length checks → `StringConstraints`. **Consider**.
+- Secrets (passwords, tokens, API keys, client secrets) typed as plain `str` are a **Must fix**: use `SecretStr`, and
+  flag any `.get_secret_value()` that is logged, traced, or returned in an output DTO.
+- Date and time fields: bare `datetime` is a **Should fix** where a stricter type fits: `NaiveDatetime` for timestamps
+  (this project uses no timezone-aware fields; flag `AwareDatetime` too), `PastDatetime` / `FutureDatetime` /
+  `PastDate` / `FutureDate` for birth dates, expiries, and scheduled times.
+- Hand-written `@field_validator`s that only re-implement phone, country, currency, coordinate, or similar checks:
+  suggest `pydantic-extra-types` (and note it must be in the app's dependencies). **Consider**.
+- Do not flag types that already satisfy these, DTOs not in the change set, or ArchiPy's own `BaseDTO` configuration.
+
 **Typing and style**
 
 - Python 3.14 typing (`X | Y`), complete public annotations, Google-style docstrings, double quotes. Follow the

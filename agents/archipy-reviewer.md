@@ -43,6 +43,8 @@ makes it worse.
 - `repositories/{domain}/` orchestrates adapters and maps to DTOs. No cross-domain repository calls, no business
   rules, no unit-of-work decorators.
 - Domain adapters live under `repositories/{domain}/adapters/`, never in a top-level `adapters/` package.
+- A repository method with two or more parameters besides `self` (and its call sites in logics) should take one
+  `*CommandDTO` / `*QueryDTO` instead (**Should fix**). Suggest the DTO name and fields.
 - `logics/{domain}/` holds business rules and the unit of work, takes `*InputDTO` and returns `*OutputDTO`. It never
   calls another domain's repository and never imports FastAPI or gRPC.
 - `services/{domain}/v{n}/` is thin transport: request → domain `*InputDTO` → logic → `*OutputDTO`. No business rules,

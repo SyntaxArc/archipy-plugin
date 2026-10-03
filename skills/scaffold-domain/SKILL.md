@@ -51,7 +51,7 @@ Install extras as needed: `uv add "archipy[<extras>]"`.
 
 ## Outcome checklist
 
-- [ ] Domain + repository DTOs with ArchiPy naming (`*InputDTO`, `*CommandDTO`, …)
+- [ ] Domain + repository DTOs with ArchiPy naming (`*InputDTO`, `*CommandDTO`, …); repository methods with 2+ params take one `*CommandDTO` / `*QueryDTO`
 - [ ] Domain error subclassing ArchiPy `BaseError` hierarchy
 - [ ] `repositories/<domain>/adapters/` + repository orchestrator
 - [ ] One logic with `@postgres_sqlalchemy_atomic_decorator` when Postgres SQLAlchemy is in play

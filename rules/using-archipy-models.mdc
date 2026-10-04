@@ -58,6 +58,44 @@ validators:
 
 Reference: https://docs.pydantic.dev/latest/api/types/ and https://github.com/pydantic/pydantic-extra-types
 
+## Validation in DTOs
+
+Make invalid states unrepresentable: a DTO that exists is valid. Enforce invariants at construction so logics and tests
+never handle (or cover) impossible inputs — this shrinks the test state space.
+
+- Field-level rules not expressible as a type: `@field_validator("x")` (normalise, cross-check one field).
+- Cross-field rules: `@model_validator(mode="after")` (e.g. `start < end`, "exactly one of `a` / `b`", `max >= min`,
+  field required only when another is set).
+- Prefer a type (see Pydantic Types) over a validator; prefer a validator over a check in a logic or service.
+- Model mutually exclusive shapes as a discriminated union (`Annotated[A | B, Field(discriminator="kind")]`) or
+  `Literal` / `StrEnum` fields instead of optional fields plus runtime `if`s; avoid boolean flags that gate other fields.
+- Raise `ValueError` with a clear message inside validators (Pydantic wraps it in `ValidationError`); the
+  transport layer surfaces it as an invalid-argument error — do not re-validate downstream.
+- Validators are pure: no I/O, no DB lookups, no clocks beyond Pydantic's date types. Uniqueness / existence checks
+  belong in logics.
+- Test each validator once at the DTO boundary (one invalid example per rule); logics and BDD scenarios then cover only
+  valid states, not the cross-product of invalid combinations.
+
+## gRPC DTOs (`BaseProtobufDTO`)
+
+For gRPC domain DTOs extend `archipy.models.dtos.base_protobuf_dto.BaseProtobufDTO` (a `BaseDTO`, so every validator
+above applies), set `_proto_class` to the generated message, and convert with `from_proto(request)` / `to_proto()`.
+Needs the `archipy[grpc]` / protobuf extra.
+
+- `from_proto` is the validation boundary: it runs `model_validate`, so field/model validators reject bad requests
+  before the logic. Do not re-check in the servicer.
+- It uses `always_print_fields_with_no_presence=True`: unset proto3 scalars arrive as `""` / `0` / `False`, not
+  missing. Constrain them (`PositiveInt`, `StringConstraints(min_length=1)`) so "unset" is rejected, and mark
+  `optional` proto fields `T | None` when absence is meaningful.
+- Pydantic `ValidationError` is not an ArchiPy error: catch it in the servicer (or interceptor) and raise
+  `InvalidArgumentError ... from e` so gRPC status maps to `INVALID_ARGUMENT`.
+- `to_proto` dumps `model_dump(mode="json")`: `SecretStr` becomes a masked string and non-JSON types change shape.
+  Keep secrets / validator-only fields out of response DTOs, and use `from_proto` for requests, `to_proto` for
+  responses only.
+- Field names must match the `.proto` names (`preserving_proto_field_name=True`); unknown request keys are ignored,
+  unknown DTO fields make `ParseDict` fail.
+- Keep proto types out of logics: convert in the servicer, pass the DTO inward.
+
 ## Errors
 
 - Subclass ArchiPy errors from `archipy.models.errors` (e.g. `AlreadyExistsError`, `NotFoundError`).

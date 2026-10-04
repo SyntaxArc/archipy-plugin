@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-10-04
+
+### Added
+
+- DTO validation rule: DTOs enforce invariants with `@field_validator` / `@model_validator(mode="after")` (and
+  discriminated unions) so invalid states are unrepresentable and the test state space shrinks; covered in
+  `using-archipy-models.mdc`, `scaffold-models`, and an `archipy-reviewer` check
+- `BaseProtobufDTO` guidance for gRPC: `from_proto` as validation boundary, proto3 unset-scalar defaults,
+  `ValidationError` → `InvalidArgumentError` mapping, `to_proto` `SecretStr` masking; in models rule, `scaffold-models`,
+  `scaffold-service`, and the reviewer
+
 ## [0.17.0] - 2026-10-03
 
 ### Added

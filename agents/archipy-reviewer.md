@@ -140,6 +140,14 @@ makes it worse.
   `PastDate` / `FutureDate` for birth dates, expiries, and scheduled times.
 - Hand-written `@field_validator`s that only re-implement phone, country, currency, coordinate, or similar checks:
   suggest `pydantic-extra-types` (and note it must be in the app's dependencies). **Consider**.
+- Invariants checked outside the DTO: cross-field or single-field rules (ranges, exactly-one-of, conditionally
+  required fields) re-checked in a logic/service instead of `@model_validator(mode="after")` / `@field_validator`, or
+  optional-field combinations that allow invalid states where a discriminated union / `Literal` would not. Suggest the
+  validator or union; this widens the test state space. **Should fix**.
+- gRPC DTOs: a servicer that hand-maps proto fields instead of `BaseProtobufDTO.from_proto` / `to_proto`, re-validates
+  after `from_proto`, lets `ValidationError` escape unmapped, passes proto messages into logics, or returns `SecretStr`
+  through `to_proto`. **Should fix**.
+- Validators doing I/O (DB, HTTP, clock reads) are a **Must fix**: move to the logic.
 - Do not flag types that already satisfy these, DTOs not in the change set, or ArchiPy's own `BaseDTO` configuration.
 
 **Typing and style**

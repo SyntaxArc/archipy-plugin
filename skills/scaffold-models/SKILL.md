@@ -118,6 +118,16 @@ when a stricter type fits. Reach for `pydantic-extra-types` (`PhoneNumber`,
 `Country`, `Currency`, `Coordinate`, …) before hand-rolled validators; add it to the app's dependencies first. Read raw
 secrets only at the boundary with `.get_secret_value()`. Reference: https://docs.pydantic.dev/latest/api/types/
 
+Make DTOs reject invalid states at construction so downstream code and tests only see valid inputs: use
+`@field_validator` for single-field rules and `@model_validator(mode="after")` for cross-field rules (ranges,
+exactly-one-of, conditionally required fields). Prefer a type over a validator, and a discriminated union /
+`Literal` / `StrEnum` over optional fields plus runtime `if`s. Validators are pure (no I/O; uniqueness and existence
+checks stay in logics). Cover each validator with one invalid example at the DTO boundary.
+
+For gRPC payloads extend `BaseProtobufDTO` instead of `BaseDTO` and set `_proto_class`. Unset proto3 scalars arrive
+as `""` / `0`, so constrain them (`PositiveInt`, `StringConstraints(min_length=1)`); `to_proto` masks `SecretStr`, so
+keep secrets out of response DTOs.
+
 `BaseDTO` is frozen — do not mutate instances after validation. Prefer existing ArchiPy errors over near-duplicates.
 Export public app errors from `models/errors/__init__.py` when other layers consume them. Prefer ArchiPy pagination /
 sort / search DTOs before inventing page or cursor shapes.

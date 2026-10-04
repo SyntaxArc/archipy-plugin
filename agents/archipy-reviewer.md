@@ -69,6 +69,10 @@ makes it worse.
 
 **Import direction** (`configs ← models ← helpers ← repositories / logics / services`)
 
+- Read the arrow as "imports from": models may import `configs`, helpers may import `models`/`configs`, repositories and
+  logics may import everything to their left. Only the reverse is upward. A `models -> configs` import is allowed; a
+  `models -> helpers` import is not. If the app's own rules place the DI container or route dispatchers in `configs/`
+  (composition root), do not flag them.
 - Nothing imports upward. Quick scan:
   `grep -rnE "^\s*(from|import) [a-z_.]*(repositories|logics|services)\b" models/ helpers/ configs/`
   and `grep -rnE "^\s*(from|import) [a-z_.]*services\b" logics/ repositories/`.
@@ -87,9 +91,18 @@ makes it worse.
 
 - Raise specific ArchiPy `BaseError` subclasses or domain errors, not bare `Exception`.
 - Adapters catch specific driver/client errors and map them to domain errors with `raise ... from e`; nothing leaks
-  raw driver exceptions into logics or services.
+  raw driver exceptions into logics or services. A domain adapter that only delegates to an ArchiPy adapter
+  (`AsyncPostgresSQLAlchemyAdapter`, `MinioAdapter`, ...) already inherits ArchiPy's error mapping: do not flag it for
+  missing `try/except`. Flag only raw client/driver calls (a bare `minio`, `httpx`, or `sqlalchemy` connection).
 - A broad `except Exception` is allowed only at the outermost infrastructure boundary when the client has no typed
   root error, and needs a narrow `# noqa: BLE001` with a reason. Bare `except:` is never allowed.
+
+**Health checks**
+
+- Responses carry no service detail: no dependency names, versions, hosts, uptime, or error text (**Must fix** if they do).
+- Readiness logic calls a repository, not ArchiPy adapters or raw SQL; each probed dependency has its own adapter file
+  under `repositories/health_check/adapters/` that raises `UnavailableError` with `raise ... from e`. A probe that returns
+  `ok` without calling the dependency is a finding.
 
 **Config and bootstrap**
 

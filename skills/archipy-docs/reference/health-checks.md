@@ -24,34 +24,28 @@ Convention (recommended):
 
 Liveness must not call external dependencies.
 
+Health responses must not describe the service: no dependency names, versions, hostnames, error text, or uptime. Probes
+only need the status code, so a public or cluster-visible endpoint must not reveal what the service is built on.
+
 Safe liveness sketch:
 
 ```python
 @router.get("/health/live")
-async def liveness() -> dict[str, str | float]:
-    return {
-        "status": "ok",
-        "uptime_seconds": time.monotonic() - start_time,
-    }
+async def liveness() -> Response:
+    return Response(status_code=status.HTTP_200_OK)
 ```
 
 Readiness should run dependency checks with timeouts and return:
 
-- `200` when all checks are healthy
-- `503` when any check fails
-- a per-check payload so you can see exactly what broke
+- `200` with an empty body when all required checks are healthy
+- `503` with an empty body (or the generic `UnavailableError` body) when a required check fails
+- per-check detail **in server logs only** (`logger.warning(..., exc_info=True)`), never in the response
 
-Example readiness payload shape:
-
-```json
-{
-  "status": "not_ready",
-  "checks": {
-    "database": { "healthy": false, "error": "..." },
-    "cache": { "healthy": true }
-  }
-}
-```
+Layering for the checks: the readiness logic calls a `HealthCheckRepository`; the repository calls one adapter per
+dependency under `repositories/health_check/adapters/` (one file each, e.g. `health_check_postgres_adapter.py`,
+`health_check_minio_adapter.py`). Each adapter catches its client's specific errors and raises `UnavailableError` with
+`raise ... from e`. The logic catches only `UnavailableError` / `TimeoutError` for soft dependencies. Logics never
+import or call ArchiPy adapters, run raw SQL, or return `"ok"` without actually probing.
 
 ### gRPC Health protocol
 
@@ -118,6 +112,9 @@ Optionally add Kubernetes `preStop` sleep for extra safety.
 - Putting dependency checks in liveness (HTTP path or gRPC `"liveness"` service)
 - No timeout on dependency checks (probes hang until infra times out)
 - Returning healthy while dependencies are down (HTTP `200` or gRPC `SERVING`)
+- Returning dependency names, versions, hostnames, or error messages in a health response
+- A probe that reports `ok` without calling the dependency (for example a hardcoded Temporal `"ok"`)
+- Driving adapters or raw SQL from the readiness logic instead of going through a repository
 - Hand-rolling a custom gRPC health RPC instead of `grpc.health.v1.Health`
 - Mixing sync and async gRPC servicers on one server
 - Starting `""` as `SERVING` before warm-up completes

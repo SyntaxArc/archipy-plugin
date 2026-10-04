@@ -54,6 +54,9 @@ services/<domain>/v{n}/
 - Export `register_<domain>_v{n}_servicers(server, container)` that adds the servicers to a server built by
   `AppUtils`; the entrypoint and the BDD harness (`/scaffold-bdd`) both call it, so neither binds a port inside it.
 - Do not mix sync/async servicer styles on one server.
+- Request/response DTOs extend `BaseProtobufDTO` (`_proto_class`, `from_proto` / `to_proto`); `from_proto` is the
+  validation boundary. Catch `ValidationError` and raise `InvalidArgumentError ... from e`; keep proto types out of
+  logics. See `rules/using-archipy-models.mdc`.
 
 ## Bootstrap (entrypoint)
 

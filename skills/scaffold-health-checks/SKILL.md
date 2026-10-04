@@ -79,9 +79,10 @@ Share readiness helpers across transports. Keep business rules out of transport 
 ## FastAPI (`health_service.py`)
 
 - Export a thin router for `GET /health/live` and `GET /health/ready`.
-- Return `200` healthy, `503` not ready / unhealthy.
+- Return `200` healthy, `503` not ready / unhealthy, with empty bodies: no dependency names, versions, or error text.
 - Wire with `include_router` into `manage.py` / app factory.
-- Liveness: process-only, no deps. Readiness: deps + warm-up + shutdown, timeouts, per-check detail.
+- Liveness: process-only, no deps. Readiness: deps + warm-up + shutdown, timeouts; per-check detail goes to logs only.
+- Probes live in `repositories/health_check/` (one adapter file per dependency raising `UnavailableError`); the logic never drives adapters or raw SQL.
 - Optional heartbeat mode for deadlock detection only when user asks.
 - Code sketches and payload shapes: `../archipy-docs/reference/health-checks.md` § Health checks → FastAPI endpoints.
 

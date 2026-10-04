@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2026-10-04
+
+### Added
+
+- Health-check rule: responses reveal nothing about the service (no dependency names, versions, hosts, uptime, or error
+  text); per-check detail goes to server logs only. Probes go logic -> `HealthCheckRepository` -> one adapter file per
+  dependency raising `UnavailableError`; covered in `security-for-apps.mdc`, `scaffold-health-checks`, the health-checks
+  reference, and an `archipy-reviewer` section
+
+### Changed
+
+- `archipy-reviewer` import-direction check now spells out the arrow (models may import configs, not helpers) and no
+  longer flags composition-root containers or dispatchers placed in `configs/` by the app's own rules
+- `archipy-reviewer` no longer flags domain adapters that delegate to ArchiPy adapters for missing driver-error mapping
+
 ## [0.18.0] - 2026-10-04
 
 ### Added

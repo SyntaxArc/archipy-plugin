@@ -20,6 +20,8 @@ alwaysApply: true
 - Validate external input at service/port boundaries.
 - Use parameterized SQL/CQL and bound query values; never concatenate untrusted values into query text.
 - Map infrastructure failures to domain errors without exposing driver messages, stack traces, hosts, or credentials.
+- Health, readiness, and liveness responses reveal nothing about the service (no dependency names, versions, hosts, uptime,
+  or error text): return only a status code and log probe failures server-side.
 - Add dependencies with `uv add`; prefer the smallest matching `archipy[...]` extras.
 - Treat network-facing adapters, authentication, cryptography, uploads, and deserialization as security-sensitive.
 

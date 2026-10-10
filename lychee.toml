@@ -3,3 +3,7 @@ include_mail = false
 
 # Treat GitHub API rate-limit as soft-OK so CI is not flaky unauthenticated.
 accept = ["200..=299", "429"]
+
+# GitHub intermittently answers 5xx for repo pages; retry instead of failing on the first transient error.
+max_retries = 5
+retry_wait_time = 10

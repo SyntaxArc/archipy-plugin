@@ -4,7 +4,7 @@ Consumer plugin for apps that depend on PyPI [`archipy`](https://pypi.org/projec
 maintaining the ArchiPy library itself.
 
 For ArchiPy core changes, use the
-[ArchiPy CONTRIBUTING](https://github.com/SyntaxArc/ArchiPy/blob/master/CONTRIBUTING.md) guide.
+[ArchiPy CONTRIBUTING](https://syntaxarc.github.io/ArchiPy/community/contributing/) guide.
 
 ## Local setup
 

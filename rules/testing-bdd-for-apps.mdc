@@ -135,6 +135,12 @@ The only allowed substitute is at the adapter port: override that one adapter pr
 fake that implements the same port (or run a stub HTTP server in a generic `DockerContainer`). Everything the app owns —
 databases, caches, queues, Temporal, object storage, identity — runs in a real container.
 
+## Log Output
+
+Passing scenarios print no logs. Set `capture_log = true` and `logging_clear_handlers = true` under `[tool.behave]` in
+`pyproject.toml`, and never call `logging.basicConfig` or attach a stderr handler in `features/` (it bypasses Behave's
+capture). Captured logs appear only for failed scenarios.
+
 ## Async Steps
 
 Behave 1.3.3 supports native `async def` steps. Await async APIs directly; never call `asyncio.run()` inside a step.

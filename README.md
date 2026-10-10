@@ -417,5 +417,5 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [ArchiPy library](https://github.com/SyntaxArc/ArchiPy) — Python package (Apache-2.0)
 - [ArchiPy documentation](https://syntaxarc.github.io/ArchiPy/)
 - Contributing to **ArchiPy core** → use
-  the [ArchiPy CONTRIBUTING](https://github.com/SyntaxArc/ArchiPy/blob/master/CONTRIBUTING.md) guide
+  the [ArchiPy CONTRIBUTING](https://syntaxarc.github.io/ArchiPy/community/contributing/) guide
 - Contributing to **this plugin** → [CONTRIBUTING.md](CONTRIBUTING.md)

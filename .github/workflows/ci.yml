@@ -48,3 +48,6 @@ jobs:
             agents
             rules
           fail: true
+        env:
+          # Authenticated GitHub requests avoid 503s from unauthenticated runner traffic.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

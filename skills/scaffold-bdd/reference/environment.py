@@ -51,7 +51,7 @@ def _needed_containers(context: Context) -> set[str]:
 
 
 def before_all(context: Context) -> None:
-    logging.basicConfig(level=logging.INFO)
+    # No logging.basicConfig: its stderr handler bypasses Behave's log capture and prints logs for passing scenarios.
     context.logger = logging.getLogger("behave.tests")
     context.scenario_context_pool = ScenarioContextPoolManager()
     # Start every tagged container before the app exists: engines and clients bind to endpoints at construction,

@@ -71,6 +71,20 @@ Fill every `ADAPT` hook; import app modules inside the hooks, never at module to
 Return `None` from a hook the app does not need. Set `from configs.app_config import AppConfig` in `environment.py`
 to the app's config class.
 
+### Log capture (`pyproject.toml`)
+
+Merge into `[tool.behave]` (keep existing keys) so logs print only for failed scenarios:
+
+```toml
+[tool.behave]
+capture = true
+capture_log = true
+logging_clear_handlers = true
+```
+
+Never call `logging.basicConfig` or add a stderr `StreamHandler` in `features/`: it bypasses Behave's capture and prints
+warnings/errors for passing scenarios. Remove one if the app already has it.
+
 ### Containers (`features/test_containers.py`)
 
 The template registers Postgres, MySQL, Redis, Kafka, Temporal, MinIO, Elasticsearch, Keycloak, Vault, and ScyllaDB
@@ -89,6 +103,7 @@ Pin images in `.env.test` when the app needs versions other than the defaults in
 ## Do not
 
 - Behave only (not pytest) as primary style.
+- No `logging.basicConfig` / stderr handlers in `features/`; rely on Behave log capture.
 - Steps never call repositories, adapters, or DI providers directly. Logics are reachable only in process/task projects
   (no services layer), through `process_logic`; apps with a services layer go through REST/gRPC for every scenario.
 - Never create the test app without `AppUtils`, and never use `grpc_testing` or direct servicer calls.

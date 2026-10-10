@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.1] - 2026-10-10
+
+### Fixed
+
+- `scaffold-bdd` template `environment.py` no longer calls `logging.basicConfig`, which bypassed Behave's log capture
+  and printed warnings/errors for passing scenarios; the skill and `testing-bdd-for-apps.mdc` now set
+  `capture_log` + `logging_clear_handlers` under `[tool.behave]`
+- `archipy-reviewer` flags `logging.basicConfig` / stderr handlers in `features/` as **Must fix**, and missing log-capture
+  settings in `[tool.behave]` as **Should fix**
+
 ## [0.19.0] - 2026-10-04
 
 ### Added

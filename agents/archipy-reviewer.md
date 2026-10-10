@@ -140,6 +140,9 @@ makes it worse.
 - Infrastructure the app owns (databases, caches, queues, Temporal, object storage) runs in testcontainers via
   `@needs-*` tags; mocking it is a finding. Only third-party APIs with no container may be faked at the adapter port.
 - Containers start before the app is built and are not restarted per feature; `reset_state()` isolates scenarios.
+- `logging.basicConfig(...)` or a stderr `StreamHandler` in `features/` (e.g. `environment.py` `before_all`) is a
+  **Must fix**: it bypasses Behave's log capture, so warnings/errors print for passing scenarios. Also flag a
+  `[tool.behave]` in `pyproject.toml` missing `capture_log = true` / `logging_clear_handlers = true` as a **Should fix**.
 
 **DTO field types** (`models/dtos/`, changed lines only)
 

@@ -87,6 +87,15 @@ makes it worse.
 - A logic method that reads or writes through a SQLAlchemy-backed repository without an atomic decorator is a finding.
 - Sync and async are not mixed within one class or one server.
 
+**Partial indexes** (Postgres)
+
+- A changed query that filters a column named in a partial index predicate (`Index(..., postgresql_where=...)` in the
+  entity's `__table_args__`, or `CREATE INDEX ... WHERE` in the app's SQL migrations) renders that filter's values
+  inline with `literal(value, literal_execute=True)`, values from a closed enum only. Bound (`field == value`,
+  `field.in_(values)`, `_apply_filter`), the filter stops matching the index once Postgres switches the prepared
+  statement to a generic plan, and the query falls back to a broader index or a full scan (**Should fix**). Columns in
+  the index key are fine as bound parameters.
+
 **Errors**
 
 - Raise specific ArchiPy `BaseError` subclasses or domain errors, not bare `Exception`.
@@ -180,6 +189,8 @@ Do not flag these; they are allowed by the rules:
 - Local CLI flags in `manage.py` that override `config.FASTAPI` defaults.
 - `hashlib` digests for cache keys/ETags (not passwords), and process/task projects calling logics from Behave
   steps via `process_logic`.
+- `literal(<enum>.value, literal_execute=True)` filters that match a partial index predicate. The values come from a
+  closed enum and SQLAlchemy quotes them, so this does not break the parameterized-queries rule.
 - Style choices the app's own formatter/linter config accepts.
 
 ## Report

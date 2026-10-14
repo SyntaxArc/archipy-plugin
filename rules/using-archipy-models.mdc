@@ -41,6 +41,40 @@ applicable.
 `BaseDTO` is frozen, strips surrounding string whitespace, validates defaults, and supports `from_attributes`. Do not
 mutate DTO instances after validation.
 
+## Paged search DTOs: ArchiPy first
+
+Before writing a page, sort, or total shape, use the ArchiPy DTOs from `archipy.models.dtos` (needs `archipy>=5.14.0`
+for the output ones):
+
+| Need | Use |
+|------|-----|
+| Page request | `PaginationDTO` (`page`, `page_size`, `offset`); it rejects `page * page_size` above `PAGINATION.MAX_ITEMS` |
+| Sort request | `SortDTO` |
+| Search input (pagination + sort) | `SearchInputDTO` |
+| Search output whose total comes from `execute_search_query` | `SearchOutputDTO` (adds `total_count` and the computed `total_count_estimated`) |
+| Search output whose total the repository counts itself | `ExactSearchOutputDTO` (`total_count_estimated` is always `false`) |
+
+- Do not declare `total_count`, `page`, `page_size` or `offset` fields by hand on an output or input DTO. Extend the
+  ArchiPy DTO and add only `items` and the domain fields.
+- With `COUNT_THRESHOLD` (defaults to `PAGINATION.MAX_ITEMS`), PostgreSQL totals above the threshold are plan
+  estimates. `SearchOutputDTO` reports that as `total_count_estimated`, so the transport layer can show "10000+". Never
+  show an estimate as an exact number.
+- Repository response DTOs only carry `items` and `total_count`; the flag is computed on the domain output.
+- `SearchOutputDTO` reads `POSTGRES_SQLALCHEMY`. For another database set `count_threshold_config` in a subclass.
+- Page depth is configured with `PAGINATION__MAX_ITEMS`; do not hard-code a page limit in a DTO or service.
+
+```python
+from archipy.models.dtos.search_output_dto import ExactSearchOutputDTO, SearchOutputDTO
+
+
+class SearchOrdersOutputDTO(SearchOutputDTO):
+    items: list[OrderDTO]
+
+
+class ListStatusesOutputDTO(ExactSearchOutputDTO):
+    items: list[StatusDTO]
+```
+
 ## Pydantic Types
 
 Use Pydantic's constrained and secret types instead of bare primitives plus `Field(...)` bounds or hand-rolled

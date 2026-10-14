@@ -173,6 +173,12 @@ makes it worse.
   after `from_proto`, lets `ValidationError` escape unmapped, passes proto messages into logics, or returns `SecretStr`
   through `to_proto`. **Should fix**.
 - Validators doing I/O (DB, HTTP, clock reads) are a **Must fix**: move to the logic.
+- Hand-written paging shapes in a DTO: own `page` / `page_size` / `offset` / `limit` fields, a `total_count` on a search
+  output, or a hard-coded page limit instead of `PaginationDTO`, `SortDTO`, `SearchInputDTO`, `SearchOutputDTO` /
+  `ExactSearchOutputDTO` and `PAGINATION.MAX_ITEMS` from `archipy.models.dtos`. Name the ArchiPy replacement.
+  **Should fix**. A search output whose total comes from `execute_search_query` that extends `BaseDTO` instead of
+  `SearchOutputDTO` hides the estimated total from API clients: **Should fix** (needs `archipy>=5.14.0`; say so when the
+  pinned version is older).
 - Do not flag types that already satisfy these, DTOs not in the change set, or ArchiPy's own `BaseDTO` configuration.
 
 **Typing and style**

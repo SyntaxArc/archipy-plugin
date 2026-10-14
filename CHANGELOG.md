@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2026-10-14
+
+### Added
+
+- "Paged search DTOs: ArchiPy first" section in `using-archipy-models.mdc`: use `PaginationDTO`, `SortDTO`,
+  `SearchInputDTO`, and `SearchOutputDTO` / `ExactSearchOutputDTO` (`archipy>=5.14.0`, `total_count_estimated`) instead
+  of hand-written page, sort, and total fields, and take the page depth from `PAGINATION__MAX_ITEMS`
+- `archipy-reviewer` flags hand-written paging shapes and search outputs that extend `BaseDTO` instead of
+  `SearchOutputDTO`, reported as **Should fix**
+
+### Changed
+
+- `/scaffold-models` and the `archipy-docs` cheat sheet name the ArchiPy paging DTOs and the `PAGINATION` config
+
 ## [0.20.1] - 2026-10-14
 
 ### Changed

@@ -129,8 +129,11 @@ as `""` / `0`, so constrain them (`PositiveInt`, `StringConstraints(min_length=1
 keep secrets out of response DTOs.
 
 `BaseDTO` is frozen — do not mutate instances after validation. Prefer existing ArchiPy errors over near-duplicates.
-Export public app errors from `models/errors/__init__.py` when other layers consume them. Prefer ArchiPy pagination /
-sort / search DTOs before inventing page or cursor shapes.
+Export public app errors from `models/errors/__init__.py` when other layers consume them. Use the ArchiPy
+pagination / sort / search DTOs before inventing page or cursor shapes: `PaginationDTO`, `SortDTO`, `SearchInputDTO` for
+inputs, and `SearchOutputDTO` (total from `execute_search_query`, adds `total_count_estimated`) or `ExactSearchOutputDTO`
+(total counted by the repository) for outputs — never hand-write `total_count`, `page`, `page_size` or `offset`.
+Page depth comes from `PAGINATION__MAX_ITEMS`; do not hard-code a page limit.
 
 ## Do not
 

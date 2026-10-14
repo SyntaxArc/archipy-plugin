@@ -126,8 +126,10 @@ Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
 | Domain input / output           | `{Op}InputDTO` / `{Op}OutputDTO`                                  | `UserRegistrationInputDTO` |
 | Repo command / query / response | `{Action}CommandDTO` / `{Action}QueryDTO` / `{Domain}ResponseDTO` | `CreateUserCommandDTO`     |
 
-Also available under `archipy.models.dtos`: pagination / sort / search-input DTOs (`range_dtos` and related), and a
-protobuf DTO base for gRPC payloads. Prefer those before inventing page/cursor shapes.
+Also available under `archipy.models.dtos`: `PaginationDTO`, `SortDTO`, `SearchInputDTO`, `SearchOutputDTO` and
+`ExactSearchOutputDTO` (`archipy>=5.14.0`; `total_count` plus `total_count_estimated`), `range_dtos`, and a protobuf DTO
+base for gRPC payloads. Prefer those before inventing page, sort, total or cursor shapes. The page depth limit is
+`PAGINATION.MAX_ITEMS` and the SQLAlchemy `COUNT_THRESHOLD` defaults to it.
 
 ## Quickstart path
 

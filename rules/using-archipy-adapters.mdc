@@ -71,6 +71,43 @@ except KafkaError as e:
 
 Never leak raw driver exceptions into logics/services.
 
+## Partial Indexes and Bound Parameters
+
+asyncpg runs every query as a server-side prepared statement (psycopg 3 does once a query passes its
+`prepare_threshold`). From about the sixth execution on a connection, Postgres may switch that statement to a generic
+plan, which sees `$1` instead of the value. A partial index (`CREATE INDEX ... WHERE status = 'PENDING'`) is usable only
+when the planner can prove its predicate, so a filter that binds the predicate's column (`field == value`,
+`field.in_(values)`, or `SQLAlchemyFilterMixin._apply_filter`) stops matching the index once the plan goes generic. The
+query falls back to a broader index or a full scan. Nothing errors, and a small development database rarely shows it.
+
+When a filter targets a column named in a partial index predicate, render its values inline. Do this only for values
+from a closed enum; keep user input and IDs bound:
+
+```python
+from sqlalchemy import literal
+
+if query_dto.statuses is not None:
+    query = query.where(
+        OrderEntity.status.in_(
+            [literal(status.value, literal_execute=True) for status in query_dto.statuses],
+        ),
+    )
+```
+
+Columns in the index key (`user_id` in `(user_id, created_at) WHERE status = 'PENDING'`) work as bound parameters; only
+the predicate's columns need inlining. Each distinct set of inlined values is its own prepared statement, which is
+another reason to keep this to small enums.
+
+Confirm the plan with a forced generic plan:
+
+```sql
+SET plan_cache_mode = force_generic_plan;
+PREPARE q(uuid) AS SELECT count(*) FROM orders WHERE user_id = $1 AND status IN ('PENDING');
+EXPLAIN EXECUTE q('00000000-0000-0000-0000-000000000000');  -- should show the partial index
+DEALLOCATE q;
+RESET plan_cache_mode;
+```
+
 ## Optional Dependencies
 
 Install the matching ArchiPy extra and import adapter dependencies normally. Do not hide missing extras behind lazy

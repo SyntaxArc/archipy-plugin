@@ -12,7 +12,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Partial-index rule: a filter on a column named in a partial index predicate renders its enum values inline with
   `literal(..., literal_execute=True)`, since a bound parameter stops matching the index once Postgres switches the
   prepared statement to a generic plan; covered in `using-archipy-adapters.mdc` and an `archipy-reviewer` check
-  reported as **Should fix**
+  reported as **Should fix**; the rule documents the psycopg 3 prepare timing, links the PostgreSQL `plan_cache_mode`
+  docs, and names `force_custom_plan` as the session-wide alternative
 
 ## [0.19.1] - 2026-10-10
 

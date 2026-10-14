@@ -73,9 +73,12 @@ Never leak raw driver exceptions into logics/services.
 
 ## Partial Indexes and Bound Parameters
 
-asyncpg runs every query as a server-side prepared statement (psycopg 3 does once a query passes its
-`prepare_threshold`). From about the sixth execution on a connection, Postgres may switch that statement to a generic
-plan, which sees `$1` instead of the value. A partial index (`CREATE INDEX ... WHERE status = 'PENDING'`) is usable only
+asyncpg runs every query as a server-side prepared statement (psycopg 3 does once a query has run more than its
+`prepare_threshold` times, 5 by default). Postgres plans the first five executions of a prepared statement with the
+actual values, then may switch to a generic plan, which sees `$1` instead of the value (`plan_cache_mode = auto`; see the
+[PostgreSQL docs](https://www.postgresql.org/docs/current/runtime-config-query.html#GUC-PLAN-CACHE-MODE)). With asyncpg
+this happens from about the sixth execution on a connection; with psycopg 3 it starts later, after the statement is
+prepared. A partial index (`CREATE INDEX ... WHERE status = 'PENDING'`) is usable only
 when the planner can prove its predicate, so a filter that binds the predicate's column (`field == value`,
 `field.in_(values)`, or `SQLAlchemyFilterMixin._apply_filter`) stops matching the index once the plan goes generic. The
 query falls back to a broader index or a full scan. Nothing errors, and a small development database rarely shows it.
@@ -97,6 +100,9 @@ if query_dto.statuses is not None:
 Columns in the index key (`user_id` in `(user_id, created_at) WHERE status = 'PENDING'`) work as bound parameters; only
 the predicate's columns need inlining. Each distinct set of inlined values is its own prepared statement, which is
 another reason to keep this to small enums.
+
+Setting `plan_cache_mode = force_custom_plan` on the connection also keeps the partial index usable, but it plans every
+query again for the whole session. Prefer inlining the few predicate columns that need it.
 
 Confirm the plan with a forced generic plan:
 

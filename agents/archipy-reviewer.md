@@ -93,7 +93,7 @@ makes it worse.
   entity's `__table_args__`, or `CREATE INDEX ... WHERE` in the app's SQL migrations) renders that filter's values
   inline with `literal(value, literal_execute=True)`, values from a closed enum only. Bound (`field == value`,
   `field.in_(values)`, `_apply_filter`), the filter stops matching the index once Postgres switches the prepared
-  statement to a generic plan, and the query falls back to a broader index or a full scan (**Should fix**). Columns in
+  statement to a generic plan, and the query falls back to a broader index or a full scan (**Must fix**). Columns in
   the index key are fine as bound parameters.
 
 **Errors**

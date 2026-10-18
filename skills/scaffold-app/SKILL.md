@@ -80,7 +80,7 @@ features/                  # optional — /scaffold-bdd
 - Do not copy ArchiPy library maintainer tooling (library BDD internals).
 - Never hardcode host/port; never hand-roll bare `FastAPI()` when AppUtils is in use.
 - Do not invent a top-level app `adapters/` package — domain adapters live under `repositories/<domain>/adapters/`.
-- There is no decorator named `atomic` — UoW means a real `*_sqlalchemy_atomic_decorator` on logics.
+- There is no decorator named `atomic` — UoW means a real `*_sqlalchemy_atomic` on logics.
 
 ## Verify
 

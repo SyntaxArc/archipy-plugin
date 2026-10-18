@@ -16,7 +16,7 @@ Pilot one case first (`--case 04-otel-question --runs 1`) to check cost. Results
 |---|---|---|
 | `01-redis-cache-adapter` | `scaffold-adapter` | adapter under `repositories/user/adapters/`, no top-level `adapters/`, wraps ArchiPy Redis, `raise ... from e` |
 | `02-orders-postgres-domain` | `scaffold-domain` | logic + versioned service created, UoW only in logics |
-| `03-wallet-transfer-logic` | `scaffold-logic` | `*_sqlalchemy_atomic_decorator` on the logic, domain error for insufficient funds |
+| `03-wallet-transfer-logic` | `scaffold-logic` | `*_sqlalchemy_atomic` on the logic, domain error for insufficient funds |
 | `04-otel-question` | `archipy-docs` | answer uses `OtelUtils` and `otel` extras, no removed 4.x APIs |
 | `05-neg-unrelated-shell` | none | no plugin skill fires on an unrelated shell question |
 | `06-reviewer-violations` | `archipy-reviewer` | catches untracked top-level adapter, hardcoded secret, leaked `httpx` errors, UoW in service; ranks them must-fix |

@@ -49,11 +49,11 @@ Stub shape:
 - Google-style class/method docstrings; double quotes; `X | Y` typing.
 - Constructor injects the domain repository (or port) — do not construct adapters.
 - Public method: domain `*InputDTO` in → domain `*OutputDTO` out.
-- Decorate with `postgres_sqlalchemy_atomic_decorator` or `async_postgres_sqlalchemy_atomic_decorator`
+- Decorate with `postgres_sqlalchemy_atomic` (it detects `async def` itself, so one name serves sync and async logics)
   **when Postgres SQLAlchemy is in play**. Otherwise omit the UoW decorator.
 
 ```python
-from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator
+from archipy.adapters.base.sqlalchemy.atomic import postgres_sqlalchemy_atomic
 
 
 class UserRegistrationLogic:
@@ -62,7 +62,7 @@ class UserRegistrationLogic:
     def __init__(self, user_repository: UserRepository) -> None:
         self._user_repository = user_repository
 
-    @postgres_sqlalchemy_atomic_decorator
+    @postgres_sqlalchemy_atomic
     def register_user(self, input_dto: UserRegistrationInputDTO) -> UserRegistrationOutputDTO:
         """Validate and create a user.
 

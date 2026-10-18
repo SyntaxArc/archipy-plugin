@@ -21,15 +21,15 @@ Live: https://syntaxarc.github.io/ArchiPy/getting-started/concepts/
 When using Postgres SQLAlchemy, decorate public methods:
 
 ```python
-from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator
+from archipy.adapters.base.sqlalchemy.atomic import postgres_sqlalchemy_atomic
 
 class UserRegistrationLogic:
-    @postgres_sqlalchemy_atomic_decorator
+    @postgres_sqlalchemy_atomic
     def register_user(self, input_dto: UserRegistrationInputDTO) -> UserRegistrationOutputDTO:
         ...
 ```
 
-- Async stack: `async_postgres_sqlalchemy_atomic_decorator`.
+- Async logics: the same decorator detects `async def`; the `async_*` names are deprecated.
 - Nested atomic-decorator calls reuse the open session — logics may call other logics.
 
 ## Domain Isolation
@@ -50,5 +50,5 @@ class UserRegistrationLogic:
 ## Do Not
 
 - Put HTTP status mapping or router code here (that belongs in `services/`).
-- Skip `*_sqlalchemy_atomic_decorator` on write/read paths that need a SQLAlchemy session when SQLAlchemy is in use.
+- Skip `*_sqlalchemy_atomic` on write/read paths that need a SQLAlchemy session when SQLAlchemy is in use.
 - Construct Redis/DB clients inside logic classes.

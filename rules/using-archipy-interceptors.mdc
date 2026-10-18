@@ -19,9 +19,9 @@ Use ArchiPy interceptors under `archipy.helpers.interceptors` (FastAPI / gRPC) b
 Prefer **AppUtils** auto-registration for stock interceptors/middleware:
 
 - FastAPI: `AppUtils.create_fastapi_app` wires middleware/exception handlers and instruments through
-  `archipy[otel-fastapi]` when `OTEL.IS_ENABLED`.
+  `archipy[otel,fastapi]` when `OTEL.IS_ENABLED`.
 - gRPC: `create_grpc_app` / `create_async_grpc_app` append exception, optional OTel traces (contrib), ArchiPy
-  metrics (`rpc.server.duration` when `OTEL.METRICS_ENABLED`), and gRPC rate-limit interceptors. Do not hand-roll
+  metrics (`rpc.server.call.duration` when `OTEL.METRICS_ENABLED`), and gRPC rate-limit interceptors. Do not hand-roll
   those stock hooks; metrics install is independent of traces.
 - FastAPI rate limiting is not shipped by ArchiPy 5.x; use `fastapi-redis-sdk` when required.
 

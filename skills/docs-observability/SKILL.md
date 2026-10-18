@@ -14,10 +14,10 @@ Cover:
 - Tracing: `trace_root` / `trace_span` (+ async twins)
 - Metrics: `measure_duration` / `count_calls` (+ async twins); `METRICS_EXPORTER` (`otlp`\|`pull`\|`pushgateway`)
 - Logs: `LOGS_EXPORTER` (`console`\|`otlp`); default console stream split
-- AppUtils FastAPI instrumentation through `archipy[otel-fastapi]`
-- AppUtils gRPC: contrib traces + ArchiPy `rpc.server.duration` metrics through `archipy[otel-grpc]`
+- AppUtils FastAPI instrumentation through `archipy[otel,fastapi]`
+- AppUtils gRPC: contrib traces + ArchiPy `rpc.server.call.duration` metrics through `archipy[otel-grpc]`
   (metrics independent of traces)
-- Timing: `timing_decorator`
+- Timing: `timing`
 
 Live docs:
 

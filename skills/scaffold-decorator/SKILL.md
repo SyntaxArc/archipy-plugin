@@ -29,13 +29,12 @@ Read these plugin rules in full before generating files (paths relative to this 
 
 Examples:
 
-- `from archipy.helpers.decorators.cache import ttl_cache_decorator`
-- `from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator`
-- `from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator`
+- `from archipy.helpers.decorators import ttl_cache`
+- `from archipy.adapters.base.sqlalchemy.atomic import postgres_sqlalchemy_atomic` (detects `async def`)
 - `trace_span` / `trace_root` (+ async twins) from `archipy.helpers.decorators.tracing`
 - `measure_duration` / `count_calls` (+ async twins) from `archipy.helpers.decorators.metrics`
-- `timeout_decorator`, `retry_decorator`, `singleton_decorator`, `timing_decorator`, and
-  `grpc_rate_limit_decorator` under `archipy.helpers.decorators`
+- `timeout`, `retry`, `singleton`, `timing`, and
+  `grpc_rate_limit` under `archipy.helpers.decorators`
 
 Show correct usage on a sample function; do not reimplement. UoW decorators belong on **logics**, not
 services/repositories.
@@ -96,12 +95,11 @@ def timed(func: Callable[P, R]) -> Callable[P, R]:
 - Preserve types where practical (`ParamSpec` / `TypeVar`)
 - Google-style docstring with Args/Returns and a usage example
 - **No** concrete adapter imports at module level
-- Separate sync/async wrappers if both needed
-- Sync wrappers must reject coroutine functions (`inspect.iscoroutinefunction`) — use async twins instead
+- One decorator detects `async def` with `inspect.iscoroutinefunction` and returns a sync or async wrapper
 
 ## Do not
 
-- Sync decorators must reject coroutine functions — use async twins instead.
+- Wrap an `async def` with a sync wrapper (it would return an un-awaited coroutine).
 
 ## Verify
 

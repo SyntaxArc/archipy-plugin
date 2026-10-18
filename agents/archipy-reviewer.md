@@ -81,8 +81,8 @@ makes it worse.
 
 **Unit of work**
 
-- Transactions use a real `*_sqlalchemy_atomic_decorator` on logics only: `postgres_sqlalchemy_atomic_decorator`
-  (or the sqlite/starrocks variant) for sync code, `async_postgres_sqlalchemy_atomic_decorator` for async. There is no
+- Transactions use a real `*_sqlalchemy_atomic` on logics only: `postgres_sqlalchemy_atomic`
+  (or the mysql/sqlite/starrocks variant), which detects `async def` itself. There is no
   decorator named `atomic`.
 - A logic method that reads or writes through a SQLAlchemy-backed repository without an atomic decorator is a finding.
 - Sync and async are not mixed within one class or one server.
@@ -126,7 +126,16 @@ makes it worse.
 
 - On `archipy` 5.x, flag removed 4.x APIs and extras: `TracingUtils`, `PrometheusUtils`, `capture_span`,
   `capture_transaction`, `FastAPIRateLimitConfig`, and the `sentry`, `elastic-apm`, `prometheus` extras. The 5.x
-  replacements are `OtelUtils`, `trace_span`, and the `otel`, `otel-fastapi`, `otel-grpc` extras.
+  replacements are `OtelUtils`, `trace_span`, and the `otel` and `otel-grpc` extras. FastAPI telemetry needs `archipy[otel,fastapi]`; there is no `otel-fastapi`
+  extra on 5.16+.
+- On `archipy` 5.10+ flag deprecated names that warn today and are removed in 6.0.0 (**Should fix**, name the
+  replacement): `*_decorator` and `async_*` decorator names (`retry`, `timeout`, `timing`, `singleton`, `ttl_cache`,
+  `grpc_rate_limit`, `*_sqlalchemy_atomic`); on 5.16+ the atomic decorators imported from `archipy.helpers.decorators`
+  instead of `archipy.adapters.base.sqlalchemy.atomic`; `KeycloakUtils` and `archipy.helpers.utils.keycloak_utils`
+  instead of `fastapi_auth` / `grpc_auth` from `archipy.adapters.keycloak.auth`; reads of `request.state.user_info`,
+  `token_info`, `actor_chain` or `user_roles` instead of `AuthContextManager`.
+- On `archipy` 5.16+ dashboards or alerts on `rpc.server.duration` / `rpc.server.request.duration` need
+  `rpc.server.call.duration` (attributes `rpc.system.name`, `rpc.response.status_code`, `error.type`).
 - For any other API you are unsure exists in the pinned version, check the live docs
   (https://syntaxarc.github.io/ArchiPy/) or the installed package (`.venv/lib/python*/site-packages/archipy/`) before
   flagging it.

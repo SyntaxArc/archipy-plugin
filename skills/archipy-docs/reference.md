@@ -4,7 +4,7 @@ Condensed patterns for **apps that depend on** PyPI `archipy`. Prefer live docs 
 
 https://syntaxarc.github.io/ArchiPy/
 
-Verified against `archipy` 5.4.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
+Verified against `archipy` 5.16.x. Import symbols from their **full submodule paths** — `archipy.helpers.utils`
 and `archipy.configs` package `__init__` files do not re-export symbols.
 
 > **ArchiPy 5.x:** OpenTelemetry replaces the removed Sentry, Elastic APM, and Prometheus integrations. Use
@@ -57,7 +57,7 @@ uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
 | `kafka`                             | Kafka producer/consumer adapters                                                |
 | `scylladb`                          | ScyllaDB / Cassandra adapter                                                    |
 | `minio`                             | MinIO / S3-compatible object storage                                            |
-| `keycloak`                          | Keycloak auth adapter + `KeycloakUtils`                                         |
+| `keycloak`                          | Keycloak auth adapter + `fastapi_auth` / `grpc_auth`                                         |
 | `elasticsearch`                     | Elasticsearch adapter                                                           |
 | `elasticsearch-async`               | Async Elasticsearch adapter                                                     |
 | `fastapi`                           | FastAPI + `AppUtils.create_fastapi_app`                                         |
@@ -67,7 +67,6 @@ uv add "archipy[grpc]"      # gRPC + AppUtils create_*_grpc_app
 | `testcontainers`                    | Testcontainers for `@needs-*` infra BDD                                         |
 | `temporalio`                        | Temporal adapter, worker, runtime                                               |
 | `otel`                              | OpenTelemetry SDK + OTLP traces, metrics, and logs                              |
-| `otel-fastapi`                      | FastAPI OpenTelemetry instrumentation                                            |
 | `otel-grpc`                         | gRPC OpenTelemetry instrumentation                                               |
 | `otel-sqlalchemy`                   | SQLAlchemy OpenTelemetry instrumentation                                         |
 | `otel-redis`                        | Redis OpenTelemetry instrumentation                                              |
@@ -114,7 +113,7 @@ Import direction: `configs ← models ← helpers ← repositories / logics / se
 Call flow: `services → logics (atomic UoW) → repositories → adapters → ArchiPy`.
 
 > **Plugin shorthand:** docs sometimes write `@atomic` to mean
-> `postgres_sqlalchemy_atomic_decorator` / `async_postgres_sqlalchemy_atomic_decorator`
+> `postgres_sqlalchemy_atomic`
 > (or the sqlite/starrocks/generic twins). There is **no** decorator named `atomic`.
 
 Live: https://syntaxarc.github.io/ArchiPy/getting-started/project_structure/
@@ -136,7 +135,7 @@ base for gRPC payloads. Prefer those before inventing page, sort, total or curso
 1. `uv init` + `uv add "archipy[redis,fastapi,postgres,sqlalchemy]"` (pick extras you need)
 2. `AppConfig` + `set_global` (customize `FASTAPI`)
 3. `AppUtils.create_fastapi_app` + domain adapters under `repositories/`
-4. Add logics (`*_sqlalchemy_atomic_decorator`) / services / optional `features/`
+4. Add logics (`*_sqlalchemy_atomic`) / services / optional `features/`
 
 Live: https://syntaxarc.github.io/ArchiPy/getting-started/quickstart/
 

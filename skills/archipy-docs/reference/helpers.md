@@ -19,7 +19,6 @@ Prefer ArchiPy utils. Import from the **concrete submodule** (package `__init__`
 | `FileUtils`       | `archipy.helpers.utils.file_utils`       | file helpers                    |
 | `ErrorUtils`      | `archipy.helpers.utils.error_utils`      | error helpers                   |
 | `TOTPUtils`       | `archipy.helpers.utils.totp_utils`       | TOTP                            |
-| `KeycloakUtils`   | `archipy.helpers.utils.keycloak_utils`   | Keycloak helpers                |
 
 ### Hand-rolled code → ArchiPy util
 
@@ -43,12 +42,12 @@ Prefer ArchiPy under `archipy.helpers.decorators`:
 
 | Area                         | Symbols                                                                                                                   |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| Cache                        | `ttl_cache_decorator` (`archipy.helpers.decorators.cache`)                                                                |
-| Transactions (on **logics**) | `postgres_sqlalchemy_atomic_decorator`, `async_postgres_sqlalchemy_atomic_decorator`, plus sqlite/starrocks/generic twins |
-| Observability                | `trace_span`, `trace_root`, `async_trace_span`, `async_trace_root`, `trace_class`; `timing_decorator`                    |
+| Cache                        | `ttl_cache` (`archipy.helpers.decorators.cache`)                                                                |
+| Transactions (on **logics**) | `postgres_sqlalchemy_atomic` (async detected), plus mysql/sqlite/starrocks/generic variants |
+| Observability                | `trace_span`, `trace_root`, `async_trace_span`, `async_trace_root`, `trace_class`; `timing`                    |
 | Metrics                      | `measure_duration`, `async_measure_duration`, `count_calls`, `async_count_calls`                                        |
-| Resilience                   | `retry_decorator`, `timeout_decorator`                                                                                    |
-| Other                        | `singleton_decorator`, `grpc_rate_limit_decorator` (gRPC only)                                                            |
+| Resilience                   | `retry`, `timeout`                                                                                    |
+| Other                        | `singleton`, `grpc_rate_limit` (gRPC only)                                                            |
 
 No concrete adapter imports at module level in custom decorators.
 
@@ -59,13 +58,13 @@ auto-registration for stock hooks; wire custom via DI / `customized_interceptors
 
 ### Instrumentation and rate limiting
 
-- FastAPI: `AppUtils.create_fastapi_app` auto-instruments through `archipy[otel-fastapi]` when `OTEL.IS_ENABLED`.
+- FastAPI: `AppUtils.create_fastapi_app` auto-instruments through `archipy[otel,fastapi]` when `OTEL.IS_ENABLED`.
 - gRPC traces: AppUtils factories insert the contrib OTel server interceptor through `archipy[otel-grpc]` when
   `OTEL.TRACES_ENABLED`.
 - gRPC metrics: AppUtils also prepends ArchiPy `GrpcServerOtelMetricsInterceptor` /
-  `AsyncGrpcServerOtelMetricsInterceptor` (`rpc.server.duration`) when `OTEL.METRICS_ENABLED` — independent of
+  `AsyncGrpcServerOtelMetricsInterceptor` (`rpc.server.call.duration`) when `OTEL.METRICS_ENABLED` — independent of
   traces.
-- gRPC rate-limit: `GRPC_RATE_LIMIT.IS_ENABLED` + `grpc_rate_limit_decorator` / stock interceptors.
+- gRPC rate-limit: `GRPC_RATE_LIMIT.IS_ENABLED` + `grpc_rate_limit` / stock interceptors.
 - FastAPI rate-limit handlers were removed in 5.0; use `fastapi-redis-sdk`.
 
 Live helpers overview: https://syntaxarc.github.io/ArchiPy/tutorials/helpers/

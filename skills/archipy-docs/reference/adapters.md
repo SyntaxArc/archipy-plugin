@@ -77,19 +77,23 @@ Atomic decorators resolve the active SQLAlchemy session through
 `archipy.adapters.base.sqlalchemy.session_manager_registry.SessionManagerRegistry`. Register the app's session manager
 at bootstrap; BDD hooks call `SessionManagerRegistry.reset()` after each scenario.
 
-| Decorator                                                     | Extra / stack                   |
-|---------------------------------------------------------------|---------------------------------|
-| `postgres_sqlalchemy_atomic_decorator`                        | `postgres` + `sqlalchemy`       |
-| `async_postgres_sqlalchemy_atomic_decorator`                  | `postgres` + `sqlalchemy-async` |
-| `sqlite_sqlalchemy_atomic_decorator` / `async_sqlite_…`       | SQLite stacks                   |
-| `starrocks_sqlalchemy_atomic_decorator` / `async_starrocks_…` | StarRocks stacks                |
-| `sqlalchemy_atomic_decorator`                                 | Generic SQLAlchemy              |
+| Decorator                                                     | Extra / stack                    |
+|---------------------------------------------------------------|----------------------------------|
+| `postgres_sqlalchemy_atomic`                                  | `postgres` + `sqlalchemy[-async]` |
+| `mysql_sqlalchemy_atomic`                                     | MySQL stacks                     |
+| `sqlite_sqlalchemy_atomic`                                    | SQLite stacks                    |
+| `starrocks_sqlalchemy_atomic`                                 | StarRocks stacks                 |
+| `sqlalchemy_atomic`                                           | Generic SQLAlchemy               |
 
-Import from `archipy.helpers.decorators.sqlalchemy_atomic` (lazy-loaded via
-`archipy.helpers.decorators` `__getattr__` so SQLAlchemy is not a hard import).
+Each detects `async def`, so there are no separate async names (the `async_*` and `*_decorator` names are deprecated,
+removed in archipy 6.0.0). Import from `archipy.adapters.base.sqlalchemy.atomic` (archipy >= 5.16.0; the old
+`archipy.helpers.decorators` path still works but warns).
+
+For several databases of the same type, pass `registry=` to the decorator or `sqlalchemy_atomic`; session managers are
+keyed by configuration (archipy >= 5.16.0).
 
 ## Logics (unit of work)
 
 - Domain DTO in → domain DTO out; no FastAPI/gRPC imports.
-- Public methods: decorate with the matching `*_sqlalchemy_atomic_decorator` when using SQLAlchemy.
+- Public methods: decorate with the matching `*_sqlalchemy_atomic` when using SQLAlchemy.
 - May call other domain logics (nested atomic reuses the open session); **never** another domain's repository.

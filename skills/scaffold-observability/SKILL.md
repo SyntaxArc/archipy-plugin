@@ -28,7 +28,7 @@ Read these plugin rules in full before generating files (paths relative to this 
 | Stack | Extra |
 |-------|-------|
 | Core OTLP traces, metrics, logs | `otel` |
-| FastAPI | `otel-fastapi` |
+| FastAPI | `otel` + `fastapi` (no separate extra) |
 | gRPC | `otel-grpc` |
 | SQLAlchemy | `otel-sqlalchemy` |
 | Redis | `otel-redis` |
@@ -40,7 +40,7 @@ Read these plugin rules in full before generating files (paths relative to this 
 Combine required extras, for example:
 
 ```bash
-uv add "archipy[otel-fastapi,otel-sqlalchemy,otel-redis]"
+uv add "archipy[otel,fastapi,otel-sqlalchemy,otel-redis]"
 ```
 
 Do not use removed ArchiPy 4.x extras: `prometheus`, `sentry`, or `elastic-apm`.
@@ -98,18 +98,21 @@ Kafka clients, ScyllaDB sessions, and logs created during bootstrap.
 
 ## Instrument application code
 
-- FastAPI: `AppUtils.create_fastapi_app(config)` with `archipy[otel-fastapi]`.
+- FastAPI: `AppUtils.create_fastapi_app(config)` with `archipy[otel,fastapi]`.
 - gRPC server: `create_grpc_app` / `create_async_grpc_app` with `archipy[otel-grpc]`.
   - Traces: contrib server interceptor when `OTEL.TRACES_ENABLED`.
   - Metrics: ArchiPy `GrpcServerOtelMetricsInterceptor` /
-    `AsyncGrpcServerOtelMetricsInterceptor` records `rpc.server.duration` when
+    `AsyncGrpcServerOtelMetricsInterceptor` records `rpc.server.call.duration` when
     `OTEL.METRICS_ENABLED` (works without traces).
+- Tuning (archipy >= 5.16.0): `OTEL.TRACES_SAMPLER`, `PROPAGATORS` (`b3`, `b3multi`; B3 ships in `archipy[otel]`),
+  `OTLP_COMPRESSION` (`none` by default), `SPAN_BATCH_*`, `RESOURCE_DETECTORS`; `USE_STANDARD_ENV` makes the standard
+  `OTEL_*` variables fill unset settings.
 - gRPC clients: `OtelUtils.grpc_client_interceptors()` / `async_grpc_client_interceptors()`.
 - Traces: `trace_root`, `trace_span`, `async_trace_root`, `async_trace_span`, `trace_class`.
 - Metrics: `measure_duration`, `async_measure_duration`, `count_calls`, `async_count_calls`.
 - Exceptions: `BaseUtils.capture_exception` records on the current span.
 
-Import decorators from `archipy.helpers.decorators`. Sync decorators reject coroutine functions; use their async twins.
+Import decorators from `archipy.helpers.decorators`. `measure_duration`, `count_calls`, `trace_span` and `trace_root` detect `async def`; the `async_*` twins remain.
 Only capture non-sensitive argument names in trace attributes.
 
 ## ArchiPy 4.x migration

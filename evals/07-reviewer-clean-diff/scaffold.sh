@@ -92,7 +92,7 @@ class WithdrawOutputDTO(BaseDTO):
     balance: int
 PY
 cat > logics/wallet/wallet_logic.py <<'PY'
-from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator
+from archipy.adapters.base.sqlalchemy.atomic import postgres_sqlalchemy_atomic
 
 from logics.notification.notification_logic import NotificationLogic
 from models.dtos.wallet.domain.v1.wallet_dtos import WithdrawInputDTO, WithdrawOutputDTO
@@ -110,7 +110,7 @@ class WalletLogic:
         self._repository = repository
         self._notification_logic = notification_logic
 
-    @postgres_sqlalchemy_atomic_decorator
+    @postgres_sqlalchemy_atomic
     def withdraw(self, input_dto: WithdrawInputDTO) -> WithdrawOutputDTO:
         """Withdraw credit, notifying when the balance runs low.
 

@@ -36,6 +36,6 @@ repositories/{domain}/
 
 ## Do Not
 
-- Put business rules or `@postgres_sqlalchemy_atomic_decorator` here (that belongs in `logics/`).
+- Put business rules or `@postgres_sqlalchemy_atomic` here (that belongs in `logics/`).
 - Create a top-level app `adapters/` package — domain adapters live under repositories.
 - Leak raw driver exceptions into logics/services.

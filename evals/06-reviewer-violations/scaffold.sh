@@ -42,7 +42,7 @@ git -c user.name=eval -c user.email=eval@example.com commit -qm "baseline"
 
 # Tracked, uncommitted: unit of work and business rule in the service layer.
 cat > services/payment/v1/payment_router.py <<'PY'
-from archipy.helpers.decorators.sqlalchemy_atomic import postgres_sqlalchemy_atomic_decorator
+from archipy.adapters.base.sqlalchemy.atomic import postgres_sqlalchemy_atomic
 from fastapi import APIRouter
 
 from logics.payment.payment_logic import PaymentLogic
@@ -53,7 +53,7 @@ def create_payment_v1_router(logic: PaymentLogic) -> APIRouter:
     router = APIRouter(prefix="/v1/payments")
 
     @router.post("")
-    @postgres_sqlalchemy_atomic_decorator
+    @postgres_sqlalchemy_atomic
     def charge(amount: int) -> dict[str, str]:
         if amount > 10_000:
             amount = int(amount * 0.95)

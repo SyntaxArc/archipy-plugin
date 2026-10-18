@@ -39,8 +39,8 @@ Paths are hierarchical resources: `/api/v{n}/<collection>/{<resource>_uuid}/<chi
 
 ## Actor identity and audit columns (JWT auth)
 
-With any JWT-based auth (`KeycloakUtils` dependencies/decorators, `JWTUtils`, or another issuer) the acting principal comes
-from the verified access token, never from a path parameter. With `KeycloakUtils` it is an `AuthenticatedUserDTO`; for
+With any JWT-based auth (`fastapi_auth` / `grpc_auth` from `archipy.adapters.keycloak.auth`, `JWTUtils`, or another issuer) the acting principal comes
+from the verified access token, never from a path parameter. With the Keycloak guards it is an `AuthenticatedUserDTO`, also readable anywhere below the endpoint through `AuthContextManager` (do not read `request.state.user_info` and friends; they warn and go away in 6.0.0); for
 other JWTs read the claims the same way: actor = `act.sub` (RFC 8693 delegation/impersonation) when present, else `sub`.
 
 - Fill `created_by*` / `updated_by*` (`created_by_admin*`, `updated_by_admin*` on `AdminEntity` /
@@ -110,7 +110,7 @@ CLI flags may override for local runs; defaults always come from `FASTAPI`.
 
 ## Do Not
 
-- Put business rules or `@postgres_sqlalchemy_atomic_decorator` in services.
+- Put business rules or `@postgres_sqlalchemy_atomic` in services.
 - Hand-roll bare `FastAPI()` / `grpc.server()` when AppUtils extras are installed.
 - Hardcode uvicorn host/port — use `FastAPIConfig`.
 - Use non-kebab literal path segments, verb paths (`/get-user`), or flat routes that hide the resource hierarchy.

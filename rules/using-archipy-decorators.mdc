@@ -12,16 +12,15 @@ Helpers stay **pure**: no database calls, no network I/O, no constructing adapte
 
 Before writing a custom decorator, prefer ArchiPy under `archipy.helpers.decorators`:
 
-- `ttl_cache_decorator` — caching (`archipy.helpers.decorators.cache`)
+- `ttl_cache` — caching (`archipy.helpers.decorators`)
 - Unit of work (apply on **logics**, not repositories):
-  - `postgres_sqlalchemy_atomic_decorator`
-  - `async_postgres_sqlalchemy_atomic_decorator`
-  - also `sqlite_` / `starrocks_` / generic `sqlalchemy_atomic_decorator` twins
+  - `postgres_sqlalchemy_atomic` (detects `async def`), imported from `archipy.adapters.base.sqlalchemy.atomic`
+  - also `mysql_` / `sqlite_` / `starrocks_` / generic `sqlalchemy_atomic` variants
 - Tracing: `trace_span`, `trace_root`, `async_trace_span`, `async_trace_root`, `trace_class`
 - Metrics: `measure_duration`, `async_measure_duration`, `count_calls`, `async_count_calls`
-- Local timing only: `timing_decorator`
-- Resilience: `retry_decorator`, `timeout_decorator`
-- Other: `singleton_decorator`, `grpc_rate_limit_decorator` (gRPC only)
+- Local timing only: `timing`
+- Resilience: `retry`, `timeout`
+- Other: `singleton`, `grpc_rate_limit` (gRPC only)
 
 ## Custom Decorators
 
@@ -36,5 +35,5 @@ Before writing a custom decorator, prefer ArchiPy under `archipy.helpers.decorat
 
 - Hide adapter construction inside decorator modules.
 - Catch broad `Exception` without re-raising as a domain error with `raise ... from e`.
-- Mix sync/async incorrectly — provide separate sync and async wrappers when needed.
-- Put `@postgres_sqlalchemy_atomic_decorator` on repositories or services — UoW belongs on logics.
+- Write separate sync and async copies of a decorator when one wrapper can detect `inspect.iscoroutinefunction`; ArchiPy's `retry`, `timeout`, `timing`, `ttl_cache` and `*_sqlalchemy_atomic` do.
+- Put `@postgres_sqlalchemy_atomic` on repositories or services — UoW belongs on logics.

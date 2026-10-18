@@ -106,7 +106,7 @@ each workflow once.
 | `scaffold-domain`        | `/scaffold-domain`        | Model + you | Full domain slice (models, repo, logic, service)                        |
 | `scaffold-models`        | `/scaffold-models`        | Model + you | Domain/repository DTOs, errors, optional entities under `models/`       |
 | `scaffold-adapter`       | `/scaffold-adapter`       | Model + you | Domain adapter under `repositories/{domain}/adapters/`                  |
-| `scaffold-logic`         | `/scaffold-logic`         | Model + you | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic_decorator`  |
+| `scaffold-logic`         | `/scaffold-logic`         | Model + you | Use-case under `logics/{domain}/` with `*_sqlalchemy_atomic`  |
 | `scaffold-service`       | `/scaffold-service`       | Model + you | Thin FastAPI/gRPC service under `services/{domain}/v{n}/`               |
 | `scaffold-bdd`           | `/scaffold-bdd`           | Model + you | Behave tests via REST/gRPC + testcontainers                             |
 | `scaffold-utils`         | `/scaffold-utils`         | Model + you | Wire or create `helpers/utils`                                          |
@@ -202,7 +202,7 @@ the layer-producing scaffold skills run it in their `## Verify` step. Claude Cod
 
 ### `/scaffold-decorator`
 
-- **Purpose:** Prefer ArchiPy decorators (`ttl_cache_decorator`, `postgres_sqlalchemy_atomic_decorator`,
+- **Purpose:** Prefer ArchiPy decorators (`ttl_cache`, `postgres_sqlalchemy_atomic`,
   `trace_span` / `trace_root`, `measure_duration` / `count_calls`, …).
 - **Asks:** Purpose; sync/async; built-in vs custom.
 - **Outcome:** Usage snippet or `helpers/decorators/<name>.py` with example.
@@ -276,7 +276,7 @@ Pure utilities; prefer ArchiPy utils. **AppUtils** for FastAPI/gRPC factories.
 
 Prefer ArchiPy decorators; UoW decorators belong on **logics**.
 
-- **Do:** Preserve wrapped signatures (`functools.wraps`); use `postgres_sqlalchemy_atomic_decorator` on logics.
+- **Do:** Preserve wrapped signatures (`functools.wraps`); use `postgres_sqlalchemy_atomic` on logics.
 - **Don’t:** Construct adapters inside decorator modules.
 
 ### `using-archipy-interceptors`
@@ -311,7 +311,7 @@ Domain data access; adapters under `repositories/{domain}/adapters/`.
 
 Business rules + unit of work; domain isolation.
 
-- **Do:** Domain DTO in/out; `*_sqlalchemy_atomic_decorator` on public methods; call other logics for cross-domain.
+- **Do:** Domain DTO in/out; `*_sqlalchemy_atomic` on public methods; call other logics for cross-domain.
 - **Don’t:** Import another domain’s repository; import FastAPI/gRPC.
 
 ### `using-archipy-services`

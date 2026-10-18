@@ -16,7 +16,7 @@ server = AppUtils.create_grpc_app(BaseConfig.global_config())       # sync — c
 Do not hand-roll bare `FastAPI()` / `grpc.server()` when extras are installed. Prefer config flags for stock
 middleware/interceptors (`OTEL.IS_ENABLED` / `OTEL.TRACES_ENABLED` / `OTEL.METRICS_ENABLED`,
 `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, `GRPC_RATE_LIMIT.IS_ENABLED`). gRPC AppUtils installs traces and
-`rpc.server.duration` metrics independently. Custom gRPC interceptors: `customized_interceptors=` on the gRPC
+`rpc.server.call.duration` metrics independently. Custom gRPC interceptors: `customized_interceptors=` on the gRPC
 factories.
 
 ## REST resource paths

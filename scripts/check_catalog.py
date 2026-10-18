@@ -44,14 +44,15 @@ ARCHIPY_5_REMOVED_GUIDANCE = (
     "`capture_span`",
     "`capture_transaction`",
     "`FastAPIRateLimitConfig`",
+    "`otel-fastapi`",
+    "`KeycloakUtils`",
 )
-ARCHIPY_5_REQUIRED_GUIDANCE = ("`OtelUtils`", "`trace_span`", "`otel-fastapi`", "`otel-grpc`")
+ARCHIPY_5_REQUIRED_GUIDANCE = ("`OtelUtils`", "`trace_span`", "`otel-grpc`")
 # Tokens the reviewer agent checks for, paired with the rule that owns them. Both files must mention each token so
 # the agent checklist cannot silently drift from the rules.
 REVIEWER_RULE_TOKENS = {
     "repositories/{domain}/adapters/": "architecture-for-apps.mdc",
-    "postgres_sqlalchemy_atomic_decorator": "using-archipy-logics.mdc",
-    "async_postgres_sqlalchemy_atomic_decorator": "using-archipy-logics.mdc",
+    "postgres_sqlalchemy_atomic": "using-archipy-logics.mdc",
     "AppUtils.create_fastapi_app": "using-archipy-services.mdc",
     "create_grpc_app": "using-archipy-services.mdc",
     "create_async_grpc_app": "using-archipy-services.mdc",

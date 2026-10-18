@@ -36,7 +36,7 @@ Optional app-local helpers (prefer `archipy.helpers` first): `helpers/{utils,dec
 services → logics (atomic UoW) → repositories → adapters → ArchiPy
 ```
 
-> Plugin shorthand `@atomic` means a real `*_sqlalchemy_atomic_decorator` — there is no decorator named `atomic`.
+> Plugin shorthand `@atomic` means a real `*_sqlalchemy_atomic` — there is no decorator named `atomic`.
 
 ## Layer Rules
 
@@ -46,7 +46,7 @@ those files are open. This always-on rule keeps only the global map:
 - **models/** — data only (no I/O, no business rules).
 - **repositories/** — domain data access; adapters under `repositories/{domain}/adapters/`; no cross-domain repo calls.
   Domain adapters map driver errors with `raise ... from e`; repository orchestrators consume domain-facing errors.
-- **logics/** — business rules + UoW (`*_sqlalchemy_atomic_decorator`); may call other logics; never other domains'
+- **logics/** — business rules + UoW (`*_sqlalchemy_atomic`); may call other logics; never other domains'
   repositories; no FastAPI/gRPC.
 - **services/** — thin transport; versioned `v{n}/`; no UoW / business rules.
 - **helpers/** — pure only; prefer ArchiPy; no adapter construction at module level.

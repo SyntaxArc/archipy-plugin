@@ -8,11 +8,11 @@ Combine library pieces rather than inventing a parallel stack:
 
 | Concern         | ArchiPy pieces                                                                                          | Extra                          |
 |-----------------|---------------------------------------------------------------------------------------------------------|--------------------------------|
-| Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation               | `otel` + `otel-fastapi`/`otel-grpc` |
-| Metrics         | `measure_duration` / `count_calls` (+ async twins), AppUtils gRPC `rpc.server.duration`, `METRICS_EXPORTER` (`otlp`\|`pull`\|`pushgateway`) | `otel` (+ `otel-grpc` for RPC) |
+| Traces          | `OtelUtils`, `trace_root` / `trace_span` (+ async twins), AppUtils auto-instrumentation               | `otel` + `fastapi`/`otel-grpc` |
+| Metrics         | `measure_duration` / `count_calls` (+ async twins), AppUtils gRPC `rpc.server.call.duration`, `METRICS_EXPORTER` (`otlp`\|`pull`\|`pushgateway`) | `otel` (+ `otel-grpc` for RPC) |
 | Logs            | `LOGS_EXPORTER` (`console`\|`otlp`); default console splits INFO/DEBUG → stdout, WARNING+ → stderr     | `otel`                         |
 | Errors          | `BaseUtils.capture_exception` records on the current span                                               | `otel`                         |
-| Timing only     | `timing_decorator`                                                                                      | —                              |
+| Timing only     | `timing`                                                                                      | —                              |
 
 Configure through nested settings, not SDK autoconfiguration:
 

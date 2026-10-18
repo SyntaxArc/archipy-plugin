@@ -14,7 +14,8 @@ Before writing a custom util, check whether ArchiPy already provides it under `a
 
 - `OtelUtils`, `RateLimitUtils`
 - `DatetimeUtils`, `StringUtils`, `JWTUtils`, `PasswordUtils`, `FileUtils`, `ErrorUtils`
-- Also: `BaseUtils`, `TOTPUtils`, `KeycloakUtils`
+- Also: `BaseUtils`, `TOTPUtils`
+- Keycloak guards are not a util: use `fastapi_auth` / `grpc_auth` from `archipy.adapters.keycloak.auth` (archipy >= 5.16.0; `KeycloakUtils` is deprecated, removed in 6.0.0)
 - Import from concrete submodules (e.g. `archipy.helpers.utils.jwt_utils`) — package `__init__` does not re-export
 - `AppUtils` — FastAPI / gRPC app factories (see below)
 
@@ -48,8 +49,8 @@ Prefer ArchiPy factories — do **not** hand-roll bare `FastAPI()` / `grpc.serve
 
 | Method | Use |
 |--------|-----|
-| `AppUtils.create_fastapi_app(config?)` | HTTP app; middleware/exception handlers plus OTel instrumentation through `archipy[otel-fastapi]` |
-| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception, optional OTel traces + ArchiPy `rpc.server.duration` metrics, and gRPC rate-limit interceptors |
+| `AppUtils.create_fastapi_app(config?)` | HTTP app; middleware/exception handlers plus OTel instrumentation through `archipy[otel,fastapi]` |
+| `AppUtils.create_grpc_app(config)` | Sync gRPC server; exception, optional OTel traces + ArchiPy `rpc.server.call.duration` metrics, and gRPC rate-limit interceptors |
 | `AppUtils.create_async_grpc_app(config)` | Async gRPC (`grpc.aio`); equivalent async interceptor setup |
 
 Rules:

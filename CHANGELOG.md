@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2026-10-18
+
+### Changed
+
+- Rules, skills, the cheat sheet and `archipy-reviewer` follow ArchiPy 5.16: unit of work is
+  `postgres_sqlalchemy_atomic` (and the mysql/sqlite/starrocks/generic variants) imported from
+  `archipy.adapters.base.sqlalchemy.atomic`, and one name serves sync and async logics
+- Decorator guidance uses the suffix-less names (`retry`, `timeout`, `timing`, `singleton`, `ttl_cache`,
+  `grpc_rate_limit`) and says that decorators detect `async def`
+- FastAPI telemetry is installed with `archipy[otel,fastapi]`; the `otel-fastapi` extra no longer exists
+- gRPC server metrics are `rpc.server.call.duration`
+- Keycloak guards are `fastapi_auth` / `grpc_auth` from `archipy.adapters.keycloak.auth`; the actor is also readable
+  through `AuthContextManager`, not `request.state`
+- `scaffold-observability` lists the OTel tuning options (sampler, B3 propagation, compression, batching, resource
+  detectors, standard `OTEL_*` variables)
+- The cheat sheet is verified against `archipy` 5.16.x
+
+### Added
+
+- `archipy-reviewer` flags names deprecated in ArchiPy 5.10 to 5.16 (removed in 6.0.0), and dashboards still using the
+  old RPC metric names
+- `scripts/check_catalog.py` rejects `otel-fastapi` and `KeycloakUtils` in the cheat sheet
+
 ## [0.21.0] - 2026-10-14
 
 ### Added

@@ -26,6 +26,9 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 | OpenTelemetry                   | `/scaffold-observability`, `/docs-observability`                                                                                                     |
 | Docs                            | `/docs-quickstart`, `/docs-adapters`, `/docs-helpers`, `/docs-config`, `/docs-errors`, `/docs-testing`, `/docs-observability`, `/docs-health-checks` |
 
+Issues, branches, PRs, checklists and merges: use the `pr-steward` plugin skills (`new-issue`, `split-issue`, `open-pr`,
+`tick-checklist`, `merge-pr`; https://github.com/SyntaxArc/pr-steward). This plugin no longer ships a contributing rule.
+
 Bundled cheat sheet: `skills/archipy-docs/reference.md`.
 
 When a skill runs, read its `SKILL.md` in full before generating files. Resolve

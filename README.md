@@ -70,6 +70,17 @@ Then restart Claude Code or run `/reload-plugins`.
 /plugin install archipy@archipy
 ```
 
+### Companion plugin: pr-steward
+
+The issue, branch, PR, checklist and merge workflow is not part of this plugin. Install
+[`pr-steward`](https://github.com/SyntaxArc/pr-steward) next to it and use its skills (`new-issue`, `split-issue`,
+`open-pr`, `tick-checklist`, `merge-pr`) for the git and PR flow in your app:
+
+```bash
+/plugin marketplace add SyntaxArc/pr-steward
+/plugin install pr-steward@pr-steward
+```
+
 ## What’s included
 
 ### Rules (16)

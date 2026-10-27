@@ -70,9 +70,20 @@ Then restart Claude Code or run `/reload-plugins`.
 /plugin install archipy@archipy
 ```
 
+### Companion plugin: pr-steward
+
+The issue, branch, PR, checklist and merge workflow is not part of this plugin. Install
+[`pr-steward`](https://github.com/SyntaxArc/pr-steward) next to it and use its skills (`new-issue`, `split-issue`,
+`open-pr`, `tick-checklist`, `merge-pr`) for the git and PR flow in your app:
+
+```bash
+/plugin marketplace add SyntaxArc/pr-steward
+/plugin install pr-steward@pr-steward
+```
+
 ## What’s included
 
-### Rules (17)
+### Rules (16)
 
 | Rule file                        | Applies when                                     |
 |----------------------------------|--------------------------------------------------|
@@ -81,7 +92,6 @@ Then restart Claude Code or run `/reload-plugins`.
 | `python-code-style-for-apps.mdc` | Always                                           |
 | `security-for-apps.mdc`          | Always                                           |
 | `tooling-for-apps.mdc`           | Always                                           |
-| `contributing-for-apps.mdc`      | Always                                           |
 | `typing-for-apps.mdc`            | `**/*.py`                                        |
 | `using-archipy-adapters.mdc`     | `**/repositories/**/adapters/**/*.py`            |
 | `using-archipy-utils.mdc`        | `**/helpers/utils/**/*.py`                       |
@@ -253,9 +263,9 @@ Always-on layer map, call flow (`services → logics → repositories → adapte
 
 ### Cross-cutting app rules
 
-`python-code-style-for-apps`, `typing-for-apps`, `security-for-apps`, `tooling-for-apps`, and
-`contributing-for-apps` carry the consumer-safe parts of ArchiPy's core standards: Python 3.14 style, complete typing,
-runtime-evaluated type safety, secrets/logging controls, parameterized queries, `uv`, and focused PR workflow. App
+`python-code-style-for-apps`, `typing-for-apps`, `security-for-apps`, and `tooling-for-apps` carry the consumer-safe parts of ArchiPy's core standards: Python 3.14 style, complete typing,
+runtime-evaluated type safety, secrets/logging controls, parameterized queries, and `uv`. The commit, branch, PR and merge workflow lives in the
+`pr-steward` plugin (`SyntaxArc/pr-steward`). App
 tooling wins when stricter; library-only Make targets and per-file exemptions are not copied.
 
 ### `using-archipy-adapters`

@@ -14,7 +14,7 @@ alwaysApply: true
 | Strict typing | `typing-for-apps.mdc` |
 | Security, secrets, query safety, suppressions | `security-for-apps.mdc` |
 | Dependencies and local checks | `tooling-for-apps.mdc` |
-| Commits, branches, PRs/MRs | `contributing-for-apps.mdc` |
+| Commits, branches, PRs/MRs | `pr-steward` plugin skills (`open-pr`, `merge-pr`) |
 | Config and dependency injection | `config-and-di.mdc` |
 | Models and domain errors | `using-archipy-models.mdc` |
 | Domain adapters and infrastructure boundaries | `using-archipy-adapters.mdc` |

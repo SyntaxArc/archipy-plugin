@@ -75,7 +75,6 @@ REVIEWER_RULE_TOKENS = {
 REVIEWER_AGENT = "archipy-reviewer.md"
 REQUIRED_APP_RULES = {
     "architecture-for-apps.mdc",
-    "contributing-for-apps.mdc",
     "python-code-style-for-apps.mdc",
     "rules-index-for-apps.mdc",
     "security-for-apps.mdc",

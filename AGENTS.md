@@ -48,7 +48,7 @@ Live docs: https://syntaxarc.github.io/ArchiPy/
 
 - Ownership/precedence: `rules/rules-index-for-apps.mdc`
 - Always-on: `architecture-for-apps.mdc`, `python-code-style-for-apps.mdc`, `security-for-apps.mdc`,
-  `tooling-for-apps.mdc`, `contributing-for-apps.mdc`
+  `tooling-for-apps.mdc`
 - Python typing: `typing-for-apps.mdc`
 - Layers: `using-archipy-models.mdc`, `using-archipy-adapters.mdc`, `using-archipy-repositories.mdc`,
   `using-archipy-logics.mdc`, `using-archipy-services.mdc`

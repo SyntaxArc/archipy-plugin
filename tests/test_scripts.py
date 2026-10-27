@@ -281,7 +281,6 @@ class HygieneTests(unittest.TestCase):
         context = self._claude_context(payload, "SessionStart")
         self.assertIn("# ArchiPy App Rules Index", context)
         self.assertIn("# Architecture for ArchiPy Apps", context)
-        self.assertIn("# Contributing to ArchiPy Apps", context)
         self.assertIn("# Python Code Style for ArchiPy Apps", context)
         self.assertIn("# Security for ArchiPy Apps", context)
         self.assertIn("# Tooling for ArchiPy Apps", context)

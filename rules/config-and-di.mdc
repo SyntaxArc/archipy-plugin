@@ -1,5 +1,5 @@
 ---
-description: ArchiPy BaseConfig, FastAPIConfig/uvicorn, and DI container wiring
+description: ArchiPy BaseConfig, FastAPIConfig/UvicornConfig, and DI container wiring
 globs: **/configs/**/*.py
 alwaysApply: false
 ---
@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 
 
 class AppConfig(BaseConfig):
-    """Application configuration. Inherits ArchiPy sections (REDIS, FASTAPI, GRPC, ...)."""
+    """Application configuration. Inherits ArchiPy sections (REDIS, FASTAPI, UVICORN, GRPC, ...)."""
 
     def customize(self) -> None:
         """Apply service-specific defaults after sources load."""
         super().customize()
         self.FASTAPI.PROJECT_NAME = "my-service"
-        self.FASTAPI.RELOAD = self.ENVIRONMENT == EnvironmentType.LOCAL
+        self.UVICORN.RELOAD = self.ENVIRONMENT == EnvironmentType.LOCAL
 
 
 config = AppConfig()
@@ -35,20 +35,24 @@ logger.info("Config loaded for environment: %s", config.ENVIRONMENT)
 - Call `BaseConfig.set_global(config)` once at bootstrap (typically importing `app_config` from the DI container).
 - Read elsewhere via `BaseConfig.global_config()`.
 - Document required env vars in `.env.example`; never commit secrets.
-- Env overrides use nested delimiter: `FASTAPI__PROJECT_NAME`, `FASTAPI__SERVE_PORT`, …
+- Env overrides use nested delimiter: `FASTAPI__PROJECT_NAME`, `FASTAPI__SERVE_PORT`, `UVICORN__RELOAD`, …
 - Preserve ArchiPy's settings-source priority: secret files → Vault → pyproject → TOML → environment → `.env` →
   defaults. Do not add scattered `os.environ` reads that bypass it.
 - Raise `ConfigurationError` / `InvalidArgumentError` from `archipy.models.errors` for config validation failures;
   do not invent ad-hoc config exceptions.
 
-## FastAPIConfig (`config.FASTAPI`)
+## FastAPIConfig (`config.FASTAPI`) and UvicornConfig (`config.UVICORN`)
 
-Drives both `AppUtils.create_fastapi_app` and uvicorn in `manage.py`:
+`config.FASTAPI` drives `AppUtils.create_fastapi_app` and the bind address; `config.UVICORN` holds the server settings
+that `AppUtils.uvicorn_config()` turns into `uvicorn.run` arguments (archipy >= 5.25.0; the same names on `FASTAPI` are
+deprecated):
 
 | Area | Fields |
 |------|--------|
-| Serve | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT` |
-| Proxy | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS` |
+| Bind (`FASTAPI`) | `SERVE_HOST`, `SERVE_PORT` |
+| Server (`UVICORN`) | `RELOAD`, `WORKERS_COUNT`, `TIMEOUT_KEEP_ALIVE`, `TIMEOUT_GRACEFUL_SHUTDOWN`, `BACKLOG`, `LIMIT_*`, `WS_*`, `ACCESS_LOG`, `DATE_HEADER`, `SERVER_HEADER` |
+| Proxy (`UVICORN`) | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS` |
+| TLS (`UVICORN`) | `SSL_KEYFILE`, `SSL_CERTFILE` (set together), `SSL_CA_CERTS` |
 | App / docs | `PROJECT_NAME`, `OPENAPI_URL`, `DOCS_URL`, `RE_DOC_URL`, … |
 | Middleware flags | `GZIP_MIDDLEWARE_IS_ENABLED`, `TRUSTED_HOST_MIDDLEWARE_*`, `HTTPS_REDIRECT_MIDDLEWARE_IS_ENABLED`, CORS fields |
 
@@ -78,4 +82,4 @@ Bundled cheat sheet (BaseConfig + FastAPIConfig/uvicorn sketches): `skills/archi
 - Scatter `os.environ` reads outside config.
 - Construct adapters inside logics when a container exists — inject them.
 - Hardcode production secrets in defaults.
-- Hardcode uvicorn host/port — use `config.FASTAPI`.
+- Hardcode uvicorn host/port, or read the deprecated uvicorn fields of `config.FASTAPI` — use `AppUtils.uvicorn_config()`.

@@ -70,8 +70,9 @@ app = AppUtils.create_fastapi_app()
 app.include_router(create_<domain>_v1_router(container))
 ```
 
-uvicorn in `manage.py` from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`,
-`FORWARDED_ALLOW_IPS`).
+uvicorn in `manage.py` with `**AppUtils.uvicorn_config(config)`: host and port from `config.FASTAPI` (`SERVE_HOST`,
+`SERVE_PORT`), the server settings (`RELOAD`, `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`, timeouts, workers, TLS) from
+`config.UVICORN` (archipy >= 5.25.0).
 
 ## Do not
 

@@ -42,7 +42,8 @@ Live docs: https://syntaxarc.github.io/ArchiPy/
 
 - Models: data only. Logics: UoW + business rules. Services: thin transport.
 - Domain adapters under `repositories/{domain}/adapters/` — not a top-level app `adapters/` package.
-- FastAPI/uvicorn from `config.FASTAPI`; prefer `AppUtils.create_fastapi_app` / gRPC factories.
+- FastAPI app settings from `config.FASTAPI`, uvicorn server settings from `config.UVICORN` through
+  `AppUtils.uvicorn_config()` (archipy >= 5.25.0); prefer `AppUtils.create_fastapi_app` / gRPC factories.
 - Specific exceptions; always `raise ... from e`.
 - Python 3.14 typing, double quotes, Google docstrings, complete public annotations; follow app tooling when stricter.
 - No hardcoded secrets or logged credentials/tokens; parameterize queries and justify narrow security suppressions.

@@ -279,7 +279,7 @@ Prefer ArchiPy extras and thin domain wrappers under `repositories/{domain}/adap
 
 Pure utilities; prefer ArchiPy utils. **AppUtils** for FastAPI/gRPC factories.
 
-- **Do:** Use `create_fastapi_app` / `create_grpc_app` / `create_async_grpc_app`; drive uvicorn from `config.FASTAPI`.
+- **Do:** Use `create_fastapi_app` / `create_grpc_app` / `create_async_grpc_app`; drive uvicorn with `AppUtils.uvicorn_config()` (`config.UVICORN`, archipy >= 5.25.0).
 - **Don’t:** Hand-roll bare `FastAPI()` / `grpc.server()`; open DB/Redis clients in utils.
 
 ### `using-archipy-decorators`
@@ -300,7 +300,7 @@ Cross-cutting hooks only; prefer AppUtils auto-registration for stock intercepto
 
 `BaseConfig`, `FastAPIConfig`, `customize()`, DI wire order `ports → adapters → repositories → logics → services`.
 
-- **Do:** Call `BaseConfig.set_global` once; set FastAPI/uvicorn defaults via `config.FASTAPI`.
+- **Do:** Call `BaseConfig.set_global` once; set FastAPI defaults via `config.FASTAPI` and uvicorn defaults via `config.UVICORN`.
 - **Don’t:** Commit secrets or scatter `os.environ` outside config.
 
 ### `using-archipy-models`
@@ -326,7 +326,7 @@ Business rules + unit of work; domain isolation.
 
 ### `using-archipy-services`
 
-Thin transport; AppUtils bootstrap; uvicorn from `FastAPIConfig`.
+Thin transport; AppUtils bootstrap; uvicorn from `UvicornConfig` through `AppUtils.uvicorn_config()`.
 
 - **Do:** Map errors to HTTP/gRPC status; version routers under `v{n}/`.
 - **Don’t:** Put atomic / UoW decorators or business rules in services; hardcode host/port.

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Rules, skills, the cheat sheet, README, `AGENTS.md` and `archipy-reviewer` follow ArchiPy 5.25: uvicorn runs with
+  `AppUtils.uvicorn_config()` from the new `UVICORN` config section (`archipy>=5.25.0`), host and port stay on
+  `FASTAPI.SERVE_HOST` and `SERVE_PORT`, `RELOAD` is set on `UVICORN`, and the reviewer flags reads of the deprecated
+  uvicorn fields of `FASTAPI`.
+
 ## [0.23.0] - 2026-10-27
 
 ### Changed

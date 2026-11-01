@@ -119,7 +119,10 @@ makes it worse.
 - With OTel enabled, `OtelUtils.init_otel_if_needed(config)` runs after `set_global` and before the container creates
   engines, clients, or other instrumented adapters.
 - FastAPI/gRPC apps are built with `AppUtils.create_fastapi_app` / `create_grpc_app` / `create_async_grpc_app`, not
-  bare `FastAPI()` / `grpc.server()`; uvicorn host and port come from `config.FASTAPI`, never hardcoded.
+  bare `FastAPI()` / `grpc.server()`; uvicorn host and port come from `config.FASTAPI`, never hardcoded, and the server settings come from
+  `config.UVICORN` through `AppUtils.uvicorn_config()`; reading the deprecated uvicorn fields of `config.FASTAPI`
+  (`RELOAD`, `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`, `WORKERS_COUNT`, `TIMEOUT_*`, `WS_*`, …) is **Should fix** (needs
+  `archipy>=5.25.0`; say so when the app pins an older version).
 - Dependencies are wired through the DI container, not constructed at module import time.
 
 **ArchiPy version**

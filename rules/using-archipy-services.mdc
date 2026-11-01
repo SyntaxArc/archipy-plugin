@@ -1,5 +1,5 @@
 ---
-description: ArchiPy app services — thin transport, AppUtils, uvicorn via FastAPIConfig
+description: ArchiPy app services — thin transport, AppUtils, uvicorn via UvicornConfig
 globs: **/services/**/*.py,**/manage.py
 alwaysApply: false
 ---
@@ -91,27 +91,22 @@ gRPC (adds servicers to an `AppUtils`-built server; never binds a port).
 
 ## manage.py / uvicorn
 
-Bind from `config.FASTAPI` — never hardcode host/port/reload/proxy:
+Build the uvicorn arguments with `AppUtils.uvicorn_config()` — host and port come from `config.FASTAPI`
+(`SERVE_HOST`, `SERVE_PORT`), the server settings from `config.UVICORN` (archipy >= 5.25.0). Never hardcode
+host/port/reload/proxy:
 
 ```python
 config = BaseConfig.global_config()
-uvicorn.run(
-    "manage:create_app",
-    factory=True,
-    host=config.FASTAPI.SERVE_HOST,
-    port=config.FASTAPI.SERVE_PORT,
-    reload=config.FASTAPI.RELOAD,
-    proxy_headers=config.FASTAPI.PROXY_HEADERS,
-    forwarded_allow_ips=config.FASTAPI.FORWARDED_ALLOW_IPS or "127.0.0.1",
-)
+uvicorn.run("manage:create_app", factory=True, **AppUtils.uvicorn_config(config))
 ```
 
-CLI flags may override for local runs; defaults always come from `FASTAPI`.
+CLI flags may override for local runs (`AppUtils.uvicorn_config(config, host=host, port=port, reload=reload)`); defaults
+always come from `FASTAPI` and `UVICORN`.
 
 ## Do Not
 
 - Put business rules or `@postgres_sqlalchemy_atomic` in services.
 - Hand-roll bare `FastAPI()` / `grpc.server()` when AppUtils extras are installed.
-- Hardcode uvicorn host/port — use `FastAPIConfig`.
+- Hardcode uvicorn host/port, or read the deprecated uvicorn fields of `FASTAPI` — use `AppUtils.uvicorn_config()`.
 - Use non-kebab literal path segments, verb paths (`/get-user`), or flat routes that hide the resource hierarchy.
 - Catch every domain error in each route/servicer when AppUtils already provides centralized mapping.

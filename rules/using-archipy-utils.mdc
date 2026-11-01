@@ -56,7 +56,8 @@ Prefer ArchiPy factories — do **not** hand-roll bare `FastAPI()` / `grpc.serve
 Rules:
 
 - Pass `BaseConfig.global_config()` (or injected config); do not duplicate middleware/interceptor setup AppUtils already does.
-- **FastAPI + uvicorn always driven by `config.FASTAPI` (`FastAPIConfig`)** — never hardcode host/port/reload/proxy settings.
+- **FastAPI is driven by `config.FASTAPI`, uvicorn by `config.UVICORN` through `AppUtils.uvicorn_config()`** (archipy >= 5.25.0)
+  — never hardcode host/port/reload/proxy settings or read the deprecated uvicorn fields of `FASTAPI`.
 - Sync servicers → `create_grpc_app`; async servicers → `create_async_grpc_app` — do not mix.
 - Enable features through config (for example `OTEL.IS_ENABLED`, `OTEL.TRACES_ENABLED`, `OTEL.METRICS_ENABLED`,
   `FASTAPI.GZIP_MIDDLEWARE_IS_ENABLED`, and `GRPC_RATE_LIMIT.IS_ENABLED`) rather than manually appending stock

@@ -12,7 +12,7 @@ class AppConfig(BaseConfig):
     def customize(self) -> None:
         super().customize()
         self.FASTAPI.PROJECT_NAME = "my-service"
-        self.FASTAPI.RELOAD = self.ENVIRONMENT == EnvironmentType.LOCAL
+        self.UVICORN.RELOAD = self.ENVIRONMENT == EnvironmentType.LOCAL
 
 config = AppConfig()
 BaseConfig.set_global(config)  # auto-invokes customize()
@@ -21,27 +21,24 @@ BaseConfig.set_global(config)  # auto-invokes customize()
 - Env vars override defaults (`FASTAPI__SERVE_PORT`, …); document keys in `.env.example`.
 - Read with `BaseConfig.global_config()`.
 
-### FastAPIConfig + uvicorn
+### FastAPIConfig + UvicornConfig
 
-`config.FASTAPI` drives `AppUtils.create_fastapi_app` **and** uvicorn — never hardcode host/port/reload:
+`config.FASTAPI` drives `AppUtils.create_fastapi_app` and the bind address; `config.UVICORN` (archipy >= 5.25.0) holds the
+server settings and `AppUtils.uvicorn_config()` builds the `uvicorn.run` arguments — never hardcode host/port/reload.
+The same names on `FASTAPI` are deprecated since 5.25.0:
 
-| Area       | Fields                                                  |
-|------------|---------------------------------------------------------|
-| Serve      | `SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `WORKERS_COUNT`   |
-| Proxy      | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`                  |
-| App / docs | `PROJECT_NAME`, `OPENAPI_URL`, `DOCS_URL`, `RE_DOC_URL` |
+| Area                | Fields                                                                    |
+|---------------------|---------------------------------------------------------------------------|
+| Bind (`FASTAPI`)    | `SERVE_HOST`, `SERVE_PORT`                                                |
+| Server (`UVICORN`)  | `RELOAD`, `WORKERS_COUNT`, `TIMEOUT_KEEP_ALIVE`, `TIMEOUT_GRACEFUL_SHUTDOWN`, `WS_*` |
+| Proxy (`UVICORN`)   | `PROXY_HEADERS`, `FORWARDED_ALLOW_IPS`                                    |
+| TLS (`UVICORN`)     | `SSL_KEYFILE`, `SSL_CERTFILE` (together), `SSL_CA_CERTS`                  |
+| App / docs (`FASTAPI`) | `PROJECT_NAME`, `OPENAPI_URL`, `DOCS_URL`, `RE_DOC_URL`                |
 
 ```python
 config = BaseConfig.global_config()
-uvicorn.run(
-    "manage:create_app",
-    factory=True,
-    host=config.FASTAPI.SERVE_HOST,
-    port=config.FASTAPI.SERVE_PORT,
-    reload=config.FASTAPI.RELOAD,
-    proxy_headers=config.FASTAPI.PROXY_HEADERS,
-    forwarded_allow_ips=config.FASTAPI.FORWARDED_ALLOW_IPS or "127.0.0.1",
-)
+uvicorn.run("manage:create_app", factory=True, **AppUtils.uvicorn_config(config))
+# overrides: AppUtils.uvicorn_config(config, host="0.0.0.0", port=9000, reload=True)
 ```
 
 gRPC bind (parallel): `config.GRPC.SERVE_HOST`, `config.GRPC.SERVE_PORT`.

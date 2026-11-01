@@ -68,8 +68,9 @@ features/                  # optional — /scaffold-bdd
 5. Add a minimal domain DTO + error following `../scaffold-models/SKILL.md`.
 6. **When extras include `fastapi` (or user wants HTTP):** emit root `manage.py`:
     - `create_app()` uses `AppUtils.create_fastapi_app()` and includes domain routers.
-    - `uvicorn.run` binds from `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`, `RELOAD`, `PROXY_HEADERS`,
-      `FORWARDED_ALLOW_IPS`) — never hardcode host/port.
+    - `uvicorn.run("manage:create_app", factory=True, **AppUtils.uvicorn_config(config))` — host and port come from
+      `config.FASTAPI` (`SERVE_HOST`, `SERVE_PORT`), the server settings from `config.UVICORN` (archipy >= 5.25.0).
+      Never hardcode host/port.
 7. Document next steps: `/scaffold-domain`, `/scaffold-models`, `/scaffold-adapter`, `/scaffold-bdd`,
    `/scaffold-health-checks`, `/docs-quickstart`.
 

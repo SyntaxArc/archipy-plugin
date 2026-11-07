@@ -39,7 +39,7 @@ FastAPI's `TestClient` needs nothing extra with `archipy[fastapi]`. gRPC tests n
 ## Generate
 
 Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
-(`$CURSOR_PLUGIN_ROOT/skills/scaffold-bdd/` or `${CLAUDE_SKILL_DIR}/`). These are
+(`$PLUGIN_ROOT/skills/scaffold-bdd/`, `$CURSOR_PLUGIN_ROOT/skills/scaffold-bdd/`, or `${CLAUDE_SKILL_DIR}/`). These are
 plugin templates, not app-relative paths. Copy and adapt them into the app; never edit the plugin copies.
 
 **Copy templates from `reference/`, adapt package imports, create only if missing:**

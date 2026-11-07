@@ -16,6 +16,10 @@ ln -sfn "$(pwd)" ~/.cursor/plugins/local/archipy
 # Claude Code
 mkdir -p ~/.claude/plugins/local
 ln -sfn "$(pwd)" ~/.claude/plugins/local/archipy
+
+# Codex
+codex plugin marketplace add SyntaxArc/archipy-plugin
+codex plugin add archipy@archipy
 ```
 
 Reload the editor after edits.
@@ -38,25 +42,27 @@ python3 scripts/check_catalog.py
 python3 -m unittest discover -s tests -v
 ```
 
-## Dual IDE parity
+## Client manifest parity
 
-Keep Cursor and Claude manifests in sync:
+Keep all client manifests in sync:
 
 | File                              | Field                |
 |-----------------------------------|----------------------|
 | `.cursor-plugin/plugin.json`      | `version`            |
 | `.claude-plugin/plugin.json`      | `version`            |
+| `.codex-plugin/plugin.json`       | `version`            |
 | `.cursor-plugin/marketplace.json` | `plugins[0].version` |
 | `.claude-plugin/marketplace.json` | `plugins[0].version` |
 
-All four must share the same SemVer string.
+All five must share the same SemVer string.
 
-`hooks` paths **must differ**: Cursor `./hooks/hooks.json`, Claude Code `./hooks/claude-hooks.json`.
+Hook formats are client-specific: Cursor uses `./hooks/hooks.json`, Claude Code uses `./hooks/claude-hooks.json`, and
+Codex declares its hooks in `.codex-plugin/plugin.json`.
 
 ## Release checklist
 
 1. Update `CHANGELOG.md` (Keep a Changelog).
-2. Bump all four JSON versions together.
+2. Bump all five JSON versions together.
 3. Run `python3 scripts/check_catalog.py` and `python3 -m unittest discover -s tests -v`.
 4. Open a focused PR; conventional commits (`feat`, `fix`, `docs`, `chore`, …). Merge after CI is green.
 5. Tag the merge commit `vX.Y.Z` and push the tag. `.github/workflows/release.yml` re-runs the checks, verifies the
@@ -65,22 +71,22 @@ All four must share the same SemVer string.
 
 ## Hooks
 
-Plugin hooks (both run `scripts/scaffold_hygiene.py`; keep Cursor and Claude Code behavior in parity):
+Plugin hooks run `scripts/scaffold_hygiene.py` for all three clients:
 
-| Event | Cursor (`hooks/hooks.json`) | Claude Code (`hooks/claude-hooks.json`) |
-|---|---|---|
-| Session start | `sessionStart` → `additional_context`: reminder + ArchiPy version | `SessionStart` → `hookSpecificOutput.additionalContext`: reminder + version + always-on rule bodies |
-| Before Write | `preToolUse` → `permission: "deny"` for a **new** file under a top-level `adapters/` | `PreToolUse` → `permissionDecision: "deny"`, same condition |
-| After edits | `postToolUse` → adapter-path warning | `PostToolUse` → warning + glob-matched rule bodies |
+| Event | Cursor (`hooks/hooks.json`) | Claude Code (`hooks/claude-hooks.json`) | Codex (`.codex-plugin/plugin.json`) |
+|---|---|---|---|
+| Session start | `sessionStart` → `additional_context`: reminder + ArchiPy version | `SessionStart` → `hookSpecificOutput.additionalContext`: reminder + version + always-on rule bodies | `SessionStart` → same context and always-on rules |
+| Before file edits | `preToolUse` → deny a **new** file under top-level `adapters/` | `PreToolUse` → deny, same condition | `PreToolUse` on `apply_patch` → deny the same misplaced new file |
+| After edits | `postToolUse` → adapter-path warning | `PostToolUse` → warning + glob-matched rule bodies | `PostToolUse` on `apply_patch` → warning + glob-matched rule bodies |
 
 - All hooks run only when the project's `pyproject.toml`, `uv.lock`, or `requirements.txt` depends on `archipy`
   (Claude sends `cwd`; Cursor sends `cwd` on tool events and `workspace_roots` everywhere).
-- Cursor loads `.mdc` rules natively, so only Claude gets rule bodies. Claude ignores Cursor's top-level
-  `additional_context`, and Cursor ignores `hookSpecificOutput`.
+- Cursor loads `.mdc` rules natively. Claude Code and Codex receive rule bodies through hooks; Cursor ignores
+  `hookSpecificOutput`.
 - Claude path-scoped rules inject once per session (and subagent), reset on each `SessionStart`
   (startup/resume/clear/compact).
 - The adapter guard only blocks creating new files; existing top-level `adapters/` files in legacy apps stay editable.
-- Do not point both manifests at the same hooks file — schemas differ.
+- Keep hook configurations client-specific — their schemas and edit tool events differ.
 
 ## Evals
 

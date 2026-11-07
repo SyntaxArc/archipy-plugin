@@ -1,6 +1,6 @@
 # ArchiPy Plugin — Agent Instructions
 
-Works in **Cursor** and **Claude Code**.
+Works in **Codex**, **Cursor**, and **Claude Code**.
 
 Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/project/archipy/).
 
@@ -14,7 +14,7 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 
 ## Prefer plugin entry points
 
-| Need                            | Skill (slash command)                                                                                                                                |
+| Need                            | Skill (Codex `$name`; Cursor / Claude slash command)                                                                                                   |
 |---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
 | New app tree                    | `/scaffold-app`                                                                                                                                      |
 | Full domain slice               | `/scaffold-domain`                                                                                                                                   |
@@ -29,11 +29,13 @@ Consumer plugin for **apps that depend on** PyPI [`archipy`](https://pypi.org/pr
 Issues, branches, PRs, checklists and merges: use the `pr-steward` plugin skills (`new-issue`, `split-issue`, `open-pr`,
 `tick-checklist`, `merge-pr`; https://github.com/SyntaxArc/pr-steward). This plugin no longer ships a contributing rule.
 
+In Codex, invoke a skill as `$skill-name` (for example, `$scaffold-app`). Cursor and Claude Code use slash commands.
+
 Bundled cheat sheet: `skills/archipy-docs/reference.md`.
 
 When a skill runs, read its `SKILL.md` in full before generating files. Resolve
 `skills/*/reference/` templates from the plugin installation (Cursor: `$CURSOR_PLUGIN_ROOT`; Claude Code substitutes
-`${CLAUDE_SKILL_DIR}` in skills, alongside `${CLAUDE_PLUGIN_ROOT}`), copy
+`${CLAUDE_SKILL_DIR}` in skills, alongside `${CLAUDE_PLUGIN_ROOT}`; Codex provides `${PLUGIN_ROOT}`), copy
 them into the app, and never edit plugin templates in place.
 
 Live docs: https://syntaxarc.github.io/ArchiPy/

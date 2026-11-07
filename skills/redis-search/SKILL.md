@@ -21,7 +21,7 @@ to this `SKILL.md`'s directory in the plugin installation — not the app worksp
 `reference/fulltext_adapter.py`, `reference/vector_adapter.py`, `reference/search_cache_adapter.py`.
 
 Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
-(`$CURSOR_PLUGIN_ROOT/skills/redis-search/` or `${CLAUDE_SKILL_DIR}/`). These are plugin templates,
+(`$PLUGIN_ROOT/skills/redis-search/`, `$CURSOR_PLUGIN_ROOT/skills/redis-search/`, or `${CLAUDE_SKILL_DIR}/`). These are plugin templates,
 not app-relative paths. Copy and adapt them into the app; never edit the plugin copies.
 
 ## Read first

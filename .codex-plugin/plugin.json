@@ -1,0 +1,55 @@
+{
+  "name": "archipy",
+  "version": "0.24.0",
+  "description": "Codex plugin: skills and hooks for building apps with ArchiPy",
+  "author": {
+    "name": "SyntaxArc"
+  },
+  "repository": "https://github.com/SyntaxArc/archipy-plugin",
+  "license": "MIT",
+  "keywords": [
+    "archipy",
+    "python",
+    "clean-architecture",
+    "codex"
+  ],
+  "skills": "./skills",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/scaffold_hygiene.py\" SessionStart",
+            "statusMessage": "Loading ArchiPy guidance"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "apply_patch|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/scaffold_hygiene.py\" PreToolUse",
+            "statusMessage": "Checking ArchiPy adapter paths"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/scaffold_hygiene.py\" PostToolUse",
+            "statusMessage": "Loading ArchiPy file guidance"
+          }
+        ]
+      }
+    ]
+  }
+}

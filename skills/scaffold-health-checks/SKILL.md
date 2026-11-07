@@ -61,7 +61,7 @@ styles on one server.
 ## Generate
 
 Resolve files under `reference/` relative to this `SKILL.md` in the plugin installation
-(`$CURSOR_PLUGIN_ROOT/skills/scaffold-health-checks/` or
+(`$PLUGIN_ROOT/skills/scaffold-health-checks/`, `$CURSOR_PLUGIN_ROOT/skills/scaffold-health-checks/`, or
 `${CLAUDE_SKILL_DIR}/`). These are plugin templates, not app-relative paths. Copy
 and adapt them into the app; never edit the plugin copies.
 

@@ -22,7 +22,7 @@ It is **not** for maintaining the ArchiPy library itself (no library changelog o
 
 ## Requirements
 
-- [Codex](https://openai.com/codex/), [Cursor](https://cursor.com/) with plugin support, or [Claude Code](https://code.claude.com/) with plugin support
+- [Codex](https://developers.openai.com/plugins/build/plugins), [Cursor](https://cursor.com/) with plugin support, or [Claude Code](https://code.claude.com/) with plugin support
 - Apps targeting **Python 3.14+**
 - [`uv`](https://docs.astral.sh/uv/) package manager
 - PyPI package [`archipy`](https://pypi.org/project/archipy/) (install the extras your service needs)

@@ -21,10 +21,10 @@ HARD_RULES = (
     "Domain adapters under repositories/{domain}/adapters/ only. "
     "Prefer archipy.helpers.utils (DatetimeUtils, PasswordUtils, JWTUtils, TOTPUtils, StringUtils, FileUtils, AppUtils) "
     "over hand-rolled datetime/password/JWT/string code. "
-    "Prefer the plugin skills (/scaffold-*, /redis-search, archipy-docs)."
+    "Prefer the plugin skills (scaffold-*, redis-search, archipy-docs)."
 )
 
-# Cursor event names (camelCase). Claude Code uses PascalCase and a different hooks.json schema.
+# Cursor event names (camelCase). Claude Code and Codex use PascalCase with hookSpecificOutput.
 CURSOR_SESSION = "sessionStart"
 CURSOR_POST = "postToolUse"
 CLAUDE_SESSION = "SessionStart"
@@ -37,10 +37,14 @@ ARCHIPY_MARKERS = ("pyproject.toml", "uv.lock", "requirements.txt")
 UV_LOCK_ARCHIPY_RE = re.compile(r'^\[\[package\]\]\nname = "archipy"\nversion = "([^"]+)"', re.MULTILINE)
 PYPROJECT_ARCHIPY_RE = re.compile(r"""["']archipy(?:\[([^\]]*)\])?\s*([<>=~!][^"']*)?["']""")
 ARCHIPY_DEP_RE = re.compile(r"""(^|[\s"'\[,])archipy([\s"'\[\]=<>~!,]|$)""", re.MULTILINE)
+APPLY_PATCH_PATH_RE = re.compile(
+    r"^\*\*\* (?:Add|Update|Delete) File: (.+)$|^\*\*\* Move to: (.+)$",
+    re.MULTILINE,
+)
 
 
 def _plugin_root() -> Path:
-    for key in ("CLAUDE_PLUGIN_ROOT", "CURSOR_PLUGIN_ROOT"):
+    for key in ("PLUGIN_ROOT", "CLAUDE_PLUGIN_ROOT", "CURSOR_PLUGIN_ROOT"):
         raw = os.environ.get(key)
         if raw:
             return Path(raw)
@@ -62,12 +66,12 @@ def _emit(payload: dict[str, Any]) -> None:
 
 
 def _emit_claude(event: str, context: str) -> dict[str, Any]:
-    """Build Claude Code hook output; Claude ignores Cursor's top-level `additional_context`."""
+    """Build Claude Code / Codex hook output; Cursor ignores `hookSpecificOutput`."""
     return {"hookSpecificOutput": {"hookEventName": event, "additionalContext": context}}
 
 
 def _project_dir(payload: dict[str, Any]) -> Path:
-    """Claude sends `cwd`; Cursor sends `cwd` on tool events and `workspace_roots` on every event."""
+    """Claude Code and Codex send `cwd`; Cursor also sends `workspace_roots` on every event."""
     roots = payload.get("workspace_roots")
     root = roots[0] if isinstance(roots, list) and roots else None
     return Path(str(payload.get("cwd") or root or os.environ.get("CLAUDE_PROJECT_DIR") or Path.cwd()))
@@ -165,6 +169,9 @@ def _paths_from_payload(payload: dict[str, Any]) -> list[str]:
             value = tool_input.get(key)
             if value:
                 paths.append(str(value))
+        if payload.get("tool_name") == "apply_patch" and isinstance(tool_input.get("command"), str):
+            for match in APPLY_PATCH_PATH_RE.finditer(tool_input["command"]):
+                paths.append(match.group(1) or match.group(2))
     elif isinstance(tool_input, str):
         try:
             parsed = json.loads(tool_input)
@@ -292,11 +299,11 @@ def _relative_to_cwd(file_path: str, cwd: str) -> str | None:
 
 
 def _new_adapter_violation(payload: dict[str, Any]) -> str | None:
-    """Reason to block a Write that creates a domain adapter outside repositories/{domain}/adapters/.
+    """Reason to block a Write/apply_patch that creates an adapter outside repositories/{domain}/adapters/.
 
     Only new files are blocked: legacy apps must still be able to edit an existing top-level adapters/ package.
     """
-    if payload.get("tool_name") != "Write" or not _is_archipy_app(payload):
+    if payload.get("tool_name") not in {"Write", "apply_patch"} or not _is_archipy_app(payload):
         return None
     cwd = str(_project_dir(payload))
     for file_path in _paths_from_payload(payload):

@@ -4,8 +4,8 @@
 [![ArchiPy Docs](https://img.shields.io/badge/docs-ArchiPy-blue.svg)](https://syntaxarc.github.io/ArchiPy/)
 [![ArchiPy](https://img.shields.io/badge/library-SyntaxArc%2FArchiPy-0F172A.svg)](https://github.com/SyntaxArc/ArchiPy)
 
-Rules, skills, and slash commands for **application teams that build
-with [ArchiPy](https://github.com/SyntaxArc/ArchiPy)**. Works with both **Cursor** and **Claude Code**.
+Rules and skills for **application teams that build
+with [ArchiPy](https://github.com/SyntaxArc/ArchiPy)**. Works with **Codex**, **Cursor**, and **Claude Code**.
 
 ## What this is
 
@@ -16,13 +16,13 @@ It ships:
 
 - **Rules** — persistent guidance while editing matching files
 - **Agents** — `archipy-reviewer` for architecture reviews of app diffs
-- **Skills** — scaffolding and docs workflows, also invocable as slash commands (`/scaffold-app`, `/docs-helpers`, …)
+- **Skills** — scaffolding and docs workflows, invocable as Codex `$skill-name` or Cursor / Claude slash commands
 
 It is **not** for maintaining the ArchiPy library itself (no library changelog or core BDD internals).
 
 ## Requirements
 
-- [Cursor](https://cursor.com/) with plugin support, **or** [Claude Code](https://code.claude.com/) with plugin support
+- [Codex](https://openai.com/codex/), [Cursor](https://cursor.com/) with plugin support, or [Claude Code](https://code.claude.com/) with plugin support
 - Apps targeting **Python 3.14+**
 - [`uv`](https://docs.astral.sh/uv/) package manager
 - PyPI package [`archipy`](https://pypi.org/project/archipy/) (install the extras your service needs)
@@ -70,6 +70,17 @@ Then restart Claude Code or run `/reload-plugins`.
 /plugin install archipy@archipy
 ```
 
+### Codex — GitHub marketplace
+
+```bash
+codex plugin marketplace add SyntaxArc/archipy-plugin
+codex plugin add archipy@archipy
+```
+
+Restart Codex or start a new session after installation. Invoke skills as `$skill-name` (for example, `$scaffold-app`).
+Codex asks you to review and trust the bundled hooks before running them. Codex loads skills and hooks; the
+`archipy-reviewer` subagent remains available only in Cursor and Claude Code.
+
 ### Companion plugin: pr-steward
 
 The issue, branch, PR, checklist and merge workflow is not part of this plugin. Install
@@ -106,11 +117,12 @@ The issue, branch, PR, checklist and merge workflow is not part of this plugin. 
 
 ### Skills (22)
 
-Every skill is a slash command in both Cursor and Claude Code (Claude Code namespaces them as `/archipy:<name>`).
+Cursor and Claude Code expose skills as slash commands (Claude Code namespaces them as `/archipy:<name>`); Codex
+invokes them as `$skill-name`.
 `docs-*` skills set `disable-model-invocation: true`: they are user shortcuts into `archipy-docs`, so the model sees
 each workflow once.
 
-| Skill                    | Slash                     | Invoked by  | When to use                                                             |
+| Skill                    | Cursor / Claude command   | Invoked by  | When to use                                                             |
 |--------------------------|---------------------------|-------------|-------------------------------------------------------------------------|
 | `scaffold-app`           | `/scaffold-app`           | Model + you | Bootstrap a new ArchiPy-based service layout                            |
 | `scaffold-domain`        | `/scaffold-domain`        | Model + you | Full domain slice (models, repo, logic, service)                        |
@@ -150,10 +162,10 @@ the layer-producing scaffold skills run it in their `## Verify` step. Claude Cod
 
 ## Quick start
 
-1. Install the plugin locally (symlink above) and reload Cursor.
+1. Install the plugin above. For Codex, restart Codex or start a new session after installation.
 2. Open an application workspace (empty or existing Python service).
-3. In Agent chat, run `/scaffold-app` — answer package name and extras (e.g. `redis`).
-4. Run `/docs-quickstart` to confirm config + first adapter steps.
+3. In Agent chat, invoke `$scaffold-app` in Codex or `/scaffold-app` in Cursor / Claude Code — answer package name and extras (e.g. `redis`).
+4. Invoke `$docs-quickstart` in Codex or `/docs-quickstart` elsewhere to confirm config + first adapter steps.
 5. Expect: `AppConfig`, models stub, `repositories/<domain>/`, optional `manage.py` (if `fastapi`), helpers tree,
    `.env.example`.
 
@@ -350,6 +362,7 @@ archipy-plugin/
 │   ├── plugin.json          # Cursor plugin manifest
 │   └── marketplace.json     # Cursor marketplace catalog
 ├── hooks/                   # Cursor hooks.json + Claude claude-hooks.json
+├── .codex-plugin/           # Codex manifest and hooks
 ├── scripts/                 # Catalog checks + hook scripts
 ├── rules/                   # .mdc rules
 ├── skills/                  # SKILL.md directories (+ docs reference)
@@ -364,11 +377,11 @@ archipy-plugin/
 ```
 
 Cursor loads `rules/` (`.mdc`), `skills/`, and `hooks/hooks.json`. Claude Code loads `skills/` and
-`hooks/claude-hooks.json`. Claude Code does **not** load Cursor `.mdc` rules. In projects that depend on `archipy`, hooks in both tools add a
-reminder and the app's ArchiPy version at session start and block creating new domain adapters outside
-`repositories/{domain}/adapters/`; in Claude Code they also inject always-on and glob-matched rule text (once per
-session). See `CONTRIBUTING.md` § Hooks.
-Skills double as slash commands; only the `docs-*` shortcuts set `disable-model-invocation: true`.
+`hooks/claude-hooks.json`. Codex loads `skills/` and the hooks declared in `.codex-plugin/plugin.json`; it does not
+load Cursor `.mdc` rules natively. In projects that depend on `archipy`, all three clients add a reminder and the
+app's ArchiPy version at session start. Claude Code and Codex also inject always-on and path-matched rule text. The
+adapter guard handles Claude `Write` and Codex `apply_patch` operations. See `CONTRIBUTING.md` § Hooks.
+Only the `docs-*` shortcuts set `disable-model-invocation: true`.
 
 ## ArchiPy docs map
 
@@ -388,10 +401,9 @@ Skills double as slash commands; only the `docs-*` shortcuts set `disable-model-
 
 ## Developing / contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist (version bump across four JSON files, catalog sync, CI).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full checklist (version bump across five JSON files, catalog sync, CI).
 
-1. Clone this repo and symlink it to `~/.cursor/plugins/local/archipy` (Cursor) or `~/.claude/plugins/local/archipy`
-   (Claude Code).
+1. Clone this repo and install it in your client using the steps above (Codex, Cursor, or Claude Code).
 2. Edit rules (`.mdc` frontmatter: `description`, `alwaysApply` / `globs`), skills (`name` + `description` matching
    folder name), `docs-*` skills also set
    `disable-model-invocation: true`.

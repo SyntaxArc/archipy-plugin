@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFESTS = (
     ROOT / ".cursor-plugin" / "plugin.json",
     ROOT / ".claude-plugin" / "plugin.json",
+    ROOT / ".codex-plugin" / "plugin.json",
     ROOT / ".cursor-plugin" / "marketplace.json",
     ROOT / ".claude-plugin" / "marketplace.json",
 )

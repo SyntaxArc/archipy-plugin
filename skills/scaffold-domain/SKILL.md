@@ -32,8 +32,8 @@ Read these plugin rules in full before generating files (paths relative to this 
 ## Compose — do not fork templates
 
 Before generating files, read these plugin skills in full. Resolve `../...` paths relative to this `SKILL.md` file's
-directory in the plugin installation (`$CURSOR_PLUGIN_ROOT/skills/scaffold-domain/` or
-`${CLAUDE_SKILL_DIR}/`) — not relative to the app workspace:
+directory in the plugin installation (`$PLUGIN_ROOT/skills/scaffold-domain/`,
+`$CURSOR_PLUGIN_ROOT/skills/scaffold-domain/`, or `${CLAUDE_SKILL_DIR}/`) — not relative to the app workspace:
 
 - `../scaffold-models/SKILL.md`
 - `../scaffold-adapter/SKILL.md`
